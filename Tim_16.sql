@@ -1,8 +1,11 @@
+-- Brisanje baze podataka ako već postoji(za clean slate pri testiranju)
 DROP DATABASE IF EXISTS teretana;
+
+-- Kreiranje nove baze podataka
 CREATE DATABASE teretana;
 USE teretana;
 
--- Tablica: clanarina
+-- Tablica: članarina
 CREATE TABLE clanarina (
     id INT PRIMARY KEY AUTO_INCREMENT,
     tip VARCHAR(50) NOT NULL,
@@ -11,6 +14,7 @@ CREATE TABLE clanarina (
     opis TEXT
 );
 
+-- Podaci za vrste članarina
 INSERT INTO clanarina (tip, cijena, trajanje, opis) VALUES
 ('Osnovna', 29.99, 30, 'Pristup svim osnovnim spravama'),
 ('Napredna', 49.99, 30, 'Pristup svim spravama i grupnim treninzima'),
@@ -28,10 +32,14 @@ CREATE TABLE clan (
     FOREIGN KEY (id_clanarina) REFERENCES clanarina(id)
 );
 
+-- Podaci za članove, moguće proširiti ako je potrebno za kompleksnije upite
 INSERT INTO clan (ime, prezime, email, telefon, datum_uclanjenja, id_clanarina) VALUES
 ('Ana', 'Anić', 'ana.anic@example.com', '0911111111', '2025-01-15', 1),
 ('Ivan', 'Ivić', 'ivan.ivic@example.com', '0922222222', '2025-02-01', 2),
-('Petra', 'Perić', 'petra.peric@example.com', '0933333333', '2025-03-01', 3);
+('Petra', 'Perić', 'petra.peric@example.com', '0933333333', '2025-03-01', 3),
+('Marko', 'Marković', 'marko.markovic@example.com', '0944444444', '2025-04-15', 1),
+('Luka', 'Lukić', 'luka.lukic@example.com', '0955555555', '2025-05-01', 2),
+('Katarina', 'Katić', 'katarina.katic@example.com', '0966666666', '2025-05-15', 3);
 
 -- Tablica: trener
 CREATE TABLE trener (
@@ -43,9 +51,12 @@ CREATE TABLE trener (
     telefon VARCHAR(20)
 );
 
+-- Podaci za trenere
 INSERT INTO trener (ime, prezime, specijalizacija, email, telefon) VALUES
 ('Marko', 'Marić', 'Kondicijska priprema', 'marko.maric@example.com', '0914445555'),
-('Lana', 'Lukić', 'Rehabilitacija', 'lana.lukic@example.com', '0926667777');
+('Lana', 'Lukić', 'Rehabilitacija', 'lana.lukic@example.com', '0926667777'),
+('Petar', 'Perović', 'Bodybuilding', 'petar.perovic@example.com', '0937778888'),
+('Ana', 'Anić', 'Funkcionalni trening', 'ana.anic@example.com', '0948889999');
 
 -- Tablica: trening
 CREATE TABLE trening (
@@ -60,9 +71,12 @@ CREATE TABLE trening (
     FOREIGN KEY (id_trenera) REFERENCES trener(id)
 );
 
+-- Podaci za treninge
 INSERT INTO trening (id_clana, id_trenera, tip_treninga, datum, vrijeme, trajanje) VALUES
 (1, 1, 'Kondicijski', '2025-05-10', '10:00:00', 60),
-(2, 2, 'Rehabilitacijski', '2025-05-11', '15:00:00', 45);
+(2, 2, 'Rehabilitacijski', '2025-05-11', '15:00:00', 45),
+(3, 3, 'Bodybuilding', '2025-05-12', '18:00:00', 90),
+(4, 4, 'Funkcionalni', '2025-05-13', '17:00:00', 75);
 
 -- Tablica: grupni_trening
 CREATE TABLE grupni_trening (
@@ -75,9 +89,12 @@ CREATE TABLE grupni_trening (
     FOREIGN KEY (id_trenera) REFERENCES trener(id)
 );
 
+-- Podaci za grupne treninge
 INSERT INTO grupni_trening (naziv, id_trenera, max_clanova, dan_u_tjednu, vrijeme) VALUES
 ('Pilates', 2, 15, 'Ponedjeljak', '18:00:00'),
-('HIIT', 1, 20, 'Srijeda', '19:00:00');
+('HIIT', 1, 20, 'Srijeda', '19:00:00'),
+('Yoga', 4, 12, 'Petak', '17:30:00'),
+('Lifting', 3, 18, 'Utorak', '20:00:00');
 
 -- Tablica: prisutnost
 CREATE TABLE prisutnost (
@@ -89,9 +106,12 @@ CREATE TABLE prisutnost (
     FOREIGN KEY (id_grupnog_treninga) REFERENCES grupni_trening(id)
 );
 
+-- Podaci za prisutnost
 INSERT INTO prisutnost (id_clana, id_grupnog_treninga, datum) VALUES
 (1, 1, '2025-05-05'),
-(2, 2, '2025-05-07');
+(2, 2, '2025-05-07'),
+(3, 3, '2025-05-09'),
+(4, 4, '2025-05-06');
 
 -- Tablica: oprema
 CREATE TABLE oprema (
@@ -102,9 +122,12 @@ CREATE TABLE oprema (
     stanje VARCHAR(50)
 );
 
+-- Podaci za opremu
 INSERT INTO oprema (sifra, naziv, datum_nabave, stanje) VALUES
 ('SPR-001', 'Bench klupa', '2023-05-01', 'ispravna'),
-('SPR-002', 'Traka za trčanje', '2024-01-15', 'u servisu');
+('SPR-002', 'Traka za trčanje', '2024-01-15', 'u servisu'),
+('SPR-003', 'Utezi', '2023-12-01', 'ispravna'),
+('SPR-004', 'Kardio sprava', '2024-02-20', 'ispravna');
 
 -- Tablica: rezervacija_opreme
 CREATE TABLE rezervacija_opreme (
@@ -118,9 +141,11 @@ CREATE TABLE rezervacija_opreme (
     FOREIGN KEY (id_opreme) REFERENCES oprema(id)
 );
 
+-- Podaci za rezervacije opreme
 INSERT INTO rezervacija_opreme (id_clana, id_opreme, datum, vrijeme_pocetka, vrijeme_zavrsetka) VALUES
 (1, 1, '2025-05-08', '09:00:00', '09:45:00'),
-(2, 2, '2025-05-08', '10:00:00', '10:30:00');
+(2, 2, '2025-05-08', '10:00:00', '10:30:00'),
+(3, 3, '2025-05-09', '16:00:00', '17:00:00');
 
 -- Tablica: placanje
 CREATE TABLE placanje (
@@ -134,9 +159,18 @@ CREATE TABLE placanje (
     FOREIGN KEY (id_clanarina) REFERENCES clanarina(id)
 );
 
+-- Podaci za plaćanja
 INSERT INTO placanje (id_clana, id_clanarina, iznos, datum_uplate, nacin_placanja) VALUES
 (1, 1, 29.99, '2025-01-15', 'kartica'),
-(2, 2, 49.99, '2025-02-01', 'gotovina');
+(2, 2, 49.99, '2025-02-01', 'gotovina'),
+(3, 3, 69.99, '2025-03-01', 'kartica'),
+(4, 1, 29.99, '2025-04-15', 'transfer'),
+(5, 2, 49.99, '2025-05-01', 'gotovina'),
+(6, 3, 69.99, '2025-02-15', 'kartica'),
+(7, 1, 29.99, '2025-03-20', 'transfer'),
+(8, 2, 49.99, '2025-04-10', 'gotovina'),
+(9, 3, 69.99, '2025-05-05', 'kartica'),
+(10, 1, 29.99, '2025-01-30', 'transfer');
 
 -- Tablica: osoblje
 CREATE TABLE osoblje (
@@ -148,60 +182,83 @@ CREATE TABLE osoblje (
     telefon VARCHAR(20)
 );
 
+-- Podaci za osoblje
 INSERT INTO osoblje (ime, prezime, uloga, email, telefon) VALUES
 ('Josip', 'Jurić', 'Recepcionist', 'josip.juric@example.com', '099888999'),
-('Maja', 'Majić', 'Voditelj', 'maja.majic@example.com', '098777666');
+('Maja', 'Majić', 'Voditelj', 'maja.majic@example.com', '098777666'),
+('Ana', 'Horvat', 'Trener', 'ana.horvat@example.com', '097666555'),
+('Petar', 'Petrović', 'Tehničko osoblje', 'petar.petrovic@example.com', '096555444');
 
--- VIEWOVI
-CREATE VIEW aktivni_clanovi AS
-SELECT c.id, c.ime, c.prezime, cl.tip, cl.cijena, c.datum_uclanjenja
+-- POGLEDI ZA PLAĆANJA I OSOBLJE
+
+-- Pogled ukupnih prihoda po mjesecima
+CREATE VIEW prihodi_po_mjesecima AS
+SELECT 
+    YEAR(datum_uplate) AS godina,
+    MONTH(datum_uplate) AS mjesec,
+    SUM(iznos) AS ukupni_prihod,
+    COUNT(*) AS broj_uplata
+FROM placanje
+GROUP BY godina, mjesec
+ORDER BY godina, mjesec;
+
+-- Pogled načina plaćanja
+CREATE VIEW nacini_placanja AS
+SELECT 
+    nacin_placanja,
+    COUNT(*) AS broj_placanja,
+    SUM(iznos) AS ukupni_prihod,
+    AVG(iznos) AS prosjecna_uplata
+FROM placanje
+GROUP BY nacin_placanja;
+
+-- Pogled članova s najvećim uplatama
+CREATE VIEW najpodmireniji_clanovi AS
+SELECT 
+    c.id AS clan_id,
+    c.ime,
+    c.prezime,
+    COUNT(p.id) AS broj_uplata,
+    SUM(p.iznos) AS ukupni_izdaci,
+    MAX(p.datum_uplate) AS zadnja_uplata
 FROM clan c
-JOIN clanarina cl ON c.id_clanarina = cl.id;
+JOIN placanje p ON c.id = p.id_clana
+GROUP BY c.id, c.ime, c.prezime
+ORDER BY ukupni_izdaci DESC
+LIMIT 5;
 
-CREATE VIEW financije AS
-SELECT p.id, c.ime, c.prezime, cl.tip, p.iznos, p.datum_uplate, p.nacin_placanja
-FROM placanje p
-JOIN clan c ON p.id_clana = c.id
-JOIN clanarina cl ON p.id_clanarina = cl.id;
-
-CREATE VIEW trener_grupni AS
-SELECT t.ime, t.prezime, gt.naziv, gt.dan_u_tjednu, gt.vrijeme
-FROM trener t
-JOIN grupni_trening gt ON t.id = gt.id_trenera;
-
-CREATE VIEW stanje_opreme AS
-SELECT * FROM oprema;
-
-CREATE VIEW rezervacije_opreme AS
-SELECT ro.id, c.ime, c.prezime, o.naziv, ro.datum, ro.vrijeme_pocetka, ro.vrijeme_zavrsetka
-FROM rezervacija_opreme ro
-JOIN clan c ON ro.id_clana = c.id
-JOIN oprema o ON ro.id_opreme = o.id;
-
-CREATE VIEW redoviti_clanovi AS
-SELECT c.id, c.ime, c.prezime, COUNT(p.id) AS broj_prisutnosti
+-- Pogled za praćenje članarina
+CREATE VIEW status_clanarina AS
+SELECT 
+    c.id AS clan_id,
+    c.ime,
+    c.prezime,
+    cl.tip AS vrsta_clanarine,
+    MAX(p.datum_uplate) AS zadnja_uplata,
+    DATEDIFF(CURRENT_DATE, MAX(p.datum_uplate)) AS dana_od_zadnje_uplate
 FROM clan c
-JOIN prisutnost p ON c.id = p.id_clana
-GROUP BY c.id
-HAVING COUNT(p.id) > 1;
+JOIN clanarina cl ON c.id_clanarina = cl.id
+LEFT JOIN placanje p ON c.id = p.id_clana
+GROUP BY c.id, c.ime, c.prezime, cl.tip
+ORDER BY dana_od_zadnje_uplate DESC;
 
-CREATE VIEW treninzi_po_treneru AS
-SELECT t.ime, t.prezime, COUNT(tr.id) AS broj_treninga
-FROM trener t
-LEFT JOIN trening tr ON t.id = tr.id_trenera
-GROUP BY t.id;
-
-CREATE VIEW statistika_prisutnosti AS
-SELECT gt.naziv, COUNT(p.id_clana) AS broj_prisutnih
-FROM grupni_trening gt
-LEFT JOIN prisutnost p ON gt.id = p.id_grupnog_treninga
-GROUP BY gt.id;
-
-CREATE VIEW zaposlenici_teretane AS
-SELECT * FROM osoblje;
-
+-- Pogled dugova
 CREATE VIEW neplacene_clanarine AS
-SELECT c.id, c.ime, c.prezime
+SELECT 
+    c.id AS clan_id,
+    c.ime,
+    c.prezime,
+    cl.tip AS vrsta_clanarine,
+    cl.cijena AS iznos_clanarine
 FROM clan c
+JOIN clanarina cl ON c.id_clanarina = cl.id
 LEFT JOIN placanje p ON c.id = p.id_clana
 WHERE p.id IS NULL;
+
+-- Pogled za osoblje
+CREATE VIEW osoblje_pregled AS
+SELECT 
+    uloga, 
+    COUNT(*) AS broj_zaposlenika
+FROM osoblje
+GROUP BY uloga;
