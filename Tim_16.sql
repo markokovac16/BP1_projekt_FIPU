@@ -32,14 +32,38 @@ CREATE TABLE clan (
     FOREIGN KEY (id_clanarina) REFERENCES clanarina(id)
 );
 
--- Podaci za članove, moguće proširiti ako je potrebno za kompleksnije upite
+-- Podaci za članove, moguće proširiti još,ako je potrebno za kompleksnije upite
 INSERT INTO clan (ime, prezime, email, telefon, datum_uclanjenja, id_clanarina) VALUES
-('Ana', 'Anić', 'ana.anic@example.com', '0911111111', '2025-01-15', 1),
-('Ivan', 'Ivić', 'ivan.ivic@example.com', '0922222222', '2025-02-01', 2),
-('Petra', 'Perić', 'petra.peric@example.com', '0933333333', '2025-03-01', 3),
-('Marko', 'Marković', 'marko.markovic@example.com', '0944444444', '2025-04-15', 1),
-('Luka', 'Lukić', 'luka.lukic@example.com', '0955555555', '2025-05-01', 2),
-('Katarina', 'Katić', 'katarina.katic@example.com', '0966666666', '2025-05-15', 3);
+('Ivana', 'Krpan', 'ivana.krpan@example.com', '0911234567', '2023-06-15', 1),
+('Marko', 'Barišić', 'marko.barisic@example.com', '0921231234', '2024-01-10', 2),
+('Ana', 'Radić', 'ana.radic@example.com', '0981112222', '2022-12-01', 3),
+('Petar', 'Kovačević', 'petar.kovacevic@example.com', '0979876543', '2023-08-20', 1),
+('Luka', 'Grgić', 'luka.grgic@example.com', '0917654321', '2023-02-12', 2),
+('Matea', 'Babić', 'matea.babic@example.com', '0929871234', '2024-03-04', 3),
+('Tomislav', 'Vuković', 'tomislav.vukovic@example.com', '0982221111', '2023-05-07', 1),
+('Ema', 'Horvat', 'ema.horvat@example.com', '0913334444', '2022-11-18', 2),
+('Ivana', 'Jurić', 'ivana.juric@example.com', '0971233211', '2024-04-22', 1),
+('Sara', 'Šimić', 'sara.simic@example.com', '0923214567', '2023-07-30', 3),
+('Josip', 'Mlinarić', 'josip.mlinaric@example.com', '0914567890', '2023-03-15', 2),
+('Iva', 'Zadro', 'iva.zadro@example.com', '0921119999', '2022-10-25', 1),
+('Filip', 'Bosanac', 'filip.bosanac@example.com', '0981234567', '2023-09-05', 3),
+('Martin', 'Perić', 'martin.peric@example.com', '0918887777', '2023-12-19', 1),
+('Nikola', 'Šarić', 'nikola.saric@example.com', '0925553333', '2024-02-28', 2),
+('Karla', 'Novak', 'karla.novak@example.com', '0971118888', '2023-01-11', 3),
+('Dario', 'Majer', 'dario.majer@example.com', '0912224444', '2024-05-10', 1),
+('Lana', 'Barić', 'lana.baric@example.com', '0924446666', '2023-06-03', 3),
+('Andrej', 'Lovrić', 'andrej.lovric@example.com', '0989990000', '2023-10-14', 2),
+('Tea', 'Bošnjak', 'tea.bosnjak@example.com', '0917776666', '2022-09-29', 1),
+('Rita', 'Ketić', 'rita.kettla@example.com', '0920001234', '2023-08-01', 2),
+('Tina', 'Trajković', 'tina.trajkovic@example.com', '0910005678', '2023-11-21', 1),
+('Sandra', 'Skočić', 'sandra.skocic@example.com', '0970009876', '2024-01-15', 3),
+('Vježbana', 'Žderić', 'vjezbana.zderic@example.com', '0980005555', '2024-03-18', 3),
+('Renata', 'Matošević', 'renata.matosevic@example.com', '0919991234', '2023-04-12', 2),
+('Domagoj', 'Vlašić', 'domagoj.vlasic@example.com', '0928884567', '2022-12-23', 3),
+('Nika', 'Župan', 'nika.zupan@example.com', '0984567890', '2023-05-29', 1),
+('Kristijan', 'Orešković', 'kristijan.oreskovic@example.com', '0971239876', '2024-02-05', 2),
+('Lucija', 'Posavec', 'lucija.posavec@example.com', '0916549870', '2023-07-09', 3),
+('Matej', 'Raguž', 'matej.raguz@example.com', '0927418529', '2023-09-17', 1);
 
 -- Tablica: trener
 CREATE TABLE trener (
@@ -396,3 +420,53 @@ GROUP BY godina, mjesec;
 SELECT * 
 FROM mjesecna_statistika_treninga
 ORDER BY godina, mjesec;
+
+-- Martina upiti (test)
+
+-- Popis članova s nazivom članarine i cijenom
+SELECT 
+  c.ime, 
+  c.prezime, 
+  cl.tip AS tip_clanarine,
+  cl.cijena,
+  (SELECT COUNT(*) 
+   FROM placanje p 
+   WHERE p.id_clana = c.id) AS broj_placanja
+FROM clan c
+INNER JOIN clanarina cl ON c.id_clanarina = cl.id;
+
+-- Prikaži članove koji plaćaju najskuplju članarinu
+
+SELECT c.ime, c.prezime, cl.tip, cl.cijena
+FROM clan c
+JOIN clanarina cl ON c.id_clanarina = cl.id
+WHERE cl.cijena = (SELECT MAX(cijena) FROM clanarina);
+
+-- Članovi koji imaju manje od 2 plaćanja 
+
+SELECT 
+  c.ime, c.prezime,
+  COUNT(p.id) AS broj_placanja
+FROM clan c
+LEFT JOIN placanje p ON c.id = p.id_clan
+GROUP BY c.id
+HAVING COUNT(p.id) < 2;
+
+-- Članovi koji su koristili opremu i pripadaju premium članarini
+
+SELECT DISTINCT 
+  c.ime, c.prezime
+FROM clan c
+JOIN clanarina cl ON c.id_clanarina = cl.id
+JOIN rezervacija_opreme r ON c.id = r.id_clan
+WHERE cl.naziv = 'Premium';
+
+-- Članovi koji imaju manje od 2 plaćanja
+
+SELECT 
+  c.ime, c.prezime,
+  COUNT(p.id) AS broj_placanja
+FROM clan c
+LEFT JOIN placanje p ON c.id = p.id_clan
+GROUP BY c.id
+HAVING COUNT(p.id) < 2;
