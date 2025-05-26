@@ -175,11 +175,15 @@ CREATE TABLE oprema (
 );
 
 -- Podaci za opremu
+-- Početni podaci + dodatni podaci za opremu
 INSERT INTO oprema (sifra, naziv, datum_nabave, stanje) VALUES
 ('SPR-001', 'Bench klupa', '2023-05-01', 'ispravna'),
 ('SPR-002', 'Traka za trčanje', '2024-01-15', 'u servisu'),
 ('SPR-003', 'Utezi', '2023-12-01', 'ispravna'),
-('SPR-004', 'Kardio sprava', '2024-02-20', 'ispravna');
+('SPR-004', 'Kardio sprava', '2024-02-20', 'ispravna'),
+('SPR-005', 'Sobni bicikl', '2024-03-10', 'ispravna'),
+('SPR-006', 'Veslačka sprava', '2023-11-25', 'potrebna zamjena dijela'),
+('SPR-007', 'Multigym sprava', '2022-08-05', 'ispravna');
 
 -- Tablica: rezervacija_opreme
 CREATE TABLE rezervacija_opreme (
@@ -197,7 +201,9 @@ CREATE TABLE rezervacija_opreme (
 INSERT INTO rezervacija_opreme (id_clana, id_opreme, datum, vrijeme_pocetka, vrijeme_zavrsetka) VALUES
 (1, 1, '2025-05-08', '09:00:00', '09:45:00'),
 (2, 2, '2025-05-08', '10:00:00', '10:30:00'),
-(3, 3, '2025-05-09', '16:00:00', '17:00:00');
+(3, 3, '2025-05-09', '16:00:00', '17:00:00'),
+(4, 5, '2025-05-10', '08:30:00', '09:15:00'),
+(1, 4, '2025-05-10', '12:00:00', '12:45:00');
 
 -- Tablica: placanje
 CREATE TABLE placanje (
@@ -396,3 +402,49 @@ GROUP BY godina, mjesec;
 SELECT * 
 FROM mjesecna_statistika_treninga
 ORDER BY godina, mjesec;
+
+-- Upiti za tablicu oprema
+SELECT stanje, COUNT(*) AS broj_komada
+FROM oprema
+GROUP BY stanje
+ORDER BY broj_komada DESC;
+
+SELECT *
+FROM oprema
+WHERE id NOT IN (
+    SELECT DISTINCT id_opreme
+    FROM rezervacija_opreme
+);
+
+SELECT *
+FROM oprema
+WHERE YEAR(datum_nabave) = 2024
+ORDER BY datum_nabave DESC;
+
+-- Upiti za tablicu rezervacija_opreme
+SELECT id_opreme, COUNT(*) AS broj_rezervacija
+FROM rezervacija_opreme
+GROUP BY id_opreme
+ORDER BY broj_rezervacija DESC;
+
+SELECT ro.*, o.naziv AS oprema_naziv
+FROM rezervacija_opreme ro
+JOIN oprema o ON ro.id_opreme = o.id
+WHERE ro.datum BETWEEN '2025-05-01' AND '2025-05-31'
+ORDER BY ro.datum, ro.vrijeme_pocetka;
+
+SELECT ro.*
+FROM rezervacija_opreme ro
+JOIN (
+    SELECT id_opreme, MAX(datum) AS zadnji_datum
+    FROM rezervacija_opreme
+    GROUP BY id_opreme
+) poslj ON ro.id_opreme = poslj.id_opreme AND ro.datum = poslj.zadnji_datum;
+
+SELECT o.naziv AS oprema, COUNT(ro.id) AS broj_rezervacija_maja
+FROM rezervacija_opreme ro
+JOIN oprema o ON ro.id_opreme = o.id
+WHERE MONTH(ro.datum) = 5 AND YEAR(ro.datum) = 2025
+GROUP BY o.naziv
+ORDER BY broj_rezervacija_maja DESC;
+
