@@ -1,4 +1,4 @@
--- Brisanje baze podataka ako već postoji(za clean slate pri testiranju)
+-- Brisanje baze podataka ako već postoji (za clean slate pri testiranju)
 DROP DATABASE IF EXISTS teretana;
 
 -- Kreiranje nove baze podataka
@@ -159,9 +159,9 @@ CREATE TABLE grupni_trening (
     id INT PRIMARY KEY AUTO_INCREMENT,
     naziv VARCHAR(100) NOT NULL,
     id_trenera INT,
-    max_clanova INT,
-    dan_u_tjednu VARCHAR(15),
-    vrijeme TIME,
+    max_clanova INT CHECK (max_clanova > 0),
+    dan_u_tjednu ENUM('Ponedjeljak', 'Utorak', 'Srijeda', 'Četvrtak', 'Petak', 'Subota', 'Nedjelja'),
+    vrijeme TIME DEFAULT '18:00:00',
     FOREIGN KEY (id_trenera) REFERENCES trener(id)
 );
 
@@ -179,7 +179,8 @@ CREATE TABLE prisutnost (
     id_grupnog_treninga INT,
     datum DATE,
     FOREIGN KEY (id_clana) REFERENCES clan(id),
-    FOREIGN KEY (id_grupnog_treninga) REFERENCES grupni_trening(id)
+    FOREIGN KEY (id_grupnog_treninga) REFERENCES grupni_trening(id),
+    UNIQUE (id_clana, id_grupnog_treninga, datum)
 );
 
 -- Podaci za prisutnost
@@ -188,6 +189,56 @@ INSERT INTO prisutnost (id_clana, id_grupnog_treninga, datum) VALUES
 (2, 2, '2025-05-07'),
 (3, 3, '2025-05-09'),
 (4, 4, '2025-05-06');
+
+-- Pogledi - marko_aleksic
+
+CREATE VIEW pregled_grupnih_treninga AS
+SELECT 
+    gt.id AS trening_id,
+    gt.naziv,
+    CONCAT(t.ime, ' ', t.prezime) AS trener,
+    gt.dan_u_tjednu,
+    gt.vrijeme,
+    gt.max_clanova
+FROM grupni_trening gt
+JOIN trener t ON gt.id_trenera = t.id;
+
+CREATE VIEW popunjenost_grupnih_treninga AS
+SELECT 
+    gt.id AS trening_id,
+    gt.naziv,
+    gt.dan_u_tjednu,
+    gt.vrijeme,
+    gt.max_clanova,
+    COUNT(p.id_clana) AS prijavljeni,
+    CONCAT(ROUND((COUNT(p.id_clana) / gt.max_clanova) * 100, 1), '%') AS popunjenost
+FROM grupni_trening gt
+LEFT JOIN prisutnost p ON gt.id = p.id_grupnog_treninga
+GROUP BY gt.id;
+
+CREATE VIEW aktivnost_clanova_grupni AS
+SELECT 
+    c.id,
+    c.ime,
+    c.prezime,
+    COUNT(*) AS broj_dolazaka
+FROM clan c
+JOIN prisutnost p ON c.id = p.id_clana
+GROUP BY c.id
+ORDER BY broj_dolazaka DESC;
+
+CREATE VIEW dolasci_na_treninge_po_danu AS
+SELECT 
+    gt.dan_u_tjednu,
+    COUNT(p.id) AS broj_dolazaka
+FROM grupni_trening gt
+JOIN prisutnost p ON gt.id = p.id_grupnog_treninga
+GROUP BY gt.dan_u_tjednu
+ORDER BY FIELD(gt.dan_u_tjednu, 'Ponedjeljak', 'Utorak', 'Srijeda', 'Četvrtak', 'Petak', 'Subota', 'Nedjelja');
+
+-- ======================
+-- Ostatak baze: oprema, rezervacije, plaćanja, osoblje
+-- ======================
 
 -- Tablica: oprema
 CREATE TABLE oprema (
@@ -199,11 +250,15 @@ CREATE TABLE oprema (
 );
 
 -- Podaci za opremu
+-- Početni podaci + dodatni podaci za opremu
 INSERT INTO oprema (sifra, naziv, datum_nabave, stanje) VALUES
 ('SPR-001', 'Bench klupa', '2023-05-01', 'ispravna'),
 ('SPR-002', 'Traka za trčanje', '2024-01-15', 'u servisu'),
 ('SPR-003', 'Utezi', '2023-12-01', 'ispravna'),
-('SPR-004', 'Kardio sprava', '2024-02-20', 'ispravna');
+('SPR-004', 'Kardio sprava', '2024-02-20', 'ispravna'),
+('SPR-005', 'Sobni bicikl', '2024-03-10', 'ispravna'),
+('SPR-006', 'Veslačka sprava', '2023-11-25', 'potrebna zamjena dijela'),
+('SPR-007', 'Multigym sprava', '2022-08-05', 'ispravna');
 
 -- Tablica: rezervacija_opreme
 CREATE TABLE rezervacija_opreme (
@@ -221,7 +276,9 @@ CREATE TABLE rezervacija_opreme (
 INSERT INTO rezervacija_opreme (id_clana, id_opreme, datum, vrijeme_pocetka, vrijeme_zavrsetka) VALUES
 (1, 1, '2025-05-08', '09:00:00', '09:45:00'),
 (2, 2, '2025-05-08', '10:00:00', '10:30:00'),
-(3, 3, '2025-05-09', '16:00:00', '17:00:00');
+(3, 3, '2025-05-09', '16:00:00', '17:00:00'),
+(4, 5, '2025-05-10', '08:30:00', '09:15:00'),
+(1, 4, '2025-05-10', '12:00:00', '12:45:00');
 
 -- Tablica: placanje
 CREATE TABLE placanje (
@@ -265,9 +322,7 @@ INSERT INTO osoblje (ime, prezime, uloga, email, telefon) VALUES
 ('Ana', 'Horvat', 'Trener', 'ana.horvat@example.com', '097666555'),
 ('Petar', 'Petrović', 'Tehničko osoblje', 'petar.petrovic@example.com', '096555444');
 
--- POGLEDI ZA PLAĆANJA I OSOBLJE
-
--- Pogled ukupnih prihoda po mjesecima
+-- Pogled: prihodi po mjesecima
 CREATE VIEW prihodi_po_mjesecima AS
 SELECT 
     YEAR(datum_uplate) AS godina,
@@ -278,7 +333,7 @@ FROM placanje
 GROUP BY godina, mjesec
 ORDER BY godina, mjesec;
 
--- Pogled načina plaćanja
+-- Pogled: načini plaćanja
 CREATE VIEW nacini_placanja AS
 SELECT 
     nacin_placanja,
@@ -288,7 +343,7 @@ SELECT
 FROM placanje
 GROUP BY nacin_placanja;
 
--- Pogled članova s najvećim uplatama
+-- Pogled: najpodmireniji članovi
 CREATE VIEW najpodmireniji_clanovi AS
 SELECT 
     c.id AS clan_id,
@@ -303,7 +358,7 @@ GROUP BY c.id, c.ime, c.prezime
 ORDER BY ukupni_izdaci DESC
 LIMIT 5;
 
--- Pogled za praćenje članarina
+-- Pogled: status članarina
 CREATE VIEW status_clanarina AS
 SELECT 
     c.id AS clan_id,
@@ -318,7 +373,7 @@ LEFT JOIN placanje p ON c.id = p.id_clana
 GROUP BY c.id, c.ime, c.prezime, cl.tip
 ORDER BY dana_od_zadnje_uplate DESC;
 
--- Pogled dugova
+-- Pogled: neplaćene članarine
 CREATE VIEW neplacene_clanarine AS
 SELECT 
     c.id AS clan_id,
@@ -331,7 +386,7 @@ JOIN clanarina cl ON c.id_clanarina = cl.id
 LEFT JOIN placanje p ON c.id = p.id_clana
 WHERE p.id IS NULL;
 
--- Pogled za osoblje
+-- Pogled: osoblje po ulozi
 CREATE VIEW osoblje_pregled AS
 SELECT 
     uloga, 
@@ -420,6 +475,53 @@ GROUP BY godina, mjesec;
 SELECT * 
 FROM mjesecna_statistika_treninga
 ORDER BY godina, mjesec;
+
+-- Upiti za tablicu oprema
+SELECT stanje, COUNT(*) AS broj_komada
+FROM oprema
+GROUP BY stanje
+ORDER BY broj_komada DESC;
+
+SELECT *
+FROM oprema
+WHERE id NOT IN (
+    SELECT DISTINCT id_opreme
+    FROM rezervacija_opreme
+);
+
+SELECT *
+FROM oprema
+WHERE YEAR(datum_nabave) = 2024
+ORDER BY datum_nabave DESC;
+
+-- Upiti za tablicu rezervacija_opreme
+SELECT id_opreme, COUNT(*) AS broj_rezervacija
+FROM rezervacija_opreme
+GROUP BY id_opreme
+ORDER BY broj_rezervacija DESC;
+
+SELECT ro.*, o.naziv AS oprema_naziv
+FROM rezervacija_opreme ro
+JOIN oprema o ON ro.id_opreme = o.id
+WHERE ro.datum BETWEEN '2025-05-01' AND '2025-05-31'
+ORDER BY ro.datum, ro.vrijeme_pocetka;
+
+SELECT ro.*
+FROM rezervacija_opreme ro
+JOIN (
+    SELECT id_opreme, MAX(datum) AS zadnji_datum
+    FROM rezervacija_opreme
+    GROUP BY id_opreme
+) poslj ON ro.id_opreme = poslj.id_opreme AND ro.datum = poslj.zadnji_datum;
+
+SELECT o.naziv AS oprema, COUNT(ro.id) AS broj_rezervacija_maja
+FROM rezervacija_opreme ro
+JOIN oprema o ON ro.id_opreme = o.id
+WHERE MONTH(ro.datum) = 5 AND YEAR(ro.datum) = 2025
+GROUP BY o.naziv
+ORDER BY broj_rezervacija_maja DESC;
+
+
 
 -- Martina upiti (test)
 
