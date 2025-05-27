@@ -1,4 +1,4 @@
--- Brisanje baze podataka ako već postoji(za clean slate pri testiranju)
+-- Brisanje baze podataka ako već postoji (za clean slate pri testiranju)
 DROP DATABASE IF EXISTS teretana;
 
 -- Kreiranje nove baze podataka
@@ -32,7 +32,7 @@ CREATE TABLE clan (
     FOREIGN KEY (id_clanarina) REFERENCES clanarina(id)
 );
 
--- Podaci za članove, moguće proširiti ako je potrebno za kompleksnije upite
+-- Podaci za članove
 INSERT INTO clan (ime, prezime, email, telefon, datum_uclanjenja, id_clanarina) VALUES
 ('Ana', 'Anić', 'ana.anic@example.com', '0911111111', '2025-01-15', 1),
 ('Ivan', 'Ivić', 'ivan.ivic@example.com', '0922222222', '2025-02-01', 2),
@@ -135,9 +135,9 @@ CREATE TABLE grupni_trening (
     id INT PRIMARY KEY AUTO_INCREMENT,
     naziv VARCHAR(100) NOT NULL,
     id_trenera INT,
-    max_clanova INT,
-    dan_u_tjednu VARCHAR(15),
-    vrijeme TIME,
+    max_clanova INT CHECK (max_clanova > 0),
+    dan_u_tjednu ENUM('Ponedjeljak', 'Utorak', 'Srijeda', 'Četvrtak', 'Petak', 'Subota', 'Nedjelja'),
+    vrijeme TIME DEFAULT '18:00:00',
     FOREIGN KEY (id_trenera) REFERENCES trener(id)
 );
 
@@ -155,7 +155,8 @@ CREATE TABLE prisutnost (
     id_grupnog_treninga INT,
     datum DATE,
     FOREIGN KEY (id_clana) REFERENCES clan(id),
-    FOREIGN KEY (id_grupnog_treninga) REFERENCES grupni_trening(id)
+    FOREIGN KEY (id_grupnog_treninga) REFERENCES grupni_trening(id),
+    UNIQUE (id_clana, id_grupnog_treninga, datum)
 );
 
 -- Podaci za prisutnost
@@ -164,6 +165,56 @@ INSERT INTO prisutnost (id_clana, id_grupnog_treninga, datum) VALUES
 (2, 2, '2025-05-07'),
 (3, 3, '2025-05-09'),
 (4, 4, '2025-05-06');
+
+-- Pogledi - marko_aleksic
+
+CREATE VIEW pregled_grupnih_treninga AS
+SELECT 
+    gt.id AS trening_id,
+    gt.naziv,
+    CONCAT(t.ime, ' ', t.prezime) AS trener,
+    gt.dan_u_tjednu,
+    gt.vrijeme,
+    gt.max_clanova
+FROM grupni_trening gt
+JOIN trener t ON gt.id_trenera = t.id;
+
+CREATE VIEW popunjenost_grupnih_treninga AS
+SELECT 
+    gt.id AS trening_id,
+    gt.naziv,
+    gt.dan_u_tjednu,
+    gt.vrijeme,
+    gt.max_clanova,
+    COUNT(p.id_clana) AS prijavljeni,
+    CONCAT(ROUND((COUNT(p.id_clana) / gt.max_clanova) * 100, 1), '%') AS popunjenost
+FROM grupni_trening gt
+LEFT JOIN prisutnost p ON gt.id = p.id_grupnog_treninga
+GROUP BY gt.id;
+
+CREATE VIEW aktivnost_clanova_grupni AS
+SELECT 
+    c.id,
+    c.ime,
+    c.prezime,
+    COUNT(*) AS broj_dolazaka
+FROM clan c
+JOIN prisutnost p ON c.id = p.id_clana
+GROUP BY c.id
+ORDER BY broj_dolazaka DESC;
+
+CREATE VIEW dolasci_na_treninge_po_danu AS
+SELECT 
+    gt.dan_u_tjednu,
+    COUNT(p.id) AS broj_dolazaka
+FROM grupni_trening gt
+JOIN prisutnost p ON gt.id = p.id_grupnog_treninga
+GROUP BY gt.dan_u_tjednu
+ORDER BY FIELD(gt.dan_u_tjednu, 'Ponedjeljak', 'Utorak', 'Srijeda', 'Četvrtak', 'Petak', 'Subota', 'Nedjelja');
+
+-- ======================
+-- Ostatak baze: oprema, rezervacije, plaćanja, osoblje
+-- ======================
 
 -- Tablica: oprema
 CREATE TABLE oprema (
@@ -247,9 +298,7 @@ INSERT INTO osoblje (ime, prezime, uloga, email, telefon) VALUES
 ('Ana', 'Horvat', 'Trener', 'ana.horvat@example.com', '097666555'),
 ('Petar', 'Petrović', 'Tehničko osoblje', 'petar.petrovic@example.com', '096555444');
 
--- POGLEDI ZA PLAĆANJA I OSOBLJE
-
--- Pogled ukupnih prihoda po mjesecima
+-- Pogled: prihodi po mjesecima
 CREATE VIEW prihodi_po_mjesecima AS
 SELECT 
     YEAR(datum_uplate) AS godina,
@@ -260,7 +309,7 @@ FROM placanje
 GROUP BY godina, mjesec
 ORDER BY godina, mjesec;
 
--- Pogled načina plaćanja
+-- Pogled: načini plaćanja
 CREATE VIEW nacini_placanja AS
 SELECT 
     nacin_placanja,
@@ -270,7 +319,7 @@ SELECT
 FROM placanje
 GROUP BY nacin_placanja;
 
--- Pogled članova s najvećim uplatama
+-- Pogled: najpodmireniji članovi
 CREATE VIEW najpodmireniji_clanovi AS
 SELECT 
     c.id AS clan_id,
@@ -285,7 +334,7 @@ GROUP BY c.id, c.ime, c.prezime
 ORDER BY ukupni_izdaci DESC
 LIMIT 5;
 
--- Pogled za praćenje članarina
+-- Pogled: status članarina
 CREATE VIEW status_clanarina AS
 SELECT 
     c.id AS clan_id,
@@ -300,7 +349,7 @@ LEFT JOIN placanje p ON c.id = p.id_clana
 GROUP BY c.id, c.ime, c.prezime, cl.tip
 ORDER BY dana_od_zadnje_uplate DESC;
 
--- Pogled dugova
+-- Pogled: neplaćene članarine
 CREATE VIEW neplacene_clanarine AS
 SELECT 
     c.id AS clan_id,
@@ -313,7 +362,7 @@ JOIN clanarina cl ON c.id_clanarina = cl.id
 LEFT JOIN placanje p ON c.id = p.id_clana
 WHERE p.id IS NULL;
 
--- Pogled za osoblje
+-- Pogled: osoblje po ulozi
 CREATE VIEW osoblje_pregled AS
 SELECT 
     uloga, 
