@@ -55,14 +55,48 @@ CREATE TABLE clan (
 );
 
 -- Podaci za članove (Martina Ilić)
-INSERT INTO clan (ime, prezime, email, telefon, datum_uclanjenja, id_clanarina, datum_rodjenja, spol, adresa) VALUES
-('Ivana', 'Krpan', 'ivana.krpan@example.com', '0911234567', '2023-06-15', 1, '1995-03-12', 'Ž', 'Ilica 1'),
-('Marko', 'Barišić', 'marko.barisic@example.com', '0921231234', '2024-01-10', 2, '1990-08-22', 'M', 'Vukovarska 22'),
-('Ana', 'Radić', 'ana.radic@example.com', '0981112222', '2022-12-01', 3, '1988-11-05', 'Ž', 'Savska 33'),
-('Petar', 'Kovačević', 'petar.kovacevic@example.com', '0979876543', '2023-08-20', 1, '1992-04-18', 'M', 'Dubrava 44'),
-('Luka', 'Grgić', 'luka.grgic@example.com', '0917654321', '2023-02-12', 2, '1994-07-30', 'M', 'Maksimirska 55'),
-('Matea', 'Babić', 'matea.babic@example.com', '0929871234', '2024-03-04', 3, '1991-09-14', 'Ž', 'Trešnjevka 66'),
-('Tomislav', 'Vuković', 'tomislav.vukovic@example.com', '0982221111', '2023-05-07', 4, '2000-01-25', 'M', 'Studentski dom');
+INSERT INTO clan (ime, prezime, email, telefon, datum_uclanjenja, id_clanarina, datum_rodjenja, spol, adresa, grad) VALUES
+('Ivana', 'Krpan', 'ivana.krpan@example.com', '0911234567', '2023-06-15', 1, '1995-03-12', 'Ž', 'Ilica 1', 'Zagreb'),
+('Marko', 'Barišić', 'marko.barisic@example.com', '0921231234', '2024-01-10', 2, '1990-08-22', 'M', 'Vukovarska 22', 'Zagreb'),
+('Ana', 'Radić', 'ana.radic@example.com', '0981112222', '2022-12-01', 3, '1988-11-05', 'Ž', 'Savska 33', 'Zagreb'),
+('Petar', 'Kovačević', 'petar.kovacevic@example.com', '0979876543', '2023-08-20', 1, '1992-04-18', 'M', 'Dubrava 44', 'Zagreb'),
+('Luka', 'Grgić', 'luka.grgic@example.com', '0917654321', '2023-02-12', 2, '1994-07-30', 'M', 'Maksimirska 55', 'Zagreb'),
+('Matea', 'Babić', 'matea.babic@example.com', '0929871234', '2024-03-04', 3, '1991-09-14', 'Ž', 'Trešnjevka 66', 'Zagreb'),
+('Tomislav', 'Vuković', 'tomislav.vukovic@example.com', '0982221111', '2023-05-07', 4, '2000-01-25', 'M', 'Studentski dom', 'Zagreb'),
+('Maja', 'Horvat', 'maja.horvat@example.com', '0913334444', '2023-11-03', 5, '1997-12-08', 'Ž', 'Heinzelova 10', 'Zagreb'),
+('Filip', 'Novak', 'filip.novak@example.com', '0924445555', '2024-02-18', 1, '1993-06-21', 'M', 'Jarunska 25', 'Zagreb'),
+('Kristina', 'Marić', 'kristina.maric@example.com', '0985556666', '2023-09-14', 6, '1989-02-14', 'Ž', 'Britanski trg 5', 'Zagreb'),
+('Dario', 'Petković', 'dario.petkovic@example.com', '0976667777', '2022-07-22', 2, '1996-10-03', 'M', 'Savska 50', 'Zagreb'),
+('Petra', 'Jukić', 'petra.jukic@example.com', '0918889999', '2024-05-11', 7, '1985-05-17', 'Ž', 'Gajeva 15', 'Zagreb'),
+('Ivan', 'Čović', 'ivan.covic@example.com', '0931111000', '2023-03-25', 3, '1991-01-29', 'M', 'Palmotićeva 30', 'Zagreb'),
+('Ema', 'Matić', 'ema.matic@example.com', '0942222111', '2024-04-08', 4, '1999-08-11', 'Ž', 'Frankopanska 8', 'Zagreb'),
+('Dominik', 'Šimić', 'dominik.simic@example.com', '0953333222', '2023-01-16', 5, '1987-11-26', 'M', 'Ilica 150', 'Zagreb'),
+('Sara', 'Božić', 'sara.bozic@example.com', '0964444333', '2022-10-30', 1, '1994-04-07', 'Ž', 'Radnička 40', 'Zagreb'),
+('Matej', 'Pavić', 'matej.pavic@example.com', '0975555444', '2024-06-12', 8, '1998-07-19', 'M', 'Kaptol 20', 'Zagreb'),
+('Lucija', 'Dragić', 'lucija.dragic@example.com', '0986666555', '2023-12-07', 2, '1990-12-01', 'Ž', 'Miramarska 100', 'Zagreb'),
+('Antonio', 'Blažević', 'antonio.blazevic@example.com', '0917777666', '2022-05-19', 3, '1995-09-13', 'M', 'Amruševa 5', 'Zagreb'),
+('Nikolina', 'Katić', 'nikolina.katic@example.com', '0928888777', '2024-01-24', 6, '1986-03-05', 'Ž', 'Tratinska 25', 'Zagreb'),
+('Josip', 'Mandić', 'josip.mandic@example.com', '0939999888', '2023-07-11', 7, '1992-10-20', 'M', 'Heinzelova 70', 'Zagreb'),
+('Petra', 'Cvitković', 'petra.cvitkovic@example.com', '0940000999', '2022-11-28', 1, '1988-01-16', 'Ž', 'Jurišićeva 12', 'Zagreb'),
+('Mateo', 'Rašić', 'mateo.rasic@example.com', '0951111222', '2024-03-17', 4, '1997-06-28', 'M', 'Deželićeva 60', 'Zagreb'),
+('Laura', 'Tomić', 'laura.tomic@example.com', '0962222333', '2023-04-14', 5, '1993-11-11', 'Ž', 'Nova Ves 10', 'Zagreb'),
+('Bruno', 'Galić', 'bruno.galic@example.com', '0973333444', '2022-08-05', 8, '1989-05-23', 'M', 'Rooseveltov trg 6', 'Zagreb'),
+('Valentina', 'Lukić', 'valentina.lukic@example.com', '0984444555', '2024-02-29', 2, '1996-08-09', 'Ž', 'Bogovićeva 3', 'Zagreb'),
+('Hrvoje', 'Milošević', 'hrvoje.milosevic@example.com', '0915555666', '2023-10-21', 3, '1984-12-17', 'M', 'Klaićeva 18', 'Zagreb'),
+('Tea', 'Perić', 'tea.peric@example.com', '0926666777', '2022-06-13', 6, '1998-02-28', 'Ž', 'Šubićeva 29', 'Zagreb'),
+('Domagoj', 'Barbarić', 'domagoj.barbaric@example.com', '0987777888', '2024-05-02', 7, '1991-07-04', 'M', 'Radićeva 50', 'Zagreb'),
+('Klara', 'Rukavina', 'klara.rukavina@example.com', '0948888999', '2023-09-08', 1, '1995-10-15', 'Ž', 'Marulićev trg 14', 'Zagreb'),
+('Nikola', 'Đurić', 'nikola.djuric@example.com', '0959999000', '2022-12-16', 4, '1987-04-02', 'M', 'Zrinjevac 8', 'Zagreb'),
+('Dora', 'Stanić', 'dora.stanic@example.com', '0960000111', '2024-07-23', 5, '1999-01-07', 'Ž', 'Teslina 12', 'Zagreb'),
+('Vedran', 'Antić', 'vedran.antic@example.com', '0971111333', '2023-05-30', 8, '1990-09-22', 'M', 'Draškovićeva 45', 'Zagreb'),
+('Anja', 'Filipović', 'anja.filipovic@example.com', '0982222444', '2022-04-06', 2, '1994-06-12', 'Ž', 'Petrinjska 35', 'Zagreb'),
+('Marko', 'Zadravec', 'marko.zadravec@example.com', '0993333555', '2024-08-14', 3, '1988-03-25', 'M', 'Varsavska 20', 'Zagreb'),
+('Nina', 'Bošnjak', 'nina.bosnjak@example.com', '0914444666', '2023-01-27', 6, '1997-11-08', 'Ž', 'Vlaška 80', 'Zagreb'),
+('Marin', 'Crnković', 'marin.crnkovic@example.com', '0925555777', '2022-09-12', 7, '1985-08-14', 'M', 'Masarykova 15', 'Zagreb'),
+('Ivona', 'Mihaljević', 'ivona.mihaljevic@example.com', '0986666888', '2024-06-20', 1, '1996-12-03', 'Ž', 'Praška 25', 'Zagreb'),
+('Stipe', 'Lovrić', 'stipe.lovric@example.com', '0947777999', '2023-11-15', 4, '1992-02-19', 'M', 'Runjaninova 10', 'Zagreb'),
+('Lana', 'Ježić', 'lana.jezic@example.com', '0958888111', '2022-03-09', 5, '1989-07-31', 'Ž', 'Ribnjak 5', 'Zagreb'),
+('David', 'Petrić', 'david.petric@example.com', '0969999222', '2024-04-25', 8, '1998-05-06', 'M', 'Demetrova 22', 'Zagreb');
 
 -- ========================================
 -- KARLO PERIĆ: TRENER I TRENING
@@ -89,7 +123,7 @@ INSERT INTO trener (ime, prezime, specijalizacija, email, telefon, datum_zaposle
 ('Ana', 'Anić', 'Funkcionalni trening', 'ana.anic@teretana.com', '0948889999', '2022-01-20', 6),
 ('Filip', 'Maričić', 'Rehabilitacija', 'filip.maricic@teretana.com', '0938140416', '2021-11-05', 7),
 ('Ante', 'Babić', 'Kardio trening', 'ante.babic@teretana.com', '0954704637', '2020-08-12', 9),
-('Tomislav', 'Dominković', 'Kardio trening', 'tomislav.dominković@teretana.com', '0944821369', '2022-04-18', 5),
+('Tomislav', 'Dominković', 'Kardio trening', 'tomislav.dominkovic@teretana.com', '0944821369', '2022-04-18', 5),
 ('Lucija', 'Šimić', 'Rehabilitacija', 'lucija.simic@teretana.com', '0938035781', '2019-12-01', 11),
 ('Martina', 'Nevest', 'CrossFit', 'martina.kovac@teretana.com', '0983317492', '2021-07-22', 8),
 ('Davor', 'Šimić', 'Pilates', 'davor.simic@teretana.com', '0977012538', '2020-02-14', 10),
@@ -170,7 +204,6 @@ INSERT INTO grupni_trening (naziv, id_trenera, max_clanova, dan_u_tjednu, vrijem
 ('CrossFit početnici', 9, 15, 'Ponedjeljak', '17:00:00', 60, 25.00, 'CrossFit za početnike'),
 ('Spinning', 11, 20, 'Subota', '10:00:00', 45, 20.00, 'Indoor biciklizam'),
 ('TRX', 18, 12, 'Srijeda', '17:00:00', 45, 25.00, 'Funkcionalni trening s TRX trakama'),
-('Yoga večernja', 17, 15, 'Utorak', '19:00:00', 75, 30.00, 'Opuštajuća večernja yoga'),
 ('HIIT napredni', 4, 15, 'Petak', '18:00:00', 60, 20.00, 'HIIT za napredne vježbače'),
 ('Pilates napredni', 10, 12, 'Četvrtak', '17:00:00', 60, 25.00, 'Napredni Pilates'),
 ('Boxing fitness', 1, 18, 'Subota', '11:00:00', 60, 20.00, 'Fitness boks bez kontakta');
@@ -200,7 +233,7 @@ INSERT INTO prisutnost (id_clana, id_grupnog_treninga, datum, prisutan) VALUES
 (2, 9, '2025-05-09', TRUE),
 (3, 10, '2025-05-09', TRUE),
 (4, 11, '2025-05-10', TRUE),
-(5, 12, '2025-05-10', TRUE),
+(5, 10, '2025-05-10', TRUE),
 (6, 1, '2025-05-11', FALSE),
 (7, 2, '2025-05-11', TRUE),
 (1, 3, '2025-05-12', TRUE),
@@ -212,7 +245,7 @@ INSERT INTO prisutnost (id_clana, id_grupnog_treninga, datum, prisutan) VALUES
 (7, 9, '2025-05-15', TRUE),
 (1, 10, '2025-05-15', TRUE),
 (2, 11, '2025-05-16', TRUE),
-(3, 12, '2025-05-16', TRUE),
+(3, 9, '2025-05-16', TRUE),
 (4, 1, '2025-05-17', TRUE),
 (5, 2, '2025-05-17', TRUE),
 (6, 3, '2025-05-18', TRUE),
@@ -230,44 +263,43 @@ CREATE TABLE oprema (
     datum_nabave DATE NOT NULL,
     stanje ENUM('ispravna', 'u servisu', 'potrebna zamjena dijela', 'neispravna', 'nova') DEFAULT 'nova',
     vrijednost DECIMAL(8,2) DEFAULT 0.00,
-    lokacija VARCHAR(50) DEFAULT 'Glavna dvorana',
     proizvođač VARCHAR(50),
     model VARCHAR(50),
     garancija_do DATE
 );
 
 -- Podaci za opremu (Vladan)
-INSERT INTO oprema (sifra, naziv, datum_nabave, stanje, vrijednost, lokacija, proizvođač, model, garancija_do) VALUES
-('OPR-001', 'Bench Press', '2022-01-15', 'ispravna', 3500.00, 'Glavna dvorana', 'Technogym', 'BenchPro 2021', '2025-01-15'),
-('OPR-002', 'Treadmill', '2023-03-10', 'ispravna', 4200.00, 'Kardio zona', 'Life Fitness', 'RunX 500', '2026-03-10'),
-('OPR-003', 'Dumbbells Set', '2021-09-05', 'ispravna', 1500.00, 'Glavna dvorana', 'Reebok', 'Hex Set', '2024-09-05'),
-('OPR-004', 'Rowing Machine', '2022-06-20', 'ispravna', 2800.00, 'Kardio zona', 'Concept2', 'Model D', '2025-06-20'),
-('OPR-005', 'Squat Rack', '2020-11-12', 'potrebna zamjena dijela', 3200.00, 'Glavna dvorana', 'Hammer Strength', 'PowerRack', '2023-11-12'),
-('OPR-006', 'Stationary Bike', '2023-02-01', 'ispravna', 2100.00, 'Kardio zona', 'Schwinn', 'IC7', '2026-02-01'),
-('OPR-007', 'Kettlebell Set', '2021-07-18', 'ispravna', 900.00, 'Glavna dvorana', 'Gorilla Sports', 'KB2021', '2024-07-18'),
-('OPR-008', 'Lat Pulldown', '2022-04-25', 'ispravna', 2600.00, 'Glavna dvorana', 'Matrix', 'LatX', '2025-04-25'),
-('OPR-009', 'Elliptical', '2023-05-15', 'ispravna', 3500.00, 'Kardio zona', 'Precor', 'EFX 885', '2026-05-15'),
-('OPR-010', 'Smith Machine', '2022-08-30', 'ispravna', 4000.00, 'Glavna dvorana', 'Gym80', 'SM2022', '2025-08-30'),
-('OPR-011', 'TRX Suspension', '2023-01-10', 'ispravna', 600.00, 'Funkcionalna zona', 'TRX', 'Pro4', '2026-01-10'),
-('OPR-012', 'Medicine Balls', '2021-10-22', 'ispravna', 500.00, 'Funkcionalna zona', 'Adidas', 'MB2021', '2024-10-22'),
-('OPR-013', 'Stepper', '2022-12-05', 'ispravna', 1800.00, 'Kardio zona', 'StairMaster', 'SM5', '2025-12-05'),
-('OPR-014', 'Leg Press', '2021-05-17', 'ispravna', 3300.00, 'Glavna dvorana', 'Panatta', 'LP2021', '2024-05-17'),
-('OPR-015', 'Pull-up Bar', '2023-04-12', 'ispravna', 400.00, 'Funkcionalna zona', 'Decathlon', 'PB100', '2026-04-12'),
-('OPR-016', 'Cable Crossover', '2022-09-09', 'ispravna', 3700.00, 'Glavna dvorana', 'Body-Solid', 'CC2022', '2025-09-09'),
-('OPR-017', 'Ab Roller', '2021-08-03', 'ispravna', 150.00, 'Funkcionalna zona', 'Nike', 'AR2021', '2024-08-03'),
-('OPR-018', 'Battle Rope', '2023-03-20', 'ispravna', 250.00, 'Funkcionalna zona', 'Tiguar', 'BR2023', '2026-03-20'),
-('OPR-019', 'Leg Extension', '2022-07-14', 'ispravna', 2100.00, 'Glavna dvorana', 'Impulse', 'LE2022', '2025-07-14'),
-('OPR-020', 'Seated Row', '2021-11-28', 'ispravna', 2300.00, 'Glavna dvorana', 'Gym80', 'SR2021', '2024-11-28'),
-('OPR-021', 'Chest Press', '2023-02-18', 'ispravna', 3400.00, 'Glavna dvorana', 'Technogym', 'CP2023', '2026-02-18'),
-('OPR-022', 'Foam Roller', '2022-05-06', 'ispravna', 80.00, 'Funkcionalna zona', 'Blackroll', 'FR2022', '2025-05-06'),
-('OPR-023', 'Dip Station', '2021-12-13', 'ispravna', 350.00, 'Funkcionalna zona', 'Kettler', 'DS2021', '2024-12-13'),
-('OPR-024', 'Plyo Box', '2023-06-01', 'ispravna', 200.00, 'Funkcionalna zona', 'Reebok', 'PBX2023', '2026-06-01'),
-('OPR-025', 'Glute Ham Developer', '2022-10-19', 'ispravna', 1200.00, 'Glavna dvorana', 'Rogue', 'GHD2022', '2025-10-19'),
-('OPR-026', 'Spin Bike', '2023-01-25', 'ispravna', 2100.00, 'Kardio zona', 'Keiser', 'M3i', '2026-01-25'),
-('OPR-027', 'Power Bag', '2021-06-11', 'ispravna', 180.00, 'Funkcionalna zona', 'Tiguar', 'PB2021', '2024-06-11'),
-('OPR-028', 'SkiErg', '2022-03-29', 'ispravna', 2200.00, 'Kardio zona', 'Concept2', 'SkiErg2', '2025-03-29'),
-('OPR-029', 'Stretching Mat', '2023-05-08', 'ispravna', 60.00, 'Funkcionalna zona', 'Domyos', 'SM2023', '2026-05-08'),
-('OPR-030', 'Reverse Hyper', '2022-11-21', 'ispravna', 1700.00, 'Glavna dvorana', 'Westside', 'RH2022', '2025-11-21');
+INSERT INTO oprema (sifra, naziv, datum_nabave, stanje, vrijednost, proizvođač, model, garancija_do) VALUES
+('OPR-001', 'Klupa za potiskivanje', '2022-01-15', 'ispravna', 3500.00, 'Technogym', 'BenchPro 2021', '2025-01-15'),
+('OPR-002', 'Traka za trčanje', '2023-03-10', 'ispravna', 4200.00, 'Life Fitness', 'RunX 500', '2026-03-10'),
+('OPR-003', 'Set bučica', '2021-09-05', 'ispravna', 1500.00, 'Reebok', 'Hex Set', '2024-09-05'),
+('OPR-004', 'Veslački trenažer', '2022-06-20', 'ispravna', 2800.00, 'Concept2', 'Model D', '2025-06-20'),
+('OPR-005', 'Stalak za čučnjeve', '2020-11-12', 'potrebna zamjena dijela', 3200.00, 'Hammer Strength', 'PowerRack', '2023-11-12'),
+('OPR-006', 'Sobni bicikl', '2023-02-01', 'ispravna', 2100.00, 'Schwinn', 'IC7', '2026-02-01'),
+('OPR-007', 'Set girja', '2021-07-18', 'ispravna', 900.00, 'Gorilla Sports', 'KB2021', '2024-07-18'),
+('OPR-008', 'Sprava za povlačenje odozgo', '2022-04-25', 'ispravna', 2600.00, 'Matrix', 'LatX', '2025-04-25'),
+('OPR-009', 'Eliptični trenažer', '2023-05-15', 'ispravna', 3500.00, 'Precor', 'EFX 885', '2026-05-15'),
+('OPR-010', 'Smith mašina', '2022-08-30', 'ispravna', 4000.00, 'Gym80', 'SM2022', '2025-08-30'),
+('OPR-011', 'TRX sustav', '2023-01-10', 'ispravna', 600.00, 'TRX', 'Pro4', '2026-01-10'),
+('OPR-012', 'Medicinske lopte', '2021-10-22', 'ispravna', 500.00, 'Adidas', 'MB2021', '2024-10-22'),
+('OPR-013', 'Stepper', '2022-12-05', 'ispravna', 1800.00, 'StairMaster', 'SM5', '2025-12-05'),
+('OPR-014', 'Leg press', '2021-05-17', 'ispravna', 3300.00, 'Panatta', 'LP2021', '2024-05-17'),
+('OPR-015', 'Šipka za zgibove', '2023-04-12', 'ispravna', 400.00, 'Decathlon', 'PB100', '2026-04-12'),
+('OPR-016', 'Kablovski sustav', '2022-09-09', 'ispravna', 3700.00, 'Body-Solid', 'CC2022', '2025-09-09'),
+('OPR-017', 'Kotač za trbušnjake', '2021-08-03', 'ispravna', 150.00, 'Nike', 'AR2021', '2024-08-03'),
+('OPR-018', 'Uže za treniranje', '2023-03-20', 'ispravna', 250.00, 'Tiguar', 'BR2023', '2026-03-20'),
+('OPR-019', 'Sprava za opružanje nogu', '2022-07-14', 'ispravna', 2100.00, 'Impulse', 'LE2022', '2025-07-14'),
+('OPR-020', 'Sprava za veslanje u sjedenju', '2021-11-28', 'ispravna', 2300.00, 'Gym80', 'SR2021', '2024-11-28'),
+('OPR-021', 'Sprava za prsa', '2023-02-18', 'ispravna', 3400.00, 'Technogym', 'CP2023', '2026-02-18'),
+('OPR-022', 'Valjak za masažu', '2022-05-06', 'ispravna', 80.00, 'Blackroll', 'FR2022', '2025-05-06'),
+('OPR-023', 'Stanica za propadanja', '2021-12-13', 'ispravna', 350.00, 'Kettler', 'DS2021', '2024-12-13'),
+('OPR-024', 'Pliometrijska kutija', '2023-06-01', 'ispravna', 200.00, 'Reebok', 'PBX2023', '2026-06-01'),
+('OPR-025', 'Sprava za stražnjicu i bedra', '2022-10-19', 'ispravna', 1200.00, 'Rogue', 'GHD2022', '2025-10-19'),
+('OPR-026', 'Spinning bicikl', '2023-01-25', 'ispravna', 2100.00, 'Keiser', 'M3i', '2026-01-25'),
+('OPR-027', 'Torba za snagu', '2021-06-11', 'ispravna', 180.00, 'Tiguar', 'PB2021', '2024-06-11'),
+('OPR-028', 'Ski trenažer', '2022-03-29', 'ispravna', 2200.00, 'Concept2', 'SkiErg2', '2025-03-29'),
+('OPR-029', 'Podloga za istezanje', '2023-05-08', 'ispravna', 60.00, 'Domyos', 'SM2023', '2026-05-08'),
+('OPR-030', 'Sprava za hiperektenziju', '2022-11-21', 'ispravna', 1700.00, 'Westside', 'RH2022', '2025-11-21');
 
 -- Tablica: rezervacija_opreme (Vladan)
 CREATE TABLE rezervacija_opreme (
@@ -318,41 +350,6 @@ INSERT INTO rezervacija_opreme (id_clana, id_opreme, datum, vrijeme_pocetka, vri
 (15, 29, '2025-05-22', '14:00:00', '15:00:00', 'aktivna'),
 (1, 30, '2025-05-23', '10:00:00', '11:00:00', 'aktivna');
 
--- ========================================
--- MARKO KOVAČ: PLAĆANJE I OSOBLJE
--- ========================================
-
--- Tablica: placanje (Marko Kovač)
-CREATE TABLE placanje (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    id_clana INT NOT NULL,
-    id_clanarina INT NOT NULL,
-    iznos DECIMAL(6,2) NOT NULL CHECK (iznos > 0),
-    datum_uplate DATE NOT NULL,
-    nacin_placanja ENUM('gotovina', 'kartica', 'transfer', 'PayPal', 'kripto') DEFAULT 'kartica',
-    broj_racuna VARCHAR(20) UNIQUE,
-    popust DECIMAL(5,2) DEFAULT 0.00,
-    FOREIGN KEY (id_clana) REFERENCES clan(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    FOREIGN KEY (id_clanarina) REFERENCES clanarina(id) ON DELETE RESTRICT ON UPDATE CASCADE
-);
-
--- Podaci za plaćanja (Marko Kovač)
-INSERT INTO placanje (id_clana, id_clanarina, iznos, datum_uplate, nacin_placanja, broj_racuna, popust) VALUES
-(1, 1, 29.99, '2024-06-15', 'kartica', 'R-2024-001', 0.00),
-(2, 2, 49.99, '2024-07-10', 'gotovina', 'R-2024-002', 0.00),
-(3, 3, 69.99, '2024-08-01', 'kartica', 'R-2024-003', 0.00),
-(4, 1, 29.99, '2024-08-20', 'transfer', 'R-2024-004', 0.00),
-(5, 2, 49.99, '2024-09-12', 'gotovina', 'R-2024-005', 0.00),
-(6, 3, 69.99, '2024-10-04', 'kartica', 'R-2024-006', 0.00),
-(7, 4, 19.99, '2024-11-07', 'kartica', 'R-2024-007', 0.00),
-(1, 1, 29.99, '2024-12-15', 'kartica', 'R-2024-008', 0.00),
-(2, 2, 49.99, '2025-01-10', 'gotovina', 'R-2025-009', 0.00),
-(3, 3, 69.99, '2025-02-01', 'kartica', 'R-2025-010', 0.00),
-(4, 1, 29.99, '2025-02-20', 'transfer', 'R-2025-011', 0.00),
-(5, 2, 49.99, '2025-03-12', 'gotovina', 'R-2025-012', 0.00),
-(6, 3, 69.99, '2025-04-04', 'kartica', 'R-2025-013', 0.00),
-(7, 4, 19.99, '2025-05-07', 'kartica', 'R-2025-014', 0.00);
-
 -- Tablica: osoblje (Marko Kovač)
 CREATE TABLE osoblje (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -369,7 +366,7 @@ CREATE TABLE osoblje (
     INDEX idx_aktivan (aktivan)
 );
 
--- Podaci za osoblje - prošireno (Marko Kovač)
+-- Podaci za osoblje (Marko Kovač)
 INSERT INTO osoblje (ime, prezime, uloga, email, telefon, datum_zaposlenja, placa, radno_vrijeme) VALUES
 ('Ivana', 'Horvat', 'Recepcionist', 'ivana.horvat@teretana.com', '0911111111', '2022-01-10', 900.00, '06:00-14:00'),
 ('Marko', 'Novak', 'Voditelj', 'marko.novak@teretana.com', '0922222222', '2021-03-01', 1600.00, '08:00-16:00'),
@@ -381,6 +378,45 @@ INSERT INTO osoblje (ime, prezime, uloga, email, telefon, datum_zaposlenja, plac
 ('Martina', 'Babić', 'Čistačica', 'martina.babic@teretana.com', '0988888888', '2022-06-01', 700.00, '06:00-14:00'),
 ('Dino', 'Radić', 'Održavanje', 'dino.radic@teretana.com', '0999999999', '2023-03-20', 1100.00, '14:00-22:00'),
 ('Sanja', 'Vidović', 'Administrator', 'sanja.vidovic@teretana.com', '0910000000', '2022-11-10', 1400.00, '12:00-20:00');
+
+-- Tablica: placanje (Marko Kovač)
+CREATE TABLE placanje (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    id_clana INT NOT NULL,
+    id_clanarina INT NOT NULL,
+    iznos DECIMAL(6,2) NOT NULL CHECK (iznos > 0),
+    datum_uplate DATE NOT NULL,
+    nacin_placanja ENUM('gotovina', 'kartica', 'transfer', 'PayPal', 'kripto') DEFAULT 'kartica',
+    broj_racuna VARCHAR(20) UNIQUE,
+    popust DECIMAL(5,2) DEFAULT 0.00,
+    id_osoblje INT NOT NULL,
+    FOREIGN KEY (id_clana) REFERENCES clan(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (id_clanarina) REFERENCES clanarina(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (id_osoblje) REFERENCES osoblje(id) ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- Podaci za plaćanja (Marko Kovač)
+INSERT INTO placanje (id_clana, id_clanarina, iznos, datum_uplate, nacin_placanja, broj_racuna, popust, id_osoblje) VALUES
+(1, 1, 25.00, '2024-06-15', 'kartica', 'R-2024-001', 0.00, 1),
+(2, 2, 45.50, '2024-07-10', 'gotovina', 'R-2024-002', 0.00, 2),
+(3, 3, 75.99, '2024-08-01', 'kartica', 'R-2024-003', 0.00, 1),
+(4, 1, 25.00, '2024-08-20', 'transfer', 'R-2024-004', 0.00, 7),
+(5, 2, 45.50, '2024-09-12', 'gotovina', 'R-2024-005', 0.00, 2),
+(6, 3, 75.99, '2024-10-04', 'kartica', 'R-2024-006', 0.00, 1),
+(7, 4, 15.00, '2024-11-07', 'kartica', 'R-2024-007', 0.00, 7),
+(1, 1, 25.00, '2024-12-15', 'kartica', 'R-2024-008', 0.00, 1),
+(2, 2, 45.50, '2025-01-10', 'gotovina', 'R-2025-009', 0.00, 2),
+(3, 3, 75.99, '2025-02-01', 'kartica', 'R-2025-010', 0.00, 1),
+(4, 1, 25.00, '2025-02-20', 'transfer', 'R-2025-011', 0.00, 7),
+(5, 2, 45.50, '2025-03-12', 'gotovina', 'R-2025-012', 0.00, 2),
+(6, 3, 75.99, '2025-04-04', 'kartica', 'R-2025-013', 0.00, 1),
+(7, 4, 15.00, '2025-05-07', 'kartica', 'R-2025-014', 0.00, 7),
+(8, 5, 22.50, '2025-05-10', 'kartica', 'R-2025-015', 0.00, 1),
+(9, 6, 280.00, '2025-05-12', 'transfer', 'R-2025-016', 0.00, 2),
+(10, 7, 450.00, '2025-05-15', 'kartica', 'R-2025-017', 0.00, 1),
+(11, 8, 120.00, '2025-05-18', 'gotovina', 'R-2025-018', 0.00, 7),
+(12, 1, 23.75, '2025-05-20', 'kartica', 'R-2025-019', 5.00, 2),
+(13, 2, 40.93, '2025-05-22', 'transfer', 'R-2025-020', 10.00, 1);
 -- ========================================
 -- POGLEDI (VIEWS) - Po 2 za svakog člana tima
 -- ========================================
@@ -500,7 +536,6 @@ SELECT
     o.sifra,
     o.naziv,
     o.stanje,
-    o.lokacija,
     o.vrijednost,
     COUNT(ro.id) AS broj_rezervacija,
     COALESCE(MAX(ro.datum), o.datum_nabave) AS zadnje_koristena,
@@ -521,7 +556,6 @@ SELECT
     YEAR(ro.datum) AS godina,
     MONTH(ro.datum) AS mjesec,
     o.naziv AS oprema,
-    o.lokacija,
     COUNT(ro.id) AS broj_rezervacija,
     COUNT(DISTINCT ro.id_clana) AS broj_razlicitih_korisnika,
     SUM(TIMESTAMPDIFF(MINUTE, ro.vrijeme_pocetka, ro.vrijeme_zavrsetka)) AS ukupno_minuta_koristenja
@@ -542,7 +576,6 @@ SELECT
     COUNT(p.id) AS broj_transakcija,
     SUM(p.iznos) AS ukupni_prihod,
     SUM(p.popust) AS ukupni_popusti,
-    SUM(p.pdv) AS ukupni_pdv,
     AVG(p.iznos) AS prosjecna_uplata,
     GROUP_CONCAT(DISTINCT p.nacin_placanja) AS nacini_placanja
 FROM placanje p
