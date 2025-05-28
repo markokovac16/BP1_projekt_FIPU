@@ -514,56 +514,6 @@ INSERT INTO osoblje (ime, prezime, uloga, email, telefon, datum_zaposlenja, plac
 ('Ivan', 'Ivanić', 'Održavanje', 'ivan.ivanic@teretana.com', '095567890', '2022-05-20', 800.00, '08:00-16:00'),
 ('Ema', 'Emić', 'Čistačica', 'ema.emic@teretana.com', '094678901', '2023-02-01', 600.00, '06:00-14:00');
 
--- ========================================
--- DODATNE TABLICE ZA KOMPLETNOST SUSTAVA
--- ========================================
-
--- Tablica: program_vjezbi (dodatna funkcionalnost)
-CREATE TABLE program_vjezbi (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    id_clana INT NOT NULL,
-    id_trenera INT NOT NULL,
-    naziv VARCHAR(100) NOT NULL,
-    datum_pocetka DATE NOT NULL,
-    datum_zavrsetka DATE,
-    cilj TEXT,
-    napomene TEXT,
-    aktivan BOOLEAN DEFAULT TRUE,
-    FOREIGN KEY (id_clana) REFERENCES clan(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (id_trenera) REFERENCES trener(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    INDEX idx_aktivan_program (aktivan)
-);
-
--- Podaci za program vježbi
-INSERT INTO program_vjezbi (id_clana, id_trenera, naziv, datum_pocetka, datum_zavrsetka, cilj) VALUES
-(1, 1, 'Program mršavljenja', '2025-05-01', '2025-07-01', 'Smanjenje tjelesne težine za 5kg'),
-(2, 3, 'Bodybuilding početnici', '2025-04-15', '2025-06-15', 'Povećanje mišićne mase'),
-(3, 4, 'Funkcionalna priprema', '2025-05-10', '2025-08-10', 'Poboljšanje opće kondicije'),
-(4, 2, 'Rehabilitacija koljena', '2025-05-01', '2025-06-01', 'Oporavak nakon ozljede'),
-(5, 16, 'Powerlifting program', '2025-04-01', '2025-07-01', 'Povećanje snage u osnovnim liftovima');
-
--- Tablica: mjerenja (dodatna funkcionalnost)
-CREATE TABLE mjerenja (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    id_clana INT NOT NULL,
-    datum DATE NOT NULL,
-    visina DECIMAL(5,2),
-    tezina DECIMAL(5,2),
-    postotak_masti DECIMAL(4,2),
-    misicna_masa DECIMAL(5,2),
-    bmi DECIMAL(4,2) GENERATED ALWAYS AS (tezina / POWER(visina/100, 2)) STORED,
-    napomena TEXT,
-    FOREIGN KEY (id_clana) REFERENCES clan(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    INDEX idx_datum_mjerenja (datum)
-);
-
--- Podaci za mjerenja
-INSERT INTO mjerenja (id_clana, datum, visina, tezina, postotak_masti, misicna_masa) VALUES
-(1, '2025-05-01', 175.00, 78.50, 22.5, 45.2),
-(1, '2025-05-15', 175.00, 77.80, 21.8, 45.5),
-(2, '2025-04-15', 182.00, 85.00, 18.5, 52.3),
-(3, '2025-05-10', 168.00, 65.00, 25.0, 38.5),
-(4, '2025-05-01', 178.00, 80.00, 20.0, 48.0);
 
 -- ========================================
 -- POGLEDI (VIEWS) - Po 2 za svakog člana tima
@@ -1066,5 +1016,3 @@ UNION SELECT 'OPREMA', COUNT(*) FROM oprema
 UNION SELECT 'REZERVACIJE', COUNT(*) FROM rezervacija_opreme
 UNION SELECT 'PLAĆANJA', COUNT(*) FROM placanje
 UNION SELECT 'OSOBLJE', COUNT(*) FROM osoblje
-UNION SELECT 'PROGRAMI VJEŽBI', COUNT(*) FROM program_vjezbi
-UNION SELECT 'MJERENJA', COUNT(*) FROM mjerenja;
