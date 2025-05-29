@@ -98,7 +98,6 @@ CREATE TABLE prisutnost (
     prisutan BOOLEAN DEFAULT TRUE,
     FOREIGN KEY (id_clana) REFERENCES clan(id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (id_grupnog_treninga) REFERENCES grupni_trening(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    UNIQUE KEY uk_clan_trening_datum (id_clana, id_grupnog_treninga, datum)
 );
 
 -- ========================================
