@@ -590,7 +590,6 @@ CREATE OR REPLACE VIEW financijski_pregled AS
 SELECT 
     YEAR(p.datum_uplate) AS godina,
     MONTH(p.datum_uplate) AS mjesec,
-    MONTHNAME(p.datum_uplate) AS naziv_mjeseca,
     COUNT(DISTINCT p.id_clana) AS broj_platioca,
     COUNT(p.id) AS broj_transakcija,
     SUM(p.iznos) AS ukupni_prihod,
@@ -600,7 +599,7 @@ SELECT
     MIN(p.iznos) AS najmanja_uplata,
     MAX(p.iznos) AS najveća_uplata
 FROM placanje p
-GROUP BY godina, mjesec, naziv_mjeseca
+GROUP BY godina, mjesec
 ORDER BY godina DESC, mjesec DESC;
 
 -- Pogled 9: Analiza tko je izvršio naplatu (Marko Kovač)
@@ -957,7 +956,6 @@ trendovi AS (
 SELECT 
     godina,
     mjesec,
-    MONTHNAME(STR_TO_DATE(mjesec, '%m')) AS naziv_mjeseca,
     broj_transakcija,
     ukupni_prihod,
     broj_platioca,
