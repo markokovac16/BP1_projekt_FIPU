@@ -653,6 +653,39 @@ LEFT JOIN rezervacija_opreme ro ON o.id = ro.id_opreme AND ro.status != 'otkazan
 GROUP BY o.id
 ORDER BY broj_rezervacija DESC;
 
+--Oprema s najviše otkazivanja rezervacija(Vladan)
+CREATE OR REPLACE VIEW otkazane_rezervacije_po_opremi AS
+SELECT 
+    o.naziv AS oprema,
+    COUNT(*) AS broj_otkazanih,
+    COUNT(DISTINCT ro.id_clana) AS broj_clanova,
+    MAX(ro.datum) AS zadnje_otkazivanje,
+    ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM rezervacija_opreme WHERE status = 'otkazana'), 2) AS postotak_od_otkazanih
+FROM oprema o
+JOIN rezervacija_opreme ro ON o.id = ro.id_opreme
+WHERE ro.status = 'otkazana'
+GROUP BY o.id
+HAVING broj_otkazanih > 0
+ORDER BY broj_otkazanih DESC;
+
+--Učestalost korištenja opreme po korisnicima (Vladan)
+CREATE OR REPLACE VIEW ucestalost_koristenja_opreme_po_clanovima AS
+SELECT 
+    CONCAT(c.ime, ' ', c.prezime) AS clan,
+    o.naziv AS oprema,
+    COUNT(ro.id) AS broj_rezervacija,
+    ROUND(AVG(TIMESTAMPDIFF(MINUTE, ro.vrijeme_pocetka, ro.vrijeme_zavrsetka)), 1) AS prosjecno_trajanje_min,
+    SUM(TIMESTAMPDIFF(MINUTE, ro.vrijeme_pocetka, ro.vrijeme_zavrsetka)) AS ukupno_trajanje_min
+FROM rezervacija_opreme ro
+JOIN clan c ON ro.id_clana = c.id
+JOIN oprema o ON ro.id_opreme = o.id
+WHERE ro.status = 'završena'
+GROUP BY c.id, o.id
+HAVING broj_rezervacija >= 2
+ORDER BY broj_rezervacija DESC;
+
+
+
 -- Pogled 11: Analiza rezervacija opreme (Vladan)
 CREATE OR REPLACE VIEW analiza_rezervacija_opreme AS
 SELECT 
