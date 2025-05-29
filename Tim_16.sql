@@ -122,7 +122,8 @@ SELECT
         WHEN o.stanje = 'neispravna' THEN 'Hitno'
         WHEN o.stanje = 'u servisu' THEN 'U servisu'
         WHEN COUNT(ro.id) = 0 THEN 'Nekorištena'
-        WHEN COUNT(ro.id) > 50 THEN 'Vrlo popularna'
+        WHEN COUNT(ro.id)  BETWEEN 5 AND 19 THEN 'Popularna'
+        WHEN COUNT(ro.id) > 19 THEN 'Vrlo popularna'
         ELSE 'Normalno'
     END AS prioritet
 FROM oprema o
