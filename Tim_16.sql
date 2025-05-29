@@ -176,7 +176,7 @@ INSERT INTO clanarina (tip, cijena, trajanje, opis) VALUES
 
 -- Podaci za članove (Martina Ilić)
 INSERT INTO clan (ime, prezime, email, telefon, datum_uclanjenja, id_clanarina, datum_rodjenja, spol, adresa, grad) VALUES
-('Ivana', 'Krpan', 'ivana.krpan@example.com', '0911234567', '2023-06-15', 1, '1995-03-12', 'Ž', 'Ilica 1', 'Zagreb'),
+('Ivana', 'Krpan', 'ivana.krpan@example.com', '0911234567', '2023-05-15', 1, '1995-03-12', 'Ž', 'Ilica 1', 'Zagreb'),
 ('Marko', 'Barišić', 'marko.barisic@example.com', '0921231234', '2024-01-10', 2, '1990-08-22', 'M', 'Vukovarska 22', 'Zagreb'),
 ('Ana', 'Radić', 'ana.radic@example.com', '0981112222', '2022-12-01', 3, '1988-11-05', 'Ž', 'Savska 33', 'Zagreb'),
 ('Petar', 'Kovačević', 'petar.kovacevic@example.com', '0979876543', '2023-08-20', 1, '1992-04-18', 'M', 'Dubrava 44', 'Zagreb'),
@@ -425,17 +425,17 @@ INSERT INTO placanje (id_clana, iznos, datum_uplate, nacin_placanja, broj_racuna
 (17, 299.99, '2025-05-29', 'transfer', 'R-2025-037', 0.00, 7, 'Godišnja Standard članarina'),
 (18, 399.99, '2025-05-30', 'PayPal', 'R-2025-038', 0.00, 2, 'Godišnja Premium članarina'),
 (19, 0.00, '2025-05-31', 'kartica', 'R-2025-039', 0.00, 1, 'Probna članarina'),
-(20, 29.99, '2025-06-01', 'kartica', 'R-2025-040', 0.00, 7, 'Osnovna članarina'),
-(21, 49.99, '2025-06-02', 'gotovina', 'R-2025-041', 0.00, 2, 'Napredna članarina'),
-(22, 69.99, '2025-06-03', 'kartica', 'R-2025-042', 0.00, 1, 'Premium članarina'),
-(23, 19.99, '2025-06-04', 'transfer', 'R-2025-043', 0.00, 7, 'Student - Basic članarina'),
-(24, 29.99, '2025-06-05', 'kripto', 'R-2025-044', 0.00, 2, 'Student - Plus članarina'),
-(25, 299.99, '2025-06-06', 'PayPal', 'R-2025-045', 0.00, 1, 'Godišnja Standard članarina'),
-(26, 399.99, '2025-06-07', 'kartica', 'R-2025-046', 0.00, 7, 'Godišnja Premium članarina'),
-(27, 0.00, '2025-06-08', 'gotovina', 'R-2025-047', 0.00, 2, 'Probna članarina'),
-(28, 26.99, '2025-06-09', 'kartica', 'R-2025-048', 10.00, 1, 'Osnovna članarina s popustom'),
-(29, 44.99, '2025-06-10', 'transfer', 'R-2025-049', 10.00, 7, 'Napredna članarina s popustom'),
-(30, 69.99, '2025-06-11', 'kripto', 'R-2025-050', 0.00, 2, 'Premium članarina');
+(20, 29.99, '2025-05-01', 'kartica', 'R-2025-040', 0.00, 7, 'Osnovna članarina'),
+(21, 49.99, '2025-05-02', 'gotovina', 'R-2025-041', 0.00, 2, 'Napredna članarina'),
+(22, 69.99, '2025-05-03', 'kartica', 'R-2025-042', 0.00, 1, 'Premium članarina'),
+(23, 19.99, '2025-05-04', 'transfer', 'R-2025-043', 0.00, 7, 'Student - Basic članarina'),
+(24, 29.99, '2025-05-05', 'kripto', 'R-2025-044', 0.00, 2, 'Student - Plus članarina'),
+(25, 299.99, '2025-05-05', 'PayPal', 'R-2025-045', 0.00, 1, 'Godišnja Standard članarina'),
+(26, 399.99, '2025-05-07', 'kartica', 'R-2025-046', 0.00, 7, 'Godišnja Premium članarina'),
+(27, 0.00, '2025-05-08', 'gotovina', 'R-2025-047', 0.00, 2, 'Probna članarina'),
+(28, 26.99, '2025-05-09', 'kartica', 'R-2025-048', 10.00, 1, 'Osnovna članarina s popustom'),
+(29, 44.99, '2025-05-10', 'transfer', 'R-2025-049', 10.00, 7, 'Napredna članarina s popustom'),
+(30, 69.99, '2025-05-11', 'kripto', 'R-2025-050', 0.00, 2, 'Premium članarina');
 
 
 -- ========================================
@@ -1125,50 +1125,26 @@ SELECT
 FROM grupni_statistika
 ORDER BY ukupni_prihod DESC;
 
--- Upit 14: Analiza ponašanja članova u grupnim treninzima (Marko Aleksić)
-WITH clan_ponašanje AS (
-    SELECT 
-        c.id,
-        CONCAT(c.ime, ' ', c.prezime) AS clan,
-        cl.tip AS tip_clanarine,
-        COUNT(DISTINCT p.id_grupnog_treninga) AS broj_programa,
-        COUNT(p.id) AS ukupno_prijava,
-        COUNT(CASE WHEN p.prisutan = TRUE THEN 1 END) AS prisutni_termini,
-        COUNT(CASE WHEN p.prisutan = FALSE THEN 1 END) AS propušteni_termini,
-        MIN(p.datum) AS prvi_dolazak,
-        MAX(p.datum) AS zadnji_dolazak,
-        DATEDIFF(MAX(p.datum), MIN(p.datum)) AS dana_aktivnosti
-    FROM clan c
-    JOIN clanarina cl ON c.id_clanarina = cl.id
-    JOIN prisutnost p ON c.id = p.id_clana
-    WHERE c.aktivan = TRUE
-    GROUP BY c.id, clan, cl.tip
-    HAVING ukupno_prijava >= 5
-)
+-- Upit 14: Analiza prisutnosti članova na grupnim treninzima (Marko Aleksić)
 SELECT 
-    clan,
-    tip_clanarine,
-    broj_programa,
-    ukupno_prijava,
-    prisutni_termini,
-    propušteni_termini,
-    ROUND((prisutni_termini / NULLIF(ukupno_prijava, 0)) * 100, 2) AS postotak_prisutnosti,
-    ROUND(ukupno_prijava / NULLIF(dana_aktivnosti, 0) * 7, 2) AS prijava_tjedno,
-    dana_aktivnosti,
-    DATEDIFF(CURRENT_DATE, zadnji_dolazak) AS dana_od_zadnjeg_dolaska,
-    CASE 
-        WHEN ROUND((prisutni_termini / NULLIF(ukupno_prijava, 0)) * 100, 2) >= 90 THEN 'Vrlo pouzdan'
-        WHEN ROUND((prisutni_termini / NULLIF(ukupno_prijava, 0)) * 100, 2) >= 75 THEN 'Pouzdan'
-        WHEN ROUND((prisutni_termini / NULLIF(ukupno_prijava, 0)) * 100, 2) >= 60 THEN 'Umjereno pouzdan'
-        ELSE 'Nepouzdan'
-    END AS tip_člana,
-    CASE 
-        WHEN DATEDIFF(CURRENT_DATE, zadnji_dolazak) > 14 THEN 'Neaktivan'
-        WHEN DATEDIFF(CURRENT_DATE, zadnji_dolazak) > 7 THEN 'Smanjena aktivnost'
-        ELSE 'Aktivan'
-    END AS trenutni_status
-FROM clan_ponašanje
+    c.id AS clan_id,
+    CONCAT(c.ime, ' ', c.prezime) AS clan,
+    cl.tip AS tip_clanarine,
+    COUNT(DISTINCT p.id_grupnog_treninga) AS broj_razlicitih_treninga,
+    COUNT(p.id) AS ukupno_prijava,
+    COUNT(CASE WHEN p.prisutan = TRUE THEN 1 END) AS prisutni,
+    COUNT(CASE WHEN p.prisutan = FALSE THEN 1 END) AS odsutni,
+    ROUND(COUNT(CASE WHEN p.prisutan = TRUE THEN 1 END) * 100.0 / NULLIF(COUNT(p.id), 0), 2) AS postotak_prisutnosti,
+    MAX(p.datum) AS zadnji_dolazak,
+    DATEDIFF(CURRENT_DATE, MAX(p.datum)) AS dana_od_zadnjeg_dolaska
+FROM clan c
+JOIN clanarina cl ON c.id_clanarina = cl.id
+LEFT JOIN prisutnost p ON c.id = p.id_clana
+WHERE c.aktivan = TRUE
+GROUP BY c.id, clan, cl.tip
+HAVING ukupno_prijava > 0
 ORDER BY postotak_prisutnosti DESC, ukupno_prijava DESC;
+
 
 -- Upit 15: Optimizacija rasporeda grupnih treninga (Marko Aleksić)
 SELECT 
