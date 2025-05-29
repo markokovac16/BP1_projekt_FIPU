@@ -55,7 +55,6 @@ CREATE TABLE tip_treninga (
     opis TEXT
 );
 
--- ISPRAVLJENA TABLICA: Trening (sada u 3NF)
 CREATE TABLE trening (
     id INT PRIMARY KEY AUTO_INCREMENT,
     id_clana INT NOT NULL,
@@ -66,7 +65,7 @@ CREATE TABLE trening (
     trajanje INT NOT NULL CHECK (trajanje > 0 AND trajanje <= 180),
     napomena TEXT,
     status ENUM('zakazan', 'održan', 'otkazan') DEFAULT 'zakazan',
-    cijena DECIMAL(6,2), -- može se razlikovati od osnovne cijene
+    cijena DECIMAL(6,2),
     FOREIGN KEY (id_clana) REFERENCES clan(id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (id_trenera) REFERENCES trener(id) ON DELETE RESTRICT ON UPDATE CASCADE,
     FOREIGN KEY (id_tip_treninga) REFERENCES tip_treninga(id) ON DELETE RESTRICT ON UPDATE CASCADE
