@@ -821,6 +821,36 @@ WHERE ro.status != 'otkazana'
 GROUP BY o.naziv, sat, dan_u_tjednu, period_dana
 ORDER BY broj_rezervacija DESC;
 
+-- Učestalost korištenja opreme (Vladan)
+CREATE OR REPLACE VIEW ucestalost_koristenja_opreme AS
+SELECT 
+    o.naziv AS oprema,
+    COUNT(ro.id) AS broj_koristenja,
+    COUNT(DISTINCT ro.id_clana) AS broj_clanova,
+    MAX(ro.datum) AS zadnje_koristenje,
+    ROUND(COUNT(ro.id) * 100.0 / (SELECT COUNT(*) FROM rezervacija_opreme), 2) AS postotak_od_svih
+FROM oprema o
+JOIN rezervacija_opreme ro ON o.id = ro.id_opreme
+WHERE ro.status = 'potvrđena'
+GROUP BY o.id
+HAVING broj_koristenja > 0
+ORDER BY broj_koristenja DESC;
+
+-- Oprema s najviše otkazivanja rezervacija (Vladan)
+CREATE OR REPLACE VIEW otkazane_rezervacije_po_opremi AS
+SELECT 
+    o.naziv AS oprema,
+    COUNT(ro.id) AS broj_otkazanih,
+    COUNT(DISTINCT ro.id_clana) AS broj_clanova,
+    MAX(ro.datum) AS zadnje_otkazivanje,
+    ROUND(COUNT(ro.id) * 100.0 / (SELECT COUNT(*) FROM rezervacija_opreme WHERE status = 'otkazana'), 2) AS postotak_od_otkazanih
+FROM oprema o
+JOIN rezervacija_opreme ro ON o.id = ro.id_opreme
+WHERE ro.status = 'otkazana'
+GROUP BY o.id
+HAVING broj_otkazanih > 0
+ORDER BY broj_otkazanih DESC;
+
 -- ==========================================
 -- MARKO ALEKSIĆ: Pogledi za grupne treninge i prisutnost
 -- ==========================================
