@@ -253,7 +253,7 @@ INSERT INTO privatni_trening (id_clana, id_trenera, id_tip_treninga, datum, vrij
 (6, 3, 7, '2025-05-11', '11:00:00', 60, 'održan', 20.00, 'Dodatni trening - naplaćuje se'),
 (12, 4, 4, '2025-06-01', '12:00:00', 60, 'zakazan', 0.00, 'Uključeno u Premium plan'), 
 (12, 5, 8, '2025-05-13', '15:00:00', 60, 'održan', 22.00, 'Dodatni trening - naplaćuje se'),
-(13, 1, 1, '2025-06-02', '17:00:00', 60, 'zakazan', 0.00, 'Uključeno u Premium plan'),
+(13, 1, 1, '2025-06-02', '17:00:00', 60, 'otkazan', 0.00, 'Uključeno u Premium plan'),
 (19, 2, 6, '2025-06-03', '17:00:00', 60, 'zakazan', 0.00, 'Uključeno u Premium plan'), 
 (21, 3, 10, '2025-05-12', '13:00:00', 75, 'održan', 0.00, 'Uključeno u Premium plan'),
 (21, 4, 6, '2025-05-16', '14:00:00', 60, 'održan', 28.00, 'Dodatni trening - naplaćuje se'),
@@ -271,7 +271,7 @@ INSERT INTO privatni_trening (id_clana, id_trenera, id_tip_treninga, datum, vrij
 (8, 2, 6, '2025-06-07', '12:00:00', 60, 'zakazan', 28.00, 'Dodatni privatni trening'),
 (14, 3, 8, '2025-05-10', '11:00:00', 60, 'održan', 22.00, 'Dodatni privatni trening'), 
 (23, 1, 1, '2025-05-09', '10:00:00', 60, 'održan', 20.00, 'Dodatni privatni trening'),
-(39, 2, 2, '2025-06-08', '14:00:00', 45, 'zakazan', 25.00, 'Dodatni privatni trening'),
+(39, 2, 2, '2025-06-08', '14:00:00', 45, 'otkazan', 25.00, 'Dodatni privatni trening'),
 (44, 3, 7, '2025-06-09', '11:00:00', 60, 'zakazan', 20.00, 'Dodatni privatni trening');
 
 
@@ -536,17 +536,13 @@ SELECT
     t.specijalizacija,
     t.godine_iskustva,
     t.email,
-    COUNT(DISTINCT tr.id) AS ukupno_individualnih,
-    COUNT(DISTINCT gt.id) AS ukupno_grupnih_treninga,
-    COALESCE(COUNT(DISTINCT pg.id), 0) AS ukupno_grupnih_termina,
+    COUNT(DISTINCT tr.id) AS ukupno_termina,
     COUNT(DISTINCT tr.id_clana) AS broj_razlicitih_klijenata,
     COALESCE(SUM(CASE WHEN tr.status = 'održan' THEN tr.trajanje ELSE 0 END), 0) AS ukupno_minuta,
     COALESCE(AVG(CASE WHEN tr.status = 'održan' THEN tr.cijena END), 0) AS prosjecna_cijena,
     COALESCE(SUM(CASE WHEN tr.status = 'održan' THEN tr.cijena ELSE 0 END), 0) AS ukupni_prihod
 FROM trener t
 LEFT JOIN privatni_trening tr ON t.id = tr.id_trenera
-LEFT JOIN grupni_trening gt ON t.id = gt.id_trenera
-LEFT JOIN prisutnost_grupni pg ON pg.id_grupnog_treninga = gt.id
 WHERE t.aktivan = TRUE
 GROUP BY t.id, t.ime, t.prezime, t.specijalizacija, t.godine_iskustva, t.email
 ORDER BY ukupni_prihod DESC;
@@ -1009,16 +1005,12 @@ SELECT
     t.specijalizacija,
 
     -- Privatni treninzi
-    COUNT(DISTINCT pt.id) AS broj_privatnih_treninga,
-    COUNT(DISTINCT pt.id_clana) AS broj_klijenata_privatno,
+    COUNT(DISTINCT pt.id) AS broj_treninga,
+    COUNT(DISTINCT pt.id_clana) AS broj_klijenata,
     
-    COALESCE(ROUND(AVG(CASE WHEN pt.status = 'održan' THEN pt.cijena END), 2), 0) AS prosjecna_cijena_privatni,
-    COALESCE(SUM(CASE WHEN pt.status = 'održan' THEN pt.cijena ELSE 0 END), 0) AS prihod_privatni,
-    COALESCE(SUM(CASE WHEN pt.status = 'održan' THEN pt.trajanje ELSE 0 END), 0) / 60.0 AS sati_privatnih,
-
-    -- Grupni treninzi
-    COUNT(DISTINCT gt.id) AS broj_grupnih_treninga,
-    COUNT(DISTINCT pg.id) AS ukupno_prisutnosti,
+    COALESCE(ROUND(AVG(CASE WHEN pt.status = 'održan' THEN pt.cijena END), 2), 0) AS prosjecna_cijena,
+    COALESCE(SUM(CASE WHEN pt.status = 'održan' THEN pt.cijena ELSE 0 END), 0) AS prihod,
+    COALESCE(SUM(CASE WHEN pt.status = 'održan' THEN pt.trajanje ELSE 0 END), 0) / 60.0 AS sati,
 
     -- Otkazani treninzi
     COUNT(CASE WHEN pt.status = 'otkazan' THEN 1 END) AS broj_otkazanih,
@@ -1034,13 +1026,11 @@ SELECT
 
 FROM trener t
 LEFT JOIN privatni_trening pt ON pt.id_trenera = t.id
-LEFT JOIN grupni_trening gt ON gt.id_trenera = t.id
-LEFT JOIN prisutnost_grupni pg ON pg.id_grupnog_treninga = gt.id
 
 WHERE t.aktivan = TRUE
 
 GROUP BY t.id, t.ime, t.prezime, t.specijalizacija
-ORDER BY prihod_privatni DESC, broj_grupnih_treninga DESC;
+ORDER BY prihod DESC;
 
 -- Upit 5: Analiza opterećenosti trenera (Karlo Perić)
 WITH privatni AS (
