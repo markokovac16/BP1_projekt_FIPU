@@ -28,7 +28,7 @@ CREATE TABLE clan (
     spol ENUM('M', 'Ž') DEFAULT NULL,
     adresa VARCHAR(200),
     grad VARCHAR(50) DEFAULT 'Zagreb',
-    FOREIGN KEY (id_clanarina) REFERENCES clanarina(id) ON DELETE SET NULL ON UPDATE CASCADE
+    FOREIGN KEY (id_clanarina) REFERENCES clanarina(id)
 );
 
 -- ========================================
@@ -47,7 +47,6 @@ CREATE TABLE trener (
     aktivan BOOLEAN DEFAULT TRUE
 );
 
--- NOVA TABLICA: Tipovi treninga (3NF)
 CREATE TABLE tip_treninga (
     id INT PRIMARY KEY AUTO_INCREMENT,
     naziv VARCHAR(50) NOT NULL UNIQUE,
@@ -55,7 +54,7 @@ CREATE TABLE tip_treninga (
     opis TEXT
 );
 
-CREATE TABLE trening (
+CREATE TABLE privatni_trening (
     id INT PRIMARY KEY AUTO_INCREMENT,
     id_clana INT NOT NULL,
     id_trenera INT NOT NULL,
@@ -66,9 +65,9 @@ CREATE TABLE trening (
     napomena TEXT,
     status ENUM('zakazan', 'održan', 'otkazan') DEFAULT 'zakazan',
     cijena DECIMAL(6,2),
-    FOREIGN KEY (id_clana) REFERENCES clan(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (id_trenera) REFERENCES trener(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    FOREIGN KEY (id_tip_treninga) REFERENCES tip_treninga(id) ON DELETE RESTRICT ON UPDATE CASCADE
+    FOREIGN KEY (id_clana) REFERENCES clan(id),
+    FOREIGN KEY (id_trenera) REFERENCES trener(id),
+    FOREIGN KEY (id_tip_treninga) REFERENCES tip_treninga(id)
 );
 
 -- ========================================
@@ -86,7 +85,7 @@ CREATE TABLE grupni_trening (
     cijena_po_terminu DECIMAL(5,2) NOT NULL CHECK (cijena_po_terminu > 0),
     aktivan BOOLEAN DEFAULT TRUE,
     opis TEXT,
-    FOREIGN KEY (id_trenera) REFERENCES trener(id) ON DELETE RESTRICT ON UPDATE CASCADE
+    FOREIGN KEY (id_trenera) REFERENCES trener(id)
 );
 
 CREATE TABLE prisutnost (
@@ -95,8 +94,8 @@ CREATE TABLE prisutnost (
     id_grupnog_treninga INT NOT NULL,
     datum DATE NOT NULL,
     prisutan BOOLEAN DEFAULT TRUE,
-    FOREIGN KEY (id_clana) REFERENCES clan(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (id_grupnog_treninga) REFERENCES grupni_trening(id) ON DELETE CASCADE ON UPDATE CASCADE
+    FOREIGN KEY (id_clana) REFERENCES clan(id),
+    FOREIGN KEY (id_grupnog_treninga) REFERENCES grupni_trening(id)
 );
 
 -- ========================================
@@ -124,8 +123,8 @@ CREATE TABLE rezervacija_opreme (
     vrijeme_zavrsetka TIME NOT NULL,
     status ENUM('aktivna', 'završena', 'otkazana') DEFAULT 'aktivna',
     napomena TEXT,
-    FOREIGN KEY (id_clana) REFERENCES clan(id) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (id_opreme) REFERENCES oprema(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (id_clana) REFERENCES clan(id),
+    FOREIGN KEY (id_opreme) REFERENCES oprema(id),
     CHECK (vrijeme_zavrsetka > vrijeme_pocetka)
 );
 
@@ -148,7 +147,7 @@ CREATE TABLE osoblje (
 CREATE TABLE placanje (
     id INT PRIMARY KEY AUTO_INCREMENT,
     id_clana INT NOT NULL,
-    iznos DECIMAL(6,2) NOT NULL CHECK (iznos >= 0),
+    iznos DECIMAL(6,2) NOT NULL CHECK (iznos > 0),
     datum_uplate DATE NOT NULL,
     nacin_placanja ENUM('gotovina', 'kartica', 'transfer', 'PayPal', 'kripto') DEFAULT 'kartica',
     broj_racuna VARCHAR(20) UNIQUE,
@@ -249,7 +248,7 @@ INSERT INTO tip_treninga (naziv, osnovna_cijena, opis) VALUES
 
 
 -- Podaci za treninge (Karlo Perić)
-INSERT INTO trening (id_clana, id_trenera, id_tip_treninga, datum, vrijeme, trajanje, status, cijena) VALUES
+INSERT INTO privatni_trening (id_clana, id_trenera, id_tip_treninga, datum, vrijeme, trajanje, status, cijena) VALUES
 (1, 1, 1, '2025-05-05', '09:00:00', 60, 'održan', 20.00),  
 (2, 2, 2, '2025-05-05', '10:30:00', 45, 'održan', 25.00), 
 (3, 3, 3, '2025-05-06', '11:00:00', 90, 'održan', 30.00),  
@@ -412,15 +411,13 @@ INSERT INTO placanje (id_clana, iznos, datum_uplate, nacin_placanja, broj_racuna
 (8, 29.99, '2025-05-18', 'kartica', 'R-2025-028', 0.00, 1, 'Student - Plus članarina'),
 (9, 299.99, '2025-05-19', 'transfer', 'R-2025-029', 0.00, 2, 'Godišnja Standard članarina'),
 (10, 399.99, '2025-05-21', 'gotovina', 'R-2025-030', 0.00, 1, 'Godišnja Premium članarina'),
-(11, 0.00, '2025-05-22', 'kartica', 'R-2025-031', 0.00, 7, 'Probna članarina'),
 (12, 26.99, '2025-05-24', 'kartica', 'R-2025-032', 10.00, 2, 'Osnovna članarina s popustom'),
 (13, 44.99, '2025-05-25', 'PayPal', 'R-2025-033', 10.00, 1, 'Napredna članarina s popustom'),
 (14, 69.99, '2025-05-26', 'kripto', 'R-2025-034', 0.00, 7, 'Premium članarina'),
 (15, 19.99, '2025-05-27', 'kartica', 'R-2025-035', 0.00, 2, 'Student - Basic članarina'),
 (16, 29.99, '2025-05-28', 'gotovina', 'R-2025-036', 0.00, 1, 'Student - Plus članarina'),
 (17, 299.99, '2025-05-29', 'transfer', 'R-2025-037', 0.00, 7, 'Godišnja Standard članarina'),
-(18, 399.99, '2025-05-14', 'PayPal', 'R-2025-038', 0.00, 2, 'Godišnja Premium članarina'),
-(19, 0.00, '2025-05-21', 'kartica', 'R-2025-039', 0.00, 1, 'Probna članarina'),
+(18, 399.99, '2025-05-30', 'PayPal', 'R-2025-038', 0.00, 2, 'Godišnja Premium članarina'),
 (20, 29.99, '2025-05-01', 'kartica', 'R-2025-040', 0.00, 7, 'Osnovna članarina'),
 (21, 49.99, '2025-05-02', 'gotovina', 'R-2025-041', 0.00, 2, 'Napredna članarina'),
 (22, 69.99, '2025-05-03', 'kartica', 'R-2025-042', 0.00, 1, 'Premium članarina'),
@@ -428,7 +425,6 @@ INSERT INTO placanje (id_clana, iznos, datum_uplate, nacin_placanja, broj_racuna
 (24, 29.99, '2025-05-05', 'kripto', 'R-2025-044', 0.00, 2, 'Student - Plus članarina'),
 (25, 299.99, '2025-05-05', 'PayPal', 'R-2025-045', 0.00, 1, 'Godišnja Standard članarina'),
 (26, 399.99, '2025-05-07', 'kartica', 'R-2025-046', 0.00, 7, 'Godišnja Premium članarina'),
-(27, 0.00, '2025-05-08', 'gotovina', 'R-2025-047', 0.00, 2, 'Probna članarina'),
 (28, 26.99, '2025-05-09', 'kartica', 'R-2025-048', 10.00, 1, 'Osnovna članarina s popustom'),
 (29, 44.99, '2025-05-10', 'transfer', 'R-2025-049', 10.00, 7, 'Napredna članarina s popustom'),
 (30, 69.99, '2025-05-11', 'kripto', 'R-2025-050', 0.00, 2, 'Premium članarina');
@@ -520,7 +516,7 @@ SELECT
     COALESCE(AVG(CASE WHEN tr.status = 'održan' THEN tr.cijena END), 0) AS prosjecna_cijena,
     COALESCE(SUM(CASE WHEN tr.status = 'održan' THEN tr.cijena ELSE 0 END), 0) AS ukupni_prihod
 FROM trener t
-LEFT JOIN trening tr ON t.id = tr.id_trenera
+LEFT JOIN privatni_trening tr ON t.id = tr.id_trenera
 LEFT JOIN grupni_trening gt ON t.id = gt.id_trenera AND gt.aktivan = TRUE
 WHERE t.aktivan = TRUE
 GROUP BY t.id, t.ime, t.prezime, t.specijalizacija, t.godine_iskustva, t.email
@@ -539,7 +535,7 @@ SELECT
     tr.cijena,
     tr.status,
     tr.napomena
-FROM trening tr
+FROM privatni_trening tr
 JOIN clan c ON tr.id_clana = c.id
 JOIN trener t ON tr.id_trenera = t.id
 JOIN tip_treninga tt ON tr.id_tip_treninga = tt.id
@@ -560,7 +556,7 @@ SELECT
     SUM(CASE WHEN tr.status = 'održan' THEN tr.cijena ELSE 0 END) AS ukupni_prihod,
     ROUND(AVG(tr.cijena) * 100.0 / tt.osnovna_cijena, 2) AS postotak_naplate
 FROM tip_treninga tt
-LEFT JOIN trening tr ON tt.id = tr.id_tip_treninga
+LEFT JOIN privatni_trening tr ON tt.id = tr.id_tip_treninga
 GROUP BY tt.id, tt.naziv, tt.osnovna_cijena, tt.opis
 ORDER BY ukupni_prihod DESC;
 
@@ -568,85 +564,72 @@ ORDER BY ukupni_prihod DESC;
 -- MARKO KOVAČ: Pogledi za osoblje i plaćanja
 -- ==========================================
 
--- Pogled 7: Pregled osoblja po ulogama (Marko Kovač)
-CREATE OR REPLACE VIEW pregled_osoblja AS
+-- Pogled 7: Pregled osoblja s performansama za tekući mjesec
+CREATE OR REPLACE VIEW pregled_osoblja_mjesec AS
 SELECT 
     o.uloga,
-    COUNT(*) AS broj_zaposlenika,
-    GROUP_CONCAT(CONCAT(o.ime, ' ', o.prezime) ORDER BY o.prezime SEPARATOR ', ') AS zaposlenici,
-    GROUP_CONCAT(DISTINCT o.radno_vrijeme ORDER BY o.radno_vrijeme SEPARATOR ', ') AS radna_vremena,
-    COUNT(CASE WHEN o.aktivan = TRUE THEN 1 END) AS aktivni,
-    COUNT(CASE WHEN o.aktivan = FALSE THEN 1 END) AS neaktivni
+    COUNT(*) AS ukupno_zaposlenika,
+    COUNT(CASE WHEN o.aktivan = TRUE THEN 1 END) AS aktivni_zaposlenici,
+    GROUP_CONCAT(
+        CONCAT(o.ime, ' ', o.prezime, 
+               CASE WHEN o.aktivan = FALSE THEN ' [NEAKTIVAN]' ELSE '' END)
+        ORDER BY o.prezime SEPARATOR ', '
+    ) AS popis_zaposlenika,
+    COALESCE(SUM(stats.broj_naplata), 0) AS ukupno_naplata_ovaj_mjesec,
+    COALESCE(SUM(stats.ukupni_iznos), 0) AS ukupni_promet_ovaj_mjesec
 FROM osoblje o
-GROUP BY o.uloga
-ORDER BY broj_zaposlenika DESC;
+LEFT JOIN (
+    SELECT 
+        p.id_osoblje,
+        COUNT(p.id) AS broj_naplata,
+        SUM(p.iznos - p.popust) AS ukupni_iznos
+    FROM placanje p 
+    WHERE YEAR(p.datum_uplate) = YEAR(CURRENT_DATE) 
+      AND MONTH(p.datum_uplate) = MONTH(CURRENT_DATE)
+    GROUP BY p.id_osoblje
+) stats ON o.id = stats.id_osoblje
+GROUP BY o.uloga 
+ORDER BY ukupni_promet_ovaj_mjesec DESC;
 
--- Pogled 8: Financijski pregled po mjesecima (Marko Kovač)
-CREATE OR REPLACE VIEW financijski_pregled AS
+-- Pogled 8: Financijski pregled za tekući mjesec
+CREATE OR REPLACE VIEW financijski_mjesec AS
 SELECT 
-    YEAR(p.datum_uplate) AS godina,
-    MONTH(p.datum_uplate) AS mjesec,
-    COUNT(DISTINCT p.id_clana) AS broj_platioca,
+    MONTHNAME(CURRENT_DATE) AS mjesec,
+    YEAR(CURRENT_DATE) AS godina,
+    COUNT(DISTINCT p.id_clana) AS broj_clanova_platilo,
     COUNT(p.id) AS broj_transakcija,
     SUM(p.iznos) AS ukupni_prihod,
     SUM(p.popust) AS ukupni_popusti,
-    SUM(p.iznos) - SUM(p.popust) AS neto_prihod,
-    AVG(p.iznos) AS prosjecna_uplata,
-    MIN(p.iznos) AS najmanja_uplata,
-    MAX(p.iznos) AS najveća_uplata
-FROM placanje p
-GROUP BY godina, mjesec
-ORDER BY godina DESC, mjesec DESC;
+    SUM(p.iznos - p.popust) AS neto_prihod,
+    AVG(p.iznos - p.popust) AS prosjecna_uplata,
+    SUM(CASE WHEN p.nacin_placanja = 'gotovina' THEN p.iznos - p.popust ELSE 0 END) AS gotovina,
+    SUM(CASE WHEN p.nacin_placanja = 'kartica' THEN p.iznos - p.popust ELSE 0 END) AS kartica,
+    SUM(CASE WHEN p.nacin_placanja IN ('transfer', 'PayPal') THEN p.iznos - p.popust ELSE 0 END) AS bezgotovinski,
+    COUNT(CASE WHEN p.popust > 0 THEN 1 END) AS broj_s_popustom
+FROM placanje p 
+WHERE YEAR(p.datum_uplate) = YEAR(CURRENT_DATE) 
+  AND MONTH(p.datum_uplate) = MONTH(CURRENT_DATE);
 
--- Pogled 9: Analiza tko je izvršio naplatu (Marko Kovač)
-CREATE OR REPLACE VIEW analiza_naplata_osoblja AS
+-- Pogled 9: Top zaposlenici po naplati za tekući mjesec
+CREATE OR REPLACE VIEW top_zaposlenici_mjesec AS
 SELECT 
     o.ime,
     o.prezime,
     o.uloga,
     COUNT(p.id) AS broj_naplata,
-    SUM(p.iznos) AS ukupni_iznos,
-    AVG(p.iznos) AS prosjecna_naplata,
-    COUNT(DISTINCT p.id_clana) AS broj_klijenata,
-    GROUP_CONCAT(DISTINCT p.nacin_placanja ORDER BY p.nacin_placanja SEPARATOR ', ') AS nacini_placanja
-FROM placanje p
-JOIN osoblje o ON p.id_osoblje = o.id
+    SUM(p.iznos - p.popust) AS ukupni_iznos,
+    AVG(p.iznos - p.popust) AS prosjecna_naplata,
+    GROUP_CONCAT(DISTINCT p.nacin_placanja ORDER BY p.nacin_placanja) AS koristi_nacine_placanja,
+    -- Dodatne korisne informacije
+    MIN(p.datum_uplate) AS prva_naplata_mjesec,
+    MAX(p.datum_uplate) AS zadnja_naplata_mjesec
+FROM placanje p 
+JOIN osoblje o ON p.id_osoblje = o.id 
 WHERE o.aktivan = TRUE
-GROUP BY o.id, o.ime, o.prezime, o.uloga
+  AND YEAR(p.datum_uplate) = YEAR(CURRENT_DATE) 
+  AND MONTH(p.datum_uplate) = MONTH(CURRENT_DATE)
+GROUP BY o.id, o.ime, o.prezime, o.uloga 
 ORDER BY ukupni_iznos DESC, broj_naplata DESC;
-
-
-CREATE VIEW pregled_placanja_clanarine AS
-SELECT 
-    c.id AS clan_id,
-    CONCAT(c.ime, ' ', c.prezime) AS clan,
-    cl.tip AS tip_clanarine,
-    MAX(p.datum_uplate) AS zadnja_uplata,
-    CASE 
-        WHEN MAX(p.datum_uplate) IS NULL THEN NULL
-        WHEN MAX(p.datum_uplate) <= DATE(CONCAT(YEAR(CURRENT_DATE), '-', MONTH(CURRENT_DATE), '-10')) THEN 
-            DATEDIFF(DATE(CONCAT(YEAR(CURRENT_DATE), '-', MONTH(CURRENT_DATE), '-10')), MAX(p.datum_uplate))
-        ELSE NULL
-    END AS dani_ranije_uplaceno,
-    CASE 
-        WHEN MAX(p.datum_uplate) IS NULL THEN NULL
-        WHEN MAX(p.datum_uplate) > DATE(CONCAT(YEAR(CURRENT_DATE), '-', MONTH(CURRENT_DATE), '-10')) THEN 
-            DATEDIFF(MAX(p.datum_uplate), DATE(CONCAT(YEAR(CURRENT_DATE), '-', MONTH(CURRENT_DATE), '-10')))
-        ELSE NULL
-    END AS dani_kasnjenja,
-    CASE 
-        WHEN MAX(p.datum_uplate) IS NULL THEN 'Nema uplata'
-        WHEN MAX(p.datum_uplate) > DATE(CONCAT(YEAR(CURRENT_DATE), '-', MONTH(CURRENT_DATE), '-10')) THEN 'Kašnjenje'
-        ELSE 'Uplaćeno na vrijeme'
-    END AS status_uplate
-FROM clan c 
-JOIN clanarina cl ON c.id_clanarina = cl.id 
-LEFT JOIN placanje p ON c.id = p.id_clana 
-    AND MONTH(p.datum_uplate) = MONTH(CURRENT_DATE) 
-    AND YEAR(p.datum_uplate) = YEAR(CURRENT_DATE) 
-WHERE c.aktivan = TRUE 
-GROUP BY c.id, clan, cl.tip;
-
 
 -- ==========================================
 -- VLADAN: Pogledi za opremu i rezervacije
@@ -682,6 +665,8 @@ FROM oprema o
 LEFT JOIN rezervacija_opreme ro ON o.id = ro.id_opreme AND ro.status != 'otkazana'
 GROUP BY o.id
 ORDER BY broj_rezervacija DESC;
+
+
 
 -- Pogled 11: Analiza rezervacija opreme (Vladan)
 CREATE OR REPLACE VIEW analiza_rezervacija_opreme AS
@@ -880,7 +865,7 @@ SELECT
     COUNT(CASE WHEN tr.status = 'otkazan' THEN 1 END) AS broj_otkazanih,
     ROUND(COUNT(CASE WHEN tr.status = 'otkazan' THEN 1 END) * 100.0 / COUNT(tr.id), 2) AS postotak_otkazanih
 FROM trener t
-JOIN trening tr ON t.id = tr.id_trenera
+JOIN privatni_trening tr ON t.id = tr.id_trenera
 JOIN tip_treninga tt ON tr.id_tip_treninga = tt.id
 WHERE t.aktivan = TRUE
 GROUP BY t.id, trener, t.specijalizacija, tt.naziv
@@ -898,7 +883,7 @@ WITH trener_opterećenost AS (
         SUM(CASE WHEN tr.datum >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) THEN tr.trajanje ELSE 0 END) AS minuta_ovaj_mjesec,
         COUNT(DISTINCT DATE(tr.datum)) AS radnih_dana_mjesec
     FROM trener t
-    LEFT JOIN trening tr ON t.id = tr.id_trenera AND tr.status != 'otkazan'
+    LEFT JOIN privatni_trening tr ON t.id = tr.id_trenera AND tr.status != 'otkazan'
     LEFT JOIN grupni_trening gt ON t.id = gt.id_trenera AND gt.aktivan = TRUE
     WHERE t.aktivan = TRUE
     GROUP BY t.id, trener
@@ -933,7 +918,7 @@ SELECT
           NULLIF(SUM(CASE WHEN tr.status = 'održan' THEN tr.trajanje ELSE 0 END), 0) * 60, 2) AS prihod_po_satu,
     ROUND(AVG(tr.cijena) / tt.osnovna_cijena * 100, 2) AS postotak_realizacije_cijene
 FROM tip_treninga tt
-LEFT JOIN trening tr ON tt.id = tr.id_tip_treninga
+LEFT JOIN privatni_trening tr ON tt.id = tr.id_tip_treninga
 GROUP BY tt.id, tt.naziv, tt.osnovna_cijena
 ORDER BY ukupni_prihod DESC;
 
@@ -941,61 +926,55 @@ ORDER BY ukupni_prihod DESC;
 -- MARKO KOVAČ: Složeni upiti za osoblje i plaćanja
 -- ==========================================
 
--- Upit 7: Produktivnost osoblja po ulogama (Marko Kovač)
+-- Upit 7 dani s najviše naplata po zaposleniku 'Recepcionist', 'Voditelj' (Marko Kovač):
 SELECT 
+    o.ime,
+    o.prezime,
     o.uloga,
-    COUNT(DISTINCT o.id) AS broj_zaposlenika,
-    COUNT(p.id) AS broj_obrađenih_plaćanja,
-    SUM(p.iznos) AS ukupno_obrađeno,
-    AVG(p.iznos) AS prosjecno_plaćanje,
-    ROUND(COUNT(p.id) / COUNT(DISTINCT o.id), 2) AS plaćanja_po_zaposleniku,
-    ROUND(SUM(p.iznos) / COUNT(DISTINCT o.id), 2) AS prihod_po_zaposleniku,
-    MAX(p.datum_uplate) AS zadnje_plaćanje
-FROM osoblje o
-LEFT JOIN placanje p ON o.id = p.id_osoblje
-WHERE o.aktivan = TRUE
-GROUP BY o.uloga
-ORDER BY prihod_po_zaposleniku DESC;
-
--- Upit 8: Analiza dnevnog prihoda i broja transakcija za zadnjih 30 dana (Marko Kovač)
-SELECT
-    p.datum_uplate,
-    COUNT(p.id) AS broj_transakcija,
-    SUM(p.iznos) AS ukupni_prihod,
-    SUM(p.popust) AS ukupni_popusti,
-    ROUND(SUM(p.iznos) - SUM(p.popust), 2) AS neto_prihod,
-    AVG(p.iznos) AS prosjecna_uplata
+    DATE(p.datum_uplate) AS datum_naplata,
+    COUNT(p.id) AS broj_naplata,
+    SUM(p.iznos) AS ukupni_iznos,
+    AVG(p.iznos) AS prosjecna_naplata
 FROM placanje p
-WHERE p.datum_uplate >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)
-GROUP BY p.datum_uplate
-ORDER BY p.datum_uplate DESC;
+JOIN osoblje o ON p.id_osoblje = o.id
+WHERE o.uloga IN ('Recepcionist', 'Voditelj') AND o.aktivan = TRUE
+GROUP BY o.id, o.ime, o.prezime, DATE(p.datum_uplate)
+ORDER BY broj_naplata DESC, ukupni_iznos DESC
+LIMIT 5;
 
--- Upit 9: Analiza kašnjenja i neplaćenih članarina(kašnjenje je kad je uplata nakon 10.5., neplaćanje je kad ID člana nema nikakvu uplatu za ovaj mjesec) (Marko Kovač)
+
+-- Upit 8: Analiza plaćanja po načinu (Marko Kovač)
 SELECT 
-    c.id AS clan_id, 
-    CONCAT(c.ime, ' ', c.prezime) AS clan, 
-    cl.tip AS tip_clanarine, 
-    MAX(p.datum_uplate) AS zadnja_uplata,
-    CASE 
-        WHEN MAX(p.datum_uplate) IS NULL THEN NULL
-        WHEN MAX(p.datum_uplate) > DATE(CONCAT(YEAR(CURRENT_DATE), '-', MONTH(CURRENT_DATE), '-10')) THEN 
-            DATEDIFF(MAX(p.datum_uplate), DATE(CONCAT(YEAR(CURRENT_DATE), '-', MONTH(CURRENT_DATE), '-10')))
-        ELSE 0
-    END AS dani_kasnjenja,
-    CASE 
-        WHEN MAX(p.datum_uplate) IS NULL THEN 'Nema uplata' 
-        WHEN MAX(p.datum_uplate) > DATE(CONCAT(YEAR(CURRENT_DATE), '-', MONTH(CURRENT_DATE), '-10')) THEN 'Kašnjenje' 
-        ELSE 'Uplaćeno na vrijeme' 
-    END AS status_uplate
-FROM clan c 
-JOIN clanarina cl ON c.id_clanarina = cl.id 
-LEFT JOIN placanje p ON c.id = p.id_clana 
-    AND MONTH(p.datum_uplate) = MONTH(CURRENT_DATE) 
-    AND YEAR(p.datum_uplate) = YEAR(CURRENT_DATE) 
-WHERE c.aktivan = TRUE 
-GROUP BY c.id, clan, cl.tip 
-HAVING status_uplate = 'Kašnjenje' OR status_uplate = 'Nema uplata' 
-ORDER BY dani_kasnjenja DESC, clan;
+    p.nacin_placanja,
+    COUNT(*) AS broj_transakcija,
+    SUM(p.iznos) AS ukupni_prihod,
+    AVG(p.iznos) AS prosjecni_iznos,
+    COUNT(DISTINCT p.id_clana) AS broj_različitih_klijenata,
+    ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM placanje), 2) AS postotak_transakcija,
+    ROUND(SUM(p.iznos) * 100.0 / (SELECT SUM(iznos) FROM placanje), 2) AS postotak_prihoda
+FROM placanje p
+WHERE p.nacin_placanja IS NOT NULL
+GROUP BY p.nacin_placanja
+ORDER BY ukupni_prihod DESC;
+
+
+-- Upit 9: Upit je za broj naplata po zaposleniku  'Recepcionist', 'Voditelj'
+SELECT 
+    o.ime,
+    o.prezime,
+    o.uloga,
+    COUNT(p.id) AS broj_naplata,
+    SUM(p.iznos) AS ukupni_iznos,
+    AVG(p.iznos) AS prosjecna_naplata,
+    COUNT(DISTINCT p.id_clana) AS broj_klijenata
+FROM placanje p
+JOIN osoblje o ON p.id_osoblje = o.id
+WHERE o.uloga IN ('Recepcionist', 'Voditelj') AND o.aktivan = TRUE
+GROUP BY o.id, o.ime, o.prezime, o.uloga
+ORDER BY ukupni_iznos DESC, broj_naplata DESC;
+
+
+
 
 -- ==========================================
 -- VLADAN: Složeni upiti za opremu i rezervacije
