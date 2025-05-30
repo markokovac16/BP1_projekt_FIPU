@@ -200,6 +200,98 @@ GROUP BY o.id
 HAVING broj_otkazanih > 0
 ORDER BY broj_otkazanih DESC; 
 
+------------------------------------------------------------------------------------
+-- Prikaz vrijenosti opreme ovisno o stanju (Vladan)
+CREATE OR REPLACE VIEW vrijednost_opreme_po_stanju AS
+SELECT
+    o.stanje,
+    COUNT(*)              AS broj_opreme,
+    SUM(o.vrijednost)     AS ukupna_vrijednost,
+    ROUND(AVG(o.vrijednost), 2) AS prosjecna_vrijednost
+FROM oprema o
+GROUP BY o.stanje
+ORDER BY ukupna_vrijednost DESC;
+
+
+-- Prikaz statistike opreme (Vladan)
+CREATE OR REPLACE VIEW oprema_statistika AS
+SELECT
+    o.id,
+    o.sifra,
+    o.naziv,
+    o.proizvodac,
+    o.model,
+    o.stanje,
+    o.vrijednost,
+    o.datum_nabave,
+    o.garancija_do,
+    COUNT(ro.id) AS broj_rezervacija,
+    COUNT(DISTINCT ro.id_clana) AS broj_razlicitih_korisnika,
+    COALESCE(SUM(TIMESTAMPDIFF(MINUTE, ro.vrijeme_pocetka, ro.vrijeme_zavrsetka)), 0) AS ukupno_trajanje_min,
+    ROUND(COALESCE(AVG(TIMESTAMPDIFF(MINUTE, ro.vrijeme_pocetka, ro.vrijeme_zavrsetka)), 0), 1) AS prosjecno_trajanje_min,
+    MAX(ro.datum) AS zadnja_rezervacija,
+    DATEDIFF(o.garancija_do, CURRENT_DATE) AS dana_do_isteka_garancije
+FROM oprema o
+LEFT JOIN rezervacija_opreme ro 
+    ON o.id = ro.id_opreme
+    AND ro.status IN ('aktivna', 'završena')
+GROUP BY
+    o.id,
+    o.sifra,
+    o.naziv,
+    o.proizvodac,
+    o.model,
+    o.stanje,
+    o.vrijednost,
+    o.datum_nabave,
+    o.garancija_do
+ORDER BY
+    ukupno_trajanje_min DESC;
+
+-----------------------------
+         -- UPITI --
+-----------------------------
+-- Upit za izvlacenje osnovnih podataka i detaljna statistika (Vladan)
+SELECT
+    o.id,
+    o.sifra,
+    o.naziv,
+    o.proizvodac,
+    o.stanje,
+    COUNT(ro.id) AS ukupno_rezervacija,
+    SUM(CASE WHEN ro.status = 'završena' THEN 1 ELSE 0 END) AS zavrsene_rezervacije,
+    SUM(CASE WHEN ro.datum >= DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY) THEN 1 ELSE 0 END) AS rezervacije_posljednjih_7_dana,
+    SUM(CASE WHEN ro.datum >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) THEN 1 ELSE 0 END) AS rezervacije_posljednjih_30_dana,
+    ROUND(
+        SUM(CASE WHEN ro.datum >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) THEN 1 ELSE 0 END)
+        / NULLIF(SUM(CASE WHEN ro.datum >= DATE_SUB(CURRENT_DATE, INTERVAL 90 DAY) THEN 1 ELSE 0 END), 0)
+        * 100, 1
+    ) AS omjer_30_90_dana,
+    DATEDIFF(CURRENT_DATE, MAX(ro.datum)) AS dana_od_zadnje_rezervacije,
+    CASE
+        WHEN SUM(CASE WHEN ro.datum >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) THEN 1 ELSE 0 END) >= 5 THEN 'Visoka'
+        WHEN SUM(CASE WHEN ro.datum >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) THEN 1 ELSE 0 END) >= 2 THEN 'Srednja'
+        ELSE 'Niska'
+    END AS razina_koristenja
+FROM oprema o
+LEFT JOIN rezervacija_opreme ro
+    ON o.id = ro.id_opreme
+GROUP BY
+    o.id,
+    o.sifra,
+    o.naziv,
+    o.proizvodac,
+    o.stanje
+ORDER BY
+    rezervacije_posljednjih_30_dana DESC,
+    dana_od_zadnje_rezervacije ASC;
+
+
+
+
+
+
+
 
 
 
