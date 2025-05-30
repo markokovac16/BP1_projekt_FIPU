@@ -88,7 +88,7 @@ CREATE TABLE grupni_trening (
     FOREIGN KEY (id_trenera) REFERENCES trener(id)
 );
 
-CREATE TABLE prisutnost (
+CREATE TABLE prisutnost_grupni (
     id INT PRIMARY KEY AUTO_INCREMENT,
     id_clana INT NOT NULL,
     id_grupnog_treninga INT NOT NULL,
@@ -247,72 +247,97 @@ INSERT INTO tip_treninga (naziv, osnovna_cijena, opis) VALUES
 
 
 
--- Podaci za treninge (Karlo Perić)
-INSERT INTO privatni_trening (id_clana, id_trenera, id_tip_treninga, datum, vrijeme, trajanje, status, cijena) VALUES
-(1, 1, 1, '2025-05-05', '09:00:00', 60, 'održan', 20.00),  
-(2, 2, 2, '2025-05-05', '10:30:00', 45, 'održan', 25.00), 
-(3, 3, 3, '2025-05-06', '11:00:00', 90, 'održan', 30.00),  
-(4, 4, 4, '2025-05-06', '12:00:00', 60, 'zakazan', 22.00), 
-(5, 5, 2, '2025-05-07', '13:00:00', 45, 'održan', 25.00), 
-(6, 6, 5, '2025-05-07', '14:00:00', 60, 'održan', 18.00),  
-(7, 1, 5, '2025-05-08', '15:00:00', 60, 'održan', 18.00),  
-(1, 2, 2, '2025-05-08', '16:00:00', 45, 'održan', 25.00),  
-(2, 3, 6, '2025-05-09', '17:00:00', 60, 'zakazan', 28.00), 
-(3, 4, 7, '2025-05-09', '18:00:00', 60, 'održan', 20.00),  
-(4, 5, 5, '2025-05-10', '09:00:00', 45, 'održan', 18.00),  
-(5, 6, 6, '2025-05-10', '10:00:00', 60, 'održan', 28.00),  
-(6, 1, 8, '2025-05-11', '11:00:00', 60, 'održan', 22.00), 
-(7, 2, 6, '2025-05-11', '12:00:00', 60, 'zakazan', 28.00),
-(1, 3, 9, '2025-05-12', '13:00:00', 75, 'održan', 30.00),
-(3, 5, 8, '2025-05-13', '15:00:00', 60, 'održan', 22.00),  
-(4, 6, 4, '2025-05-13',  '16:00:00', 60, 'održan', 22.00),
-(5, 1, 1, '2025-05-14', '17:00:00', 60, 'zakazan', 20.00),
-(6, 2, 2, '2025-05-14', '18:00:00', 45, 'održan', 25.00); 
+INSERT INTO privatni_trening (id_clana, id_trenera, id_tip_treninga, datum, vrijeme, trajanje, status, cijena, napomena) VALUES
+(3, 1, 3, '2025-05-05', '09:00:00', 60, 'održan', 0.00, 'Uključeno u Premium plan'),  
+(3, 1, 9, '2025-05-08', '09:00:00', 75, 'održan', 30.00, 'Dodatni trening - naplaćuje se'),
+(6, 2, 2, '2025-05-07', '14:00:00', 60, 'održan', 0.00, 'Uključeno u Premium plan'),  
+(6, 3, 7, '2025-05-11', '11:00:00', 60, 'održan', 20.00, 'Dodatni trening - naplaćuje se'),
+(12, 4, 4, '2025-05-06', '12:00:00', 60, 'zakazan', 0.00, 'Uključeno u Premium plan'), 
+(12, 5, 8, '2025-05-13', '15:00:00', 60, 'održan', 22.00, 'Dodatni trening - naplaćuje se'),
+(13, 1, 1, '2025-05-14', '17:00:00', 60, 'zakazan', 0.00, 'Uključeno u Premium plan'),
+(19, 2, 6, '2025-05-09', '17:00:00', 60, 'zakazan', 0.00, 'Uključeno u Premium plan'), 
+(21, 3, 10, '2025-05-12', '13:00:00', 75, 'održan', 0.00, 'Uključeno u Premium plan'),
+(21, 4, 6, '2025-05-16', '14:00:00', 60, 'održan', 28.00, 'Dodatni trening - naplaćuje se'),
+
+(2, 2, 2, '2025-05-05', '10:30:00', 45, 'održan', 25.00, 'Dodatni privatni trening'), 
+(2, 3, 6, '2025-05-15', '16:00:00', 60, 'zakazan', 28.00, 'Dodatni privatni trening'), 
+(5, 5, 2, '2025-05-07', '13:00:00', 45, 'održan', 25.00, 'Dodatni privatni trening'), 
+(11, 4, 5, '2025-05-10', '09:00:00', 45, 'održan', 18.00, 'Dodatni privatni trening'),  
+(17, 2, 2, '2025-05-14', '18:00:00', 45, 'održan', 25.00, 'Dodatni privatni trening'),
+(18, 5, 5, '2025-05-12', '10:00:00', 60, 'održan', 18.00, 'Dodatni privatni trening'),
+(20, 1, 1, '2025-05-11', '12:00:00', 60, 'zakazan', 20.00, 'Dodatni privatni trening'),
+(26, 4, 4, '2025-05-13', '16:00:00', 60, 'održan', 22.00, 'Dodatni privatni trening'),
+
+(1, 1, 1, '2025-05-11', '15:00:00', 60, 'održan', 20.00, 'Dodatni privatni trening'),  
+(4, 4, 4, '2025-05-08', '12:00:00', 60, 'zakazan', 22.00, 'Dodatni privatni trening'), 
+(7, 1, 5, '2025-05-08', '15:00:00', 60, 'održan', 18.00, 'Dodatni privatni trening'),  
+(8, 2, 6, '2025-05-11', '12:00:00', 60, 'zakazan', 28.00, 'Dodatni privatni trening'),
+(14, 3, 8, '2025-05-10', '11:00:00', 60, 'održan', 22.00, 'Dodatni privatni trening'), 
+(23, 1, 1, '2025-05-09', '10:00:00', 60, 'održan', 20.00, 'Dodatni privatni trening'),
+(39, 2, 2, '2025-05-13', '14:00:00', 45, 'održan', 25.00, 'Dodatni privatni trening'),
+(44, 3, 7, '2025-05-15', '11:00:00', 60, 'održan', 20.00, 'Dodatni privatni trening');
 
 
--- Podaci za grupne treninge (Marko Aleksić)
 INSERT INTO grupni_trening (naziv, id_trenera, max_clanova, dan_u_tjednu, vrijeme, trajanje, cijena_po_terminu, opis) VALUES
-('Pilates', 3, 12, 'Ponedjeljak', '18:00:00', 60, 25.00, 'Pilates za sve razine'),
-('HIIT', 4, 15, 'Utorak', '19:00:00', 45, 20.00, 'Visoko intenzivni intervalni trening'),
-('Spinning', 5, 15, 'Srijeda', '18:30:00', 45, 20.00, 'Indoor biciklizam'),
-('Yoga', 3, 10, 'Četvrtak', '18:00:00', 60, 25.00, 'Yoga za fleksibilnost i opuštanje'),
-('CrossFit', 4, 12, 'Petak', '19:00:00', 60, 25.00, 'Funkcionalni fitness'),
-('Zumba', 6, 20, 'Subota', '10:00:00', 60, 15.00, 'Plesni fitness program'),
-('Snaga & Kondicija', 1, 10, 'Subota', '11:30:00', 75, 30.00, 'Trening snage s utezima'),
-('Kardio Mix', 5, 15, 'Nedjelja', '10:00:00', 45, 15.00, 'Kombinacija kardio vježbi');
+('Pilates za početnike', 3, 12, 'Ponedjeljak', '18:00:00', 60, 15.00, 'Pilates za sve razine'),
+('HIIT jutarnji', 4, 15, 'Utorak', '07:00:00', 45, 18.00, 'Jutarnji visoko intenzivni trening'),
+('HIIT večernji', 4, 15, 'Utorak', '19:00:00', 45, 18.00, 'Večernji visoko intenzivni trening'),
+('Spinning', 5, 15, 'Srijeda', '18:30:00', 45, 16.00, 'Indoor biciklizam'),
+('Yoga relax', 3, 10, 'Četvrtak', '18:00:00', 60, 20.00, 'Yoga za opuštanje'),
+('CrossFit', 4, 12, 'Petak', '19:00:00', 60, 22.00, 'Funkcionalni fitness'),
+('Zumba vikend', 6, 20, 'Subota', '10:00:00', 60, 12.00, 'Plesni fitness program'),
+('Snaga & Kondicija', 1, 10, 'Subota', '11:30:00', 75, 25.00, 'Trening snage s utezima'),
+('Kardio Mix', 5, 15, 'Nedjelja', '10:00:00', 45, 14.00, 'Kombinacija kardio vježbi'),
+('Funkcionalni trening', 2, 12, 'Ponedjeljak', '19:30:00', 60, 20.00, 'Funkcionalni pokret'),
+('Pilates napredni', 3, 8, 'Srijeda', '20:00:00', 60, 18.00, 'Napredni Pilates'),
+('Power Yoga', 3, 10, 'Petak', '17:30:00', 75, 22.00, 'Dinamična yoga');
 
 
 -- Podaci za prisutnost (Marko Aleksić)
-INSERT INTO prisutnost (id_clana, id_grupnog_treninga, datum, prisutan) VALUES
--- Tjedan 1
-(1, 1, '2025-05-05', TRUE), (2, 1, '2025-05-05', TRUE), (3, 1, '2025-05-05', TRUE), (4, 1, '2025-05-05', FALSE), (5, 1, '2025-05-05', TRUE),
-(6, 2, '2025-05-06', TRUE), (7, 2, '2025-05-06', TRUE), (8, 2, '2025-05-06', TRUE), (9, 2, '2025-05-06', FALSE), (10, 2, '2025-05-06', TRUE),
-(11, 3, '2025-05-07', TRUE), (12, 3, '2025-05-07', TRUE), (13, 3, '2025-05-07', TRUE), (14, 3, '2025-05-07', FALSE), (15, 3, '2025-05-07', TRUE),
-(16, 4, '2025-05-08', TRUE), (17, 4, '2025-05-08', TRUE), (18, 4, '2025-05-08', TRUE), (19, 4, '2025-05-08', FALSE), (20, 4, '2025-05-08', TRUE),
-(21, 5, '2025-05-09', TRUE), (22, 5, '2025-05-09', TRUE), (23, 5, '2025-05-09', TRUE), (24, 5, '2025-05-09', FALSE), (25, 5, '2025-05-09', TRUE),
-(26, 6, '2025-05-10', TRUE), (27, 6, '2025-05-10', TRUE), (28, 6, '2025-05-10', TRUE), (29, 6, '2025-05-10', FALSE), (30, 6, '2025-05-10', TRUE),
-(31, 7, '2025-05-10', TRUE), (32, 7, '2025-05-10', TRUE), (33, 7, '2025-05-10', TRUE), (34, 7, '2025-05-10', FALSE), (35, 7, '2025-05-10', TRUE),
-(36, 8, '2025-05-11', TRUE), (37, 8, '2025-05-11', TRUE), (38, 8, '2025-05-11', TRUE), (39, 8, '2025-05-11', FALSE), (40, 8, '2025-05-11', TRUE),
-
--- Tjedan 2
-(1, 1, '2025-05-12', TRUE), (2, 1, '2025-05-12', TRUE), (3, 1, '2025-05-12', TRUE), (4, 1, '2025-05-12', TRUE), (5, 1, '2025-05-12', FALSE),
-(6, 2, '2025-05-13', TRUE), (7, 2, '2025-05-13', TRUE), (8, 2, '2025-05-13', TRUE), (9, 2, '2025-05-13', TRUE), (10, 2, '2025-05-13', FALSE),
-(11, 3, '2025-05-14', TRUE), (12, 3, '2025-05-14', TRUE), (13, 3, '2025-05-14', TRUE), (14, 3, '2025-05-14', TRUE), (15, 3, '2025-05-14', FALSE),
-(16, 4, '2025-05-15', TRUE), (17, 4, '2025-05-15', TRUE), (18, 4, '2025-05-15', TRUE), (19, 4, '2025-05-15', TRUE), (20, 4, '2025-05-15', FALSE),
-(21, 5, '2025-05-16', TRUE), (22, 5, '2025-05-16', TRUE), (23, 5, '2025-05-16', TRUE), (24, 5, '2025-05-16', TRUE), (25, 5, '2025-05-16', FALSE),
-(26, 6, '2025-05-17', TRUE), (27, 6, '2025-05-17', TRUE), (28, 6, '2025-05-17', TRUE), (29, 6, '2025-05-17', TRUE), (30, 6, '2025-05-17', FALSE),
-(31, 7, '2025-05-17', TRUE), (32, 7, '2025-05-17', TRUE), (33, 7, '2025-05-17', TRUE), (34, 7, '2025-05-17', TRUE), (35, 7, '2025-05-17', FALSE),
-(36, 8, '2025-05-18', TRUE), (37, 8, '2025-05-18', TRUE), (38, 8, '2025-05-18', TRUE), (39, 8, '2025-05-18', TRUE), (40, 8, '2025-05-18', FALSE),
-
--- Tjedan 3
-(41, 1, '2025-05-19', TRUE), (42, 1, '2025-05-19', TRUE), (43, 1, '2025-05-19', TRUE), (44, 1, '2025-05-19', TRUE), (45, 1, '2025-05-19', FALSE),
-(46, 2, '2025-05-20', TRUE), (47, 2, '2025-05-20', TRUE), (48, 2, '2025-05-20', TRUE), (49, 2, '2025-05-20', TRUE), (50, 2, '2025-05-20', FALSE),
-(41, 3, '2025-05-21', TRUE), (42, 3, '2025-05-21', TRUE), (43, 3, '2025-05-21', TRUE), (44, 3, '2025-05-21', TRUE), (45, 3, '2025-05-21', FALSE),
-(46, 4, '2025-05-22', TRUE), (47, 4, '2025-05-22', TRUE), (48, 4, '2025-05-22', TRUE), (49, 4, '2025-05-22', TRUE), (50, 4, '2025-05-22', FALSE),
-(41, 5, '2025-05-23', TRUE), (42, 5, '2025-05-23', TRUE), (43, 5, '2025-05-23', TRUE), (44, 5, '2025-05-23', TRUE), (45, 5, '2025-05-23', FALSE),
-(46, 6, '2025-05-24', TRUE), (47, 6, '2025-05-24', TRUE), (48, 6, '2025-05-24', TRUE), (49, 6, '2025-05-24', TRUE), (50, 6, '2025-05-24', FALSE),
-(41, 7, '2025-05-24', TRUE), (42, 7, '2025-05-24', TRUE), (43, 7, '2025-05-24', TRUE), (44, 7, '2025-05-24', TRUE), (45, 7, '2025-05-24', FALSE),
-(46, 8, '2025-05-25', TRUE), (47, 8, '2025-05-25', TRUE), (48, 8, '2025-05-25', TRUE), (49, 8, '2025-05-25', TRUE), (50, 8, '2025-05-25', FALSE);
+INSERT INTO prisutnost_grupni (id_clana, id_grupnog_treninga, datum, prisutan) VALUES
+(2, 1, '2025-05-05', TRUE), (3, 1, '2025-05-05', TRUE), (5, 1, '2025-05-05', TRUE), (6, 1, '2025-05-05', TRUE),
+(11, 2, '2025-05-06', TRUE), (12, 2, '2025-05-06', TRUE), (13, 2, '2025-05-06', TRUE), (18, 2, '2025-05-06', TRUE),
+(19, 3, '2025-05-06', TRUE), (21, 3, '2025-05-06', TRUE), (25, 3, '2025-05-06', TRUE), (26, 3, '2025-05-06', TRUE),
+(29, 4, '2025-05-07', TRUE), (34, 4, '2025-05-07', TRUE), (35, 4, '2025-05-07', TRUE), (36, 4, '2025-05-07', TRUE),
+(42, 5, '2025-05-08', TRUE), (48, 5, '2025-05-08', TRUE), (2, 5, '2025-05-08', TRUE), (3, 5, '2025-05-08', TRUE),
+(8, 6, '2025-05-09', TRUE), (15, 6, '2025-05-09', TRUE), (24, 6, '2025-05-09', TRUE), (33, 6, '2025-05-09', TRUE),
+(39, 7, '2025-05-10', TRUE), (45, 7, '2025-05-10', TRUE), (8, 8, '2025-05-10', TRUE), (15, 8, '2025-05-10', TRUE),
+(1, 1, '2025-05-12', TRUE), (4, 2, '2025-05-13', TRUE), (9, 4, '2025-05-15', TRUE), 
+(16, 6, '2025-05-16', TRUE), (22, 8, '2025-05-18', TRUE), (30, 1, '2025-05-19', TRUE),
+(37, 3, '2025-05-20', TRUE), (43, 5, '2025-05-22', TRUE), (49, 7, '2025-05-24', TRUE),
+(7, 9, '2025-05-11', TRUE), (14, 10, '2025-05-05', TRUE), (23, 11, '2025-05-14', TRUE), 
+(38, 12, '2025-05-16', TRUE), (44, 1, '2025-05-26', TRUE),
+(2, 1, '2025-05-12', TRUE), (3, 1, '2025-05-12', TRUE), (5, 1, '2025-05-12', TRUE), (6, 1, '2025-05-12', TRUE),
+(11, 2, '2025-05-13', TRUE), (12, 2, '2025-05-13', TRUE), (13, 3, '2025-05-13', TRUE), (18, 3, '2025-05-13', TRUE),
+(19, 4, '2025-05-15', TRUE), (21, 4, '2025-05-15', TRUE), (25, 5, '2025-05-16', TRUE), (26, 5, '2025-05-16', TRUE),
+(29, 6, '2025-05-16', TRUE), (34, 6, '2025-05-16', TRUE), (35, 7, '2025-05-17', TRUE), (36, 7, '2025-05-17', TRUE),
+(42, 8, '2025-05-18', TRUE), (48, 8, '2025-05-18', TRUE), (8, 9, '2025-05-18', TRUE), (15, 9, '2025-05-18', TRUE),
+(24, 10, '2025-05-19', TRUE), (33, 10, '2025-05-19', TRUE), (39, 11, '2025-05-21', TRUE), (45, 11, '2025-05-21', TRUE),
+(2, 12, '2025-05-23', TRUE), (3, 12, '2025-05-23', TRUE), (5, 2, '2025-05-20', TRUE), (6, 3, '2025-05-21', TRUE),
+(2, 1, '2025-05-26', TRUE), (3, 1, '2025-05-26', TRUE), (5, 1, '2025-05-26', TRUE), (6, 1, '2025-05-26', TRUE),
+(11, 10, '2025-05-26', TRUE), (12, 10, '2025-05-26', TRUE), (18, 10, '2025-05-26', TRUE), (26, 10, '2025-05-26', TRUE),
+(1, 1, '2025-05-26', TRUE), (9, 10, '2025-05-26', TRUE),
+(7, 1, '2025-05-26', TRUE),
+(11, 2, '2025-05-27', TRUE), (12, 2, '2025-05-27', TRUE), (13, 2, '2025-05-27', TRUE), (18, 2, '2025-05-27', TRUE),
+(19, 3, '2025-05-27', TRUE), (21, 3, '2025-05-27', TRUE), (25, 3, '2025-05-27', TRUE), (26, 3, '2025-05-27', TRUE),
+(4, 2, '2025-05-27', TRUE), (16, 3, '2025-05-27', TRUE),
+(14, 2, '2025-05-27', TRUE),
+(29, 4, '2025-05-28', TRUE), (34, 4, '2025-05-28', TRUE), (35, 4, '2025-05-28', TRUE), (36, 4, '2025-05-28', TRUE),
+(2, 11, '2025-05-28', TRUE), (3, 11, '2025-05-28', TRUE), (5, 11, '2025-05-28', TRUE), (6, 11, '2025-05-28', TRUE),
+(8, 4, '2025-05-28', TRUE), (15, 11, '2025-05-28', TRUE), (24, 4, '2025-05-28', TRUE), (33, 11, '2025-05-28', TRUE),
+(22, 4, '2025-05-28', TRUE), (30, 11, '2025-05-28', TRUE),
+(23, 4, '2025-05-28', TRUE),
+(42, 5, '2025-05-29', TRUE), (48, 5, '2025-05-29', TRUE), (2, 5, '2025-05-29', TRUE), (3, 5, '2025-05-29', TRUE),
+(11, 5, '2025-05-29', TRUE), (12, 5, '2025-05-29', TRUE), (18, 5, '2025-05-29', TRUE), (26, 5, '2025-05-29', TRUE),
+(39, 5, '2025-05-29', TRUE), (45, 5, '2025-05-29', TRUE),
+(37, 5, '2025-05-29', TRUE), (43, 5, '2025-05-29', TRUE),
+(38, 5, '2025-05-29', TRUE),
+(19, 6, '2025-05-30', TRUE), (21, 6, '2025-05-30', TRUE), (25, 6, '2025-05-30', TRUE), (29, 6, '2025-05-30', TRUE),
+(34, 6, '2025-05-30', TRUE), (35, 6, '2025-05-30', TRUE), (36, 6, '2025-05-30', TRUE), (42, 6, '2025-05-30', TRUE),
+(2, 12, '2025-05-30', TRUE), (3, 12, '2025-05-30', TRUE), (5, 12, '2025-05-30', TRUE), (6, 12, '2025-05-30', TRUE),
+(8, 6, '2025-05-30', TRUE), (15, 12, '2025-05-30', TRUE), (24, 6, '2025-05-30', TRUE), (33, 12, '2025-05-30', TRUE),
+(49, 6, '2025-05-30', TRUE), (1, 12, '2025-05-30', TRUE),
+(44, 6, '2025-05-30', TRUE), (7, 12, '2025-05-30', TRUE);
 
 
 
@@ -401,33 +426,41 @@ INSERT INTO osoblje (ime, prezime, uloga, email, telefon, datum_zaposlenja, radn
 
 -- Podaci za plaćanja (Marko Kovač)
 INSERT INTO placanje (id_clana, iznos, datum_uplate, nacin_placanja, broj_racuna, popust, id_osoblje, opis) VALUES
-(1, 29.99, '2025-05-05', 'kartica', 'R-2025-021', 0.00, 1, 'Osnovna članarina'),
-(2, 49.99, '2025-05-07', 'gotovina', 'R-2025-022', 0.00, 2, 'Napredna članarina'),
-(3, 69.99, '2025-05-09', 'kartica', 'R-2025-023', 0.00, 1, 'Premium članarina'),
-(4, 29.99, '2025-05-11', 'transfer', 'R-2025-024', 0.00, 7, 'Osnovna članarina'),
-(5, 49.99, '2025-05-12', 'kartica', 'R-2025-025', 0.00, 2, 'Napredna članarina'),
-(6, 69.99, '2025-05-14', 'kripto', 'R-2025-026', 0.00, 1, 'Premium članarina'),
-(7, 19.99, '2025-05-16', 'PayPal', 'R-2025-027', 0.00, 7, 'Student - Basic članarina'),
-(8, 29.99, '2025-05-18', 'kartica', 'R-2025-028', 0.00, 1, 'Student - Plus članarina'),
-(9, 299.99, '2025-05-19', 'transfer', 'R-2025-029', 0.00, 2, 'Godišnja Standard članarina'),
-(10, 399.99, '2025-05-21', 'gotovina', 'R-2025-030', 0.00, 1, 'Godišnja Premium članarina'),
-(12, 26.99, '2025-05-24', 'kartica', 'R-2025-032', 10.00, 2, 'Osnovna članarina s popustom'),
-(13, 44.99, '2025-05-25', 'PayPal', 'R-2025-033', 10.00, 1, 'Napredna članarina s popustom'),
-(14, 69.99, '2025-05-26', 'kripto', 'R-2025-034', 0.00, 7, 'Premium članarina'),
-(15, 19.99, '2025-05-27', 'kartica', 'R-2025-035', 0.00, 2, 'Student - Basic članarina'),
-(16, 29.99, '2025-05-28', 'gotovina', 'R-2025-036', 0.00, 1, 'Student - Plus članarina'),
-(17, 299.99, '2025-05-29', 'transfer', 'R-2025-037', 0.00, 7, 'Godišnja Standard članarina'),
-(18, 399.99, '2025-05-30', 'PayPal', 'R-2025-038', 0.00, 2, 'Godišnja Premium članarina'),
-(20, 29.99, '2025-05-01', 'kartica', 'R-2025-040', 0.00, 7, 'Osnovna članarina'),
-(21, 49.99, '2025-05-02', 'gotovina', 'R-2025-041', 0.00, 2, 'Napredna članarina'),
-(22, 69.99, '2025-05-03', 'kartica', 'R-2025-042', 0.00, 1, 'Premium članarina'),
-(23, 19.99, '2025-05-04', 'transfer', 'R-2025-043', 0.00, 7, 'Student - Basic članarina'),
-(24, 29.99, '2025-05-05', 'kripto', 'R-2025-044', 0.00, 2, 'Student - Plus članarina'),
-(25, 299.99, '2025-05-05', 'PayPal', 'R-2025-045', 0.00, 1, 'Godišnja Standard članarina'),
-(26, 399.99, '2025-05-07', 'kartica', 'R-2025-046', 0.00, 7, 'Godišnja Premium članarina'),
-(28, 26.99, '2025-05-09', 'kartica', 'R-2025-048', 10.00, 1, 'Osnovna članarina s popustom'),
-(29, 44.99, '2025-05-10', 'transfer', 'R-2025-049', 10.00, 7, 'Napredna članarina s popustom'),
-(30, 69.99, '2025-05-11', 'kripto', 'R-2025-050', 0.00, 2, 'Premium članarina');
+(1, 29.99, '2025-05-05', 'kartica', 'R-2025-001', 5.00, 1, 'Osnovna članarina - svibanj 2025'),
+(3, 69.99, '2025-05-02', 'kartica', 'R-2025-002', 0.00, 1, 'Premium članarina - svibanj 2025'),
+(4, 29.99, '2025-05-08', 'transfer', 'R-2025-003', 10.00, 2, 'Osnovna članarina - svibanj 2025'),
+(6, 69.99, '2025-05-03', 'kartica', 'R-2025-004', 0.00, 1, 'Premium članarina - svibanj 2025'),
+(9, 29.99, '2025-05-10', 'gotovina', 'R-2025-005', 3.00, 7, 'Osnovna članarina - svibanj 2025'),
+(10, 299.99, '2025-05-01', 'transfer', 'R-2025-006', 0.00, 2, 'Godišnja Standard članarina 2025'),
+(13, 69.99, '2025-05-07', 'kartica', 'R-2025-007', 15.00, 1, 'Premium članarina - svibanj 2025'),
+(14, 19.99, '2025-05-09', 'PayPal', 'R-2025-008', 0.00, 7, 'Student Basic članarina - svibanj 2025'),
+(16, 29.99, '2025-05-06', 'kartica', 'R-2025-009', 0.00, 1, 'Osnovna članarina - svibanj 2025'),
+(19, 69.99, '2025-05-04', 'kartica', 'R-2025-010', 0.00, 1, 'Premium članarina - svibanj 2025'),
+(20, 299.99, '2025-05-01', 'kartica', 'R-2025-011', 0.00, 2, 'Godišnja Standard članarina 2025'),
+(22, 29.99, '2025-05-10', 'gotovina', 'R-2025-012', 8.00, 7, 'Osnovna članarina - svibanj 2025'),
+(24, 29.99, '2025-05-08', 'kartica', 'R-2025-013', 0.00, 1, 'Student Plus članarina - svibanj 2025'),
+(2, 49.99, '2025-05-15', 'kartica', 'R-2025-014', 20.00, 1, 'Napredna članarina - svibanj 2025'),
+(5, 49.99, '2025-05-18', 'transfer', 'R-2025-015', 12.00, 2, 'Napredna članarina - svibanj 2025'),
+(7, 19.99, '2025-05-12', 'gotovina', 'R-2025-016', 0.00, 7, 'Student Basic članarina - svibanj 2025'),
+(8, 29.99, '2025-05-20', 'kartica', 'R-2025-017', 0.00, 1, 'Student Plus članarina - svibanj 2025'),
+(11, 49.99, '2025-05-13', 'PayPal', 'R-2025-018', 2.50, 2, 'Napredna članarina - svibanj 2025'),
+(12, 399.99, '2025-05-17', 'transfer', 'R-2025-019', 0.00, 2, 'Godišnja Premium članarina 2025'),
+(15, 29.99, '2025-05-14', 'kartica', 'R-2025-020', 0.00, 1, 'Student Plus članarina - svibanj 2025'),
+(17, 299.99, '2025-05-16', 'kartica', 'R-2025-021', 0.00, 2, 'Godišnja Standard članarina 2025'),
+(18, 49.99, '2025-05-19', 'gotovina', 'R-2025-022', 0.00, 7, 'Napredna članarina - svibanj 2025'),
+(21, 399.99, '2025-05-11', 'kartica', 'R-2025-023', 0.00, 2, 'Godišnja Premium članarina 2025'),
+(23, 19.99, '2025-05-22', 'PayPal', 'R-2025-024', 0.00, 7, 'Student Basic članarina - svibanj 2025'),
+(25, 69.99, '2025-05-15', 'kartica', 'R-2025-025', 25.00, 1, 'Premium članarina - svibanj 2025'),
+(26, 49.99, '2025-05-17', 'transfer', 'R-2025-026', 7.00, 2, 'Napredna članarina - svibanj 2025'),
+(27, 69.99, '2025-05-21', 'kartica', 'R-2025-027', 0.00, 1, 'Premium članarina - svibanj 2025'),
+(28, 299.99, '2025-05-13', 'kartica', 'R-2025-028', 0.00, 2, 'Godišnja Standard članarina 2025'),
+(29, 399.99, '2025-05-16', 'transfer', 'R-2025-029', 0.00, 2, 'Godišnja Premium članarina 2025'),
+(30, 29.99, '2025-05-12', 'gotovina', 'R-2025-030', 4.00, 7, 'Osnovna članarina - svibanj 2025'),
+(31, 19.99, '2025-05-09', 'kartica', 'R-2025-031', 0.00, 1, 'Student Basic članarina - svibanj 2025'),
+(32, 29.99, '2025-05-06', 'gotovina', 'R-2025-032', 6.00, 7, 'Student Plus članarina - svibanj 2025'),
+(33, 29.99, '2025-05-08', 'transfer', 'R-2025-033', 0.00, 2, 'Student Plus članarina - svibanj 2025'),
+(34, 49.99, '2025-05-18', 'kartica', 'R-2025-034', 0.00, 1, 'Napredna članarina - svibanj 2025'),
+(35, 299.99, '2025-05-20', 'PayPal', 'R-2025-035', 0.00, 2, 'Godišnja Standard članarina 2025');
 
 
 -- ========================================
@@ -565,71 +598,152 @@ ORDER BY ukupni_prihod DESC;
 -- ==========================================
 
 -- Pogled 7: Pregled osoblja s performansama za tekući mjesec
-CREATE OR REPLACE VIEW pregled_osoblja_mjesec AS
+CREATE OR REPLACE VIEW pregled_uplata_clanarina AS
 SELECT 
-    o.uloga,
-    COUNT(*) AS ukupno_zaposlenika,
-    COUNT(CASE WHEN o.aktivan = TRUE THEN 1 END) AS aktivni_zaposlenici,
-    GROUP_CONCAT(
-        CONCAT(o.ime, ' ', o.prezime, 
-               CASE WHEN o.aktivan = FALSE THEN ' [NEAKTIVAN]' ELSE '' END)
-        ORDER BY o.prezime SEPARATOR ', '
-    ) AS popis_zaposlenika,
-    COALESCE(SUM(stats.broj_naplata), 0) AS ukupno_naplata_ovaj_mjesec,
-    COALESCE(SUM(stats.ukupni_iznos), 0) AS ukupni_promet_ovaj_mjesec
-FROM osoblje o
-LEFT JOIN (
-    SELECT 
-        p.id_osoblje,
-        COUNT(p.id) AS broj_naplata,
-        SUM(p.iznos - p.popust) AS ukupni_iznos
-    FROM placanje p 
-    WHERE YEAR(p.datum_uplate) = YEAR(CURRENT_DATE) 
-      AND MONTH(p.datum_uplate) = MONTH(CURRENT_DATE)
-    GROUP BY p.id_osoblje
-) stats ON o.id = stats.id_osoblje
-GROUP BY o.uloga 
-ORDER BY ukupni_promet_ovaj_mjesec DESC;
+    c.id,
+    c.ime,
+    c.prezime,
+    c.email,
+    c.telefon,
+    cl.tip AS tip_clanarine,
+    cl.cijena AS cijena_clanarine,
+    
+    -- Informacije o uplati
+    p.datum_uplate,
+    p.iznos AS uplatio_iznos,
+    p.nacin_placanja,
+    CONCAT(o.ime, ' ', o.prezime) AS primio_uplatu,
+    
+    -- Status plaćanja s napomenama
+    CASE 
+        WHEN p.datum_uplate IS NULL THEN 'POSLATI OPOMENU'
+        WHEN DAY(p.datum_uplate) <= 10 THEN 'OK'
+        WHEN DAY(p.datum_uplate) > 10 THEN 'KAŠNJENJE'
+    END AS status_placanja,
+    
+    -- Dodatne korisne informacije
+    CASE 
+        WHEN p.datum_uplate IS NULL THEN DATEDIFF(CURRENT_DATE, DATE(CONCAT(YEAR(CURRENT_DATE), '-', MONTH(CURRENT_DATE), '-10')))
+        WHEN DAY(p.datum_uplate) > 10 THEN DAY(p.datum_uplate) - 10
+        ELSE 0
+    END AS dana_kasnjenja,
+    
+    c.aktivan AS clan_aktivan
+    
+FROM clan c
+JOIN clanarina cl ON c.id_clanarina = cl.id
+LEFT JOIN placanje p ON c.id = p.id_clana 
+    AND YEAR(p.datum_uplate) = YEAR(CURRENT_DATE) 
+    AND MONTH(p.datum_uplate) = MONTH(CURRENT_DATE)
+LEFT JOIN osoblje o ON p.id_osoblje = o.id
+WHERE c.aktivan = TRUE
+ORDER BY 
+    CASE 
+        WHEN p.datum_uplate IS NULL THEN 1
+        WHEN DAY(p.datum_uplate) > 10 THEN 2
+        ELSE 3
+    END,
+    dana_kasnjenja DESC,
+    c.prezime, c.ime;
 
 -- Pogled 8: Financijski pregled za tekući mjesec
-CREATE OR REPLACE VIEW financijski_mjesec AS
+CREATE OR REPLACE VIEW dodatni_troskovi_clanova AS
 SELECT 
-    MONTHNAME(CURRENT_DATE) AS mjesec,
-    YEAR(CURRENT_DATE) AS godina,
-    COUNT(DISTINCT p.id_clana) AS broj_clanova_platilo,
-    COUNT(p.id) AS broj_transakcija,
-    SUM(p.iznos) AS ukupni_prihod,
-    SUM(p.popust) AS ukupni_popusti,
-    SUM(p.iznos - p.popust) AS neto_prihod,
-    AVG(p.iznos - p.popust) AS prosjecna_uplata,
-    SUM(CASE WHEN p.nacin_placanja = 'gotovina' THEN p.iznos - p.popust ELSE 0 END) AS gotovina,
-    SUM(CASE WHEN p.nacin_placanja = 'kartica' THEN p.iznos - p.popust ELSE 0 END) AS kartica,
-    SUM(CASE WHEN p.nacin_placanja IN ('transfer', 'PayPal') THEN p.iznos - p.popust ELSE 0 END) AS bezgotovinski,
-    COUNT(CASE WHEN p.popust > 0 THEN 1 END) AS broj_s_popustom
-FROM placanje p 
-WHERE YEAR(p.datum_uplate) = YEAR(CURRENT_DATE) 
-  AND MONTH(p.datum_uplate) = MONTH(CURRENT_DATE);
+    c.id,
+    c.ime,
+    c.prezime,
+    cl.tip AS tip_clanarine,
+    
+    COUNT(pt.id) AS broj_privatnih_treninga,
+    COALESCE(SUM(pt.cijena), 0) AS troskovi_privatni_treninzi,
+    
+    COUNT(CASE 
+        WHEN cl.tip IN ('Osnovna', 'Student - Basic') THEN pr.id 
+        ELSE NULL 
+    END) AS broj_dodatnih_grupnih,
+    COALESCE(SUM(CASE 
+        WHEN cl.tip IN ('Osnovna', 'Student - Basic') THEN gt.cijena_po_terminu 
+        ELSE 0 
+    END), 0) AS troskovi_grupni_treninzi,
+    
 
--- Pogled 9: Top zaposlenici po naplati za tekući mjesec
-CREATE OR REPLACE VIEW top_zaposlenici_mjesec AS
+    COALESCE(SUM(pt.cijena), 0) + 
+    COALESCE(SUM(CASE 
+        WHEN cl.tip IN ('Osnovna', 'Student - Basic') THEN gt.cijena_po_terminu 
+        ELSE 0 
+    END), 0) AS ukupno_dodatni_troskovi,
+
+    CASE 
+        WHEN c.id_clanarina IN (6, 7) THEN 0.00
+        ELSE cl.cijena
+    END AS mjesecni_iznos_clanarine,
+    
+    CASE 
+        WHEN c.id_clanarina IN (6, 7) THEN 
+            COALESCE(SUM(pt.cijena), 0) + 
+            COALESCE(SUM(CASE 
+                WHEN cl.tip IN ('Osnovna', 'Student - Basic') THEN gt.cijena_po_terminu 
+                ELSE 0 
+            END), 0)
+        ELSE 
+            cl.cijena + 
+            COALESCE(SUM(pt.cijena), 0) + 
+            COALESCE(SUM(CASE 
+                WHEN cl.tip IN ('Osnovna', 'Student - Basic') THEN gt.cijena_po_terminu 
+                ELSE 0 
+            END), 0)
+    END AS ukupno_za_naplatu_ovaj_mjesec,
+    
+    CASE 
+        WHEN c.id_clanarina IN (6, 7) THEN 'DA' 
+        ELSE 'NE' 
+    END AS godisnja_clanarina
+
+FROM clan c
+JOIN clanarina cl ON c.id_clanarina = cl.id
+LEFT JOIN privatni_trening pt ON c.id = pt.id_clana 
+    AND pt.status = 'održan'
+    AND YEAR(pt.datum) = YEAR(CURRENT_DATE) 
+    AND MONTH(pt.datum) = MONTH(CURRENT_DATE)
+LEFT JOIN prisutnost_grupni pr ON c.id = pr.id_clana 
+    AND pr.prisutan = TRUE
+    AND YEAR(pr.datum) = YEAR(CURRENT_DATE) 
+    AND MONTH(pr.datum) = MONTH(CURRENT_DATE)
+LEFT JOIN grupni_trening gt ON pr.id_grupnog_treninga = gt.id
+WHERE c.aktivan = TRUE
+GROUP BY c.id, c.ime, c.prezime, cl.tip, cl.cijena, c.id_clanarina
+ORDER BY ukupno_dodatni_troskovi DESC;
+
+-- Pogled 9: Pregled aktivnosti trenera za tekući mjesec (Marko Kovač)
+CREATE OR REPLACE VIEW aktivnost_trenera AS
 SELECT 
-    o.ime,
-    o.prezime,
-    o.uloga,
-    COUNT(p.id) AS broj_naplata,
-    SUM(p.iznos - p.popust) AS ukupni_iznos,
-    AVG(p.iznos - p.popust) AS prosjecna_naplata,
-    GROUP_CONCAT(DISTINCT p.nacin_placanja ORDER BY p.nacin_placanja) AS koristi_nacine_placanja,
-    -- Dodatne korisne informacije
-    MIN(p.datum_uplate) AS prva_naplata_mjesec,
-    MAX(p.datum_uplate) AS zadnja_naplata_mjesec
-FROM placanje p 
-JOIN osoblje o ON p.id_osoblje = o.id 
-WHERE o.aktivan = TRUE
-  AND YEAR(p.datum_uplate) = YEAR(CURRENT_DATE) 
-  AND MONTH(p.datum_uplate) = MONTH(CURRENT_DATE)
-GROUP BY o.id, o.ime, o.prezime, o.uloga 
-ORDER BY ukupni_iznos DESC, broj_naplata DESC;
+    t.id,
+    t.ime,
+    t.prezime,
+    t.specijalizacija,
+    
+    COUNT(pt.id) AS broj_privatnih_treninga,
+    COALESCE(SUM(pt.cijena), 0) AS ukupni_prihod,
+    COUNT(DISTINCT pt.id_clana) AS broj_klijenata,
+    
+    ROUND(AVG(pt.cijena), 2) AS prosjecna_cijena_treninga,
+    ROUND(COALESCE(SUM(pt.cijena), 0) / NULLIF(COUNT(DISTINCT pt.id_clana), 0), 2) AS prihod_po_klijentu,
+    
+    MIN(pt.datum) AS prvi_trening_ovaj_mjesec,
+    MAX(pt.datum) AS zadnji_trening_ovaj_mjesec,
+    
+    GROUP_CONCAT(DISTINCT tt.naziv ORDER BY tt.naziv SEPARATOR ', ') AS tipovi_treninga
+    
+FROM trener t
+LEFT JOIN privatni_trening pt ON t.id = pt.id_trenera 
+    AND pt.status = 'održan'
+    AND YEAR(pt.datum) = YEAR(CURRENT_DATE) 
+    AND MONTH(pt.datum) = MONTH(CURRENT_DATE)
+LEFT JOIN tip_treninga tt ON pt.id_tip_treninga = tt.id
+WHERE t.aktivan = TRUE
+GROUP BY t.id, t.ime, t.prezime, t.specijalizacija
+ORDER BY ukupni_prihod DESC;
+
 
 -- ==========================================
 -- VLADAN: Pogledi za opremu i rezervacije
@@ -731,7 +845,7 @@ SELECT
         ELSE 'Ima mjesta'
     END AS status_popunjenosti
 FROM grupni_trening gt
-LEFT JOIN prisutnost p ON gt.id = p.id_grupnog_treninga 
+LEFT JOIN prisutnost_grupni p ON gt.id = p.id_grupnog_treninga 
     AND p.datum >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)
     AND p.prisutan = TRUE
 JOIN trener t ON gt.id_trenera = t.id
@@ -754,7 +868,7 @@ SELECT
     DATEDIFF(CURRENT_DATE, MAX(p.datum)) AS dana_od_zadnjeg_dolaska
 FROM clan c
 JOIN clanarina cl ON c.id_clanarina = cl.id
-LEFT JOIN prisutnost p ON c.id = p.id_clana
+LEFT JOIN prisutnost_grupni p ON c.id = p.id_clana
 WHERE c.aktivan = TRUE
 GROUP BY c.id
 HAVING ukupno_prijava > 0
@@ -773,7 +887,7 @@ SELECT
     ROUND(AVG(gt.cijena_po_terminu), 2) AS prosjecna_cijena,
     SUM(CASE WHEN p.prisutan = TRUE THEN gt.cijena_po_terminu ELSE 0 END) AS potencijalni_prihod
 FROM grupni_trening gt
-LEFT JOIN prisutnost p ON gt.id = p.id_grupnog_treninga 
+LEFT JOIN prisutnost_grupni p ON gt.id = p.id_grupnog_treninga 
     AND p.datum >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)
 WHERE gt.aktivan = TRUE
 GROUP BY gt.dan_u_tjednu
@@ -926,54 +1040,57 @@ ORDER BY ukupni_prihod DESC;
 -- MARKO KOVAČ: Složeni upiti za osoblje i plaćanja
 -- ==========================================
 
--- Upit 7 dani s najviše naplata po zaposleniku 'Recepcionist', 'Voditelj' (Marko Kovač):
+-- Upit 7: Koji zaposlenici rade s najskupljim klijentima
 SELECT 
     o.ime,
     o.prezime,
     o.uloga,
-    DATE(p.datum_uplate) AS datum_naplata,
-    COUNT(p.id) AS broj_naplata,
-    SUM(p.iznos) AS ukupni_iznos,
-    AVG(p.iznos) AS prosjecna_naplata
-FROM placanje p
-JOIN osoblje o ON p.id_osoblje = o.id
+    COUNT(DISTINCT p.id_clana) AS broj_klijenata,
+    COUNT(p.id) AS ukupno_transakcija,
+    SUM(p.iznos - p.popust) AS ukupni_prihod,
+    ROUND(SUM(p.iznos - p.popust) / COUNT(DISTINCT p.id_clana), 2) AS prihod_po_klijentu,
+    MAX(p.iznos - p.popust) AS najveca_pojedinacna_naplata,
+    GROUP_CONCAT(DISTINCT p.nacin_placanja ORDER BY p.nacin_placanja) AS nacini_placanja_koje_koristi
+FROM osoblje o
+JOIN placanje p ON o.id = p.id_osoblje
 WHERE o.uloga IN ('Recepcionist', 'Voditelj') AND o.aktivan = TRUE
-GROUP BY o.id, o.ime, o.prezime, DATE(p.datum_uplate)
-ORDER BY broj_naplata DESC, ukupni_iznos DESC
-LIMIT 5;
+GROUP BY o.id, o.ime, o.prezime, o.uloga
+ORDER BY prihod_po_klijentu DESC;
 
 
 -- Upit 8: Analiza plaćanja po načinu (Marko Kovač)
 SELECT 
     p.nacin_placanja,
     COUNT(*) AS broj_transakcija,
-    SUM(p.iznos) AS ukupni_prihod,
-    AVG(p.iznos) AS prosjecni_iznos,
+    SUM(p.iznos - p.popust) AS ukupni_prihod,
+    ROUND(AVG(p.iznos - p.popust), 2) AS prosjecni_iznos,
     COUNT(DISTINCT p.id_clana) AS broj_različitih_klijenata,
     ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM placanje), 2) AS postotak_transakcija,
-    ROUND(SUM(p.iznos) * 100.0 / (SELECT SUM(iznos) FROM placanje), 2) AS postotak_prihoda
+    ROUND(SUM(p.iznos - p.popust) * 100.0 / (SELECT SUM(iznos - popust) FROM placanje), 2) AS postotak_prihoda
 FROM placanje p
 WHERE p.nacin_placanja IS NOT NULL
 GROUP BY p.nacin_placanja
 ORDER BY ukupni_prihod DESC;
 
 
--- Upit 9: Upit je za broj naplata po zaposleniku  'Recepcionist', 'Voditelj'
+-- Upit 9: Koji zaposlenici daju popuste i koliki je ukupni iznos popusta(EUR)  'Recepcionist', 'Voditelj'
 SELECT 
     o.ime,
     o.prezime,
     o.uloga,
-    COUNT(p.id) AS broj_naplata,
-    SUM(p.iznos) AS ukupni_iznos,
-    AVG(p.iznos) AS prosjecna_naplata,
-    COUNT(DISTINCT p.id_clana) AS broj_klijenata
-FROM placanje p
-JOIN osoblje o ON p.id_osoblje = o.id
+    COUNT(CASE WHEN p.popust > 0 THEN 1 END) AS broj_popusta_odobren,
+    COUNT(p.id) AS ukupno_naplata,
+    ROUND((COUNT(CASE WHEN p.popust > 0 THEN 1 END) * 100.0) / COUNT(p.id), 2) AS postotak_s_popustom,
+    ROUND(AVG(CASE WHEN p.popust > 0 THEN p.popust END), 2) AS prosjecni_popust_kad_da,
+    SUM(p.popust) AS ukupni_popusti_dani,
+    SUM(p.iznos) AS ukupni_bruto_iznos,
+    SUM(p.iznos - p.popust) AS ukupni_neto_iznos,
+    ROUND((SUM(p.popust) * 100.0) / SUM(p.iznos), 2) AS postotak_umanjenja_prihoda
+FROM osoblje o
+JOIN placanje p ON o.id = p.id_osoblje
 WHERE o.uloga IN ('Recepcionist', 'Voditelj') AND o.aktivan = TRUE
 GROUP BY o.id, o.ime, o.prezime, o.uloga
-ORDER BY ukupni_iznos DESC, broj_naplata DESC;
-
-
+ORDER BY ukupni_popusti_dani DESC;
 
 
 -- ==========================================
@@ -1081,7 +1198,7 @@ WITH grupni_statistika AS (
         CONCAT(t.ime, ' ', t.prezime) AS trener
     FROM grupni_trening gt
     JOIN trener t ON gt.id_trenera = t.id
-    LEFT JOIN prisutnost p ON gt.id = p.id_grupnog_treninga
+    LEFT JOIN prisutnost_grupni p ON gt.id = p.id_grupnog_treninga
     WHERE gt.aktivan = TRUE
     GROUP BY gt.id, gt.naziv, gt.dan_u_tjednu, gt.cijena_po_terminu, gt.max_clanova, trener
 )
@@ -1121,7 +1238,7 @@ SELECT
     DATEDIFF(CURRENT_DATE, MAX(p.datum)) AS dana_od_zadnjeg_dolaska
 FROM clan c
 JOIN clanarina cl ON c.id_clanarina = cl.id
-LEFT JOIN prisutnost p ON c.id = p.id_clana
+LEFT JOIN prisutnost_grupni p ON c.id = p.id_clana
 WHERE c.aktivan = TRUE
 GROUP BY c.id, clan, cl.tip
 HAVING ukupno_prijava > 0
@@ -1147,7 +1264,7 @@ SELECT
     END AS preporuka,
     GROUP_CONCAT(DISTINCT gt.naziv ORDER BY gt.naziv SEPARATOR ', ') AS programi
 FROM grupni_trening gt
-LEFT JOIN prisutnost p ON gt.id = p.id_grupnog_treninga 
+LEFT JOIN prisutnost_grupni p ON gt.id = p.id_grupnog_treninga 
     AND p.datum >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)
 WHERE gt.aktivan = TRUE
 GROUP BY gt.dan_u_tjednu, gt.vrijeme
