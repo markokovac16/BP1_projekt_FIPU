@@ -453,6 +453,394 @@ Idealno za usporedbu koliko se realno naplaćuje u odnosu na očekivano (osnovna
 
 ---
 
+## 7.6 Pogled – Trenutno stanje i vrijednost opreme
+
+Vodstvo teretane treba brz uvid u sve komade opreme i njihov rok jamstva kako bi planirali servise i zamjene.
+
+**TRAŽENO RJEŠENJE:**  
+ID opreme, šifra, naziv, proizvođač, model, stanje, vrijednost, datum nabave, datum isteka garancije, broj dana do isteka garancije.
+
+**KOD:**
+```sql
+CREATE OR REPLACE VIEW stanje_opreme AS
+SELECT 
+    o.id,
+    o.sifra,
+    o.naziv,
+    o.proizvodac,
+    o.model,
+    o.stanje,
+    o.vrijednost,
+    o.datum_nabave,
+    o.garancija_do,
+    DATEDIFF(o.garancija_do, CURRENT_DATE) AS dana_do_isteka_garancije
+FROM oprema o
+ORDER BY o.stanje DESC, o.vrijednost DESC;
+```
+**OPIS:**
+
+Iz tablice ``oprema`` dohvaća sve ključne atribute.
+
+Funkcija ``DATEDIFF`` izračunava broj dana do isteka garancije, omogućujući pravovremeno zakazivanje servisa.
+
+Sortira prvo po stanje (najkritičnije sprave na vrhu), a potom po vrijednost (najskuplje sprave prve).
+
+---------------------------------------------------
+## 7.7 Pogled – Oprema po proizvođaču
+
+Odjel analitike treba agregirane podatke o vrijednosti i stanju garancija za svaku robnu marku opreme kako bi mogao optimizirati nabavu i servis.
+
+**TRAŽENO RJEŠENJE:**  
+Proizvođač, broj stavki, ukupna vrijednost, prosjek dana do isteka garancije, broj isteklih garancija, broj garancija koje uskoro istječu.
+
+**KOD**:
+```sql
+CREATE OR REPLACE VIEW oprema_po_proizvodacu AS
+SELECT
+    o.proizvodac,
+    COUNT(*)                     AS broj_stavki,
+    SUM(o.vrijednost)            AS ukupna_vrijednost,
+    ROUND(AVG(DATEDIFF(o.garancija_do, CURRENT_DATE)), 1) AS prosjek_dana_do_isteka_garancije,
+    SUM(CASE WHEN DATEDIFF(o.garancija_do, CURRENT_DATE) < 0 THEN 1 ELSE 0 END) AS broj_isteklih_garancija,
+    SUM(CASE WHEN DATEDIFF(o.garancija_do, CURRENT_DATE) BETWEEN 0 AND 30 THEN 1 ELSE 0 END) AS broj_garancija_uskoro_istjece
+FROM oprema o
+GROUP BY o.proizvodac
+ORDER BY ukupna_vrijednost DESC; 
+```
+**OPIS:**
+
+Grupira opremu prema proizvođaču (``GROUP BY o.proizvodac``).
+
+``COUNT(*)`` broji koliko komada opreme ima svaki proizvođač.
+
+``SUM(o.vrijednost)`` daje ukupnu nabavnu vrijednost opreme po proizvođaču.
+
+``AVG(DATEDIFF(...))`` računa prosjek dana do isteka garancije, zaokružen na jedno decimalno mjesto.
+
+``SUM(CASE WHEN ... < 0)`` izračunava koliko je garancija već isteklo.
+
+``SUM(CASE WHEN ... BETWEEN 0 AND 30)`` broji garancije koje istječu unutar idućih 30 dana.
+
+Rezultati se sortiraju silazno po ukupna_vrijednost za prioritetno praćenje najvrjednijih proizvođača.
+
+------------------------------------------------
+## 7.8 Pogled – Broj rezervacija po opremi
+
+Menadžment želi znati koje sprave su najpopularnije kako bi mogao prilagoditi raspored održavanja i eventualno proširiti ponudu.
+
+**TRAŽENO RJEŠENJE:**  
+Naziv opreme, broj svih rezervacija, broj različitih korisnika, datum zadnje rezervacije.
+
+**KOD:**
+```sql
+CREATE OR REPLACE VIEW broj_rezervacija_po_opremi AS
+SELECT 
+    o.naziv AS oprema,
+    COUNT(ro.id) AS broj_rezervacija,
+    COUNT(DISTINCT ro.id_clana) AS broj_razlicitih_korisnika,
+    MAX(ro.datum) AS zadnja_rezervacija
+FROM oprema o
+LEFT JOIN rezervacija_opreme ro ON o.id = ro.id_opreme
+GROUP BY o.id
+ORDER BY broj_rezervacija DESC;
+```
+**OPIS:**
+
+``COUNT(ro.id)`` pokazuje koliko je puta svaka sprava rezervirana.
+
+``COUNT(DISTINCT ro.id_clana)`` mjeri koliko je različitih članova koristilo spravu.
+
+``MAX(ro.datum)`` daje datum zadnje upotrebe.
+
+``LEFT JOIN`` osigurava da i nepopularne sprave budu vidljive s brojem rezervacija 0.
+
+---------------------------
+## 7.9 Pogled – Prosječno korištenje opreme po članu
+
+Odjel analitike želi dobiti uvid u to koliko vremena pojedini članovi u prosjeku provode na svakoj spravi kako bi se razumjela korisnička aktivnost i optimizirao raspored.
+
+**TRAŽENO RJEŠENJE:**  
+Naziv opreme, ime i prezime člana, broj rezervacija, prosječno trajanje rezervacije u minutama.
+
+**KOD:**
+```sql
+CREATE OR REPLACE VIEW prosjecno_koristenje_opreme AS
+SELECT 
+    o.naziv AS oprema,
+    CONCAT(c.ime, ' ', c.prezime) AS clan,
+    COUNT(ro.id) AS broj_rezervacija,
+    ROUND(AVG(TIMESTAMPDIFF(MINUTE, ro.vrijeme_pocetka, ro.vrijeme_zavrsetka)), 1) AS prosjecno_trajanje_minuta
+FROM rezervacija_opreme ro
+JOIN oprema o ON ro.id_opreme = o.id
+JOIN clan c ON ro.id_clana = c.id
+WHERE ro.status IN ('završena', 'aktivna')
+GROUP BY o.id, c.id
+ORDER BY broj_rezervacija DESC, prosjecno_trajanje_minuta DESC;
+```
+**OPIS:**
+
+``COUNT(ro.id)` prebrojava sve rezervacije pojedine sprave od strane člana.
+
+``AVG(TIMESTAMPDIFF(...))`` računa prosječno trajanje svake rezervacije u minutama.
+
+Filtrira se samo status ``aktivna`` i ``završena`` kako bi se izbjegle otkazane rezervacije.
+
+Rezultati se sortiraju po broju rezervacija (silazno) i po duljini prosječnog trajanja.
+
+-----------------------------------
+## 7.10 Pogled – Top 5 sprava po trajanju
+
+Cilj je identificirati sprave koje su kroz vrijeme najintenzivnije korištene kako bi se planiralo održavanje i eventualno proširenje inventara.
+
+**TRAŽENO RJEŠENJE:**  
+Naziv opreme, broj rezervacija, ukupno minuta korištenja, prosječno trajanje.
+
+**KOD:**
+```sql
+CREATE OR REPLACE VIEW top_oprema_po_trajanju AS
+SELECT 
+    o.naziv AS oprema,
+    COUNT(ro.id) AS broj_rezervacija,
+    SUM(TIMESTAMPDIFF(MINUTE, ro.vrijeme_pocetka, ro.vrijeme_zavrsetka)) AS ukupno_minuta,
+    ROUND(AVG(TIMESTAMPDIFF(MINUTE, ro.vrijeme_pocetka, ro.vrijeme_zavrsetka)), 1) AS prosjecno_trajanje
+FROM rezervacija_opreme ro
+JOIN oprema o ON ro.id_opreme = o.id
+WHERE ro.status IN ('završena', 'aktivna')
+GROUP BY o.id
+ORDER BY ukupno_minuta DESC
+LIMIT 5;
+```
+**OPIS:**
+
+``COUNT(ro.id)`` daje ukupan broj svih rezervacija za svaku spravu.
+
+``SUM(TIMESTAMPDIFF(...))`` sabira minute korištenja po spravi, pokazujući ukupno opterećenje.
+
+``AVG(TIMESTAMPDIFF(...))`` računa prosječno trajanje rezervacije, zaokruženo na jednu decimalu.
+
+``LIMIT 5`` osigurava da se prikaže samo prvih pet najintenzivnijih sprava.
+
+--------------------------------------
+## 7.11 Pogled – Oprema bez rezervacija
+
+Operativni tim želi identificirati komade opreme koji nikada nisu rezervirani kako bi mogao pokrenuti promocije ili preispitati njihove troškove.
+
+**TRAŽENO RJEŠENJE:**  
+ID opreme, šifra, naziv, stanje, vrijednost, datum nabave, proizvođač.
+
+**KOD:**
+```sql
+CREATE OR REPLACE VIEW oprema_bez_rezervacije AS
+SELECT 
+    o.id,
+    o.sifra,
+    o.naziv,
+    o.stanje,
+    o.vrijednost,
+    o.datum_nabave,
+    o.proizvodac
+FROM oprema o
+LEFT JOIN rezervacija_opreme ro ON o.id = ro.id_opreme
+WHERE ro.id IS NULL
+ORDER BY o.vrijednost DESC;
+```
+**OPIS:**
+
+``LEFT JOIN`` osigurava da se uključe sve sprave čak i one bez rezervacija.
+
+``WHERE ro.id IS NULL`` filtrira samo sprave koje nisu rezervirane nijednom.
+
+Sortira po vrijednost silazno kako bi se prvo vidjele najskuplje neiskorištene sprave.
+
+---------------------------------------
+## 7.12 Upit – Osnovni podaci opreme i detaljna statistika
+
+Menadžment želi objedinjeni prikaz ključnih metrika korištenja svake sprave kako bi mogao pratiti učestalost rezervacija, recentne trendove i prioritete za servis.
+
+**TRAŽENO RJEŠENJE:**  
+ID opreme, šifra, naziv, proizvođač, stanje, ukupno rezervacija, završene rezervacije, rezervacije u zadnjih 7 dana, rezervacije u zadnjih 30 dana, omjer 30-dnevnih prema 90-dnevnim rezervacijama (u %), broj dana od zadnje rezervacije, razina korištenja (Visoka/​Srednja/​Niska).
+
+**KOD:**
+```sql
+SELECT
+    o.id,
+    o.sifra,
+    o.naziv,
+    o.proizvodac,
+    o.stanje,
+    COUNT(ro.id) AS ukupno_rezervacija,
+    SUM(CASE WHEN ro.status = 'završena' THEN 1 ELSE 0 END) AS zavrsene_rezervacije,
+    SUM(CASE WHEN ro.datum >= DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY) THEN 1 ELSE 0 END) AS rezervacije_posljednjih_7_dana,
+    SUM(CASE WHEN ro.datum >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) THEN 1 ELSE 0 END) AS rezervacije_posljednjih_30_dana,
+    ROUND(
+        SUM(CASE WHEN ro.datum >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) THEN 1 ELSE 0 END)
+        / NULLIF(SUM(CASE WHEN ro.datum >= DATE_SUB(CURRENT_DATE, INTERVAL 90 DAY) THEN 1 ELSE 0 END), 0)
+        * 100, 1
+    ) AS omjer_30_90_dana,
+    DATEDIFF(CURRENT_DATE, MAX(ro.datum)) AS dana_od_zadnje_rezervacije,
+    CASE
+        WHEN SUM(CASE WHEN ro.datum >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) THEN 1 ELSE 0 END) >= 5 THEN 'Visoka'
+        WHEN SUM(CASE WHEN ro.datum >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) THEN 1 ELSE 0 END) >= 2 THEN 'Srednja'
+        ELSE 'Niska'
+    END AS razina_koristenja
+FROM oprema o
+LEFT JOIN rezervacija_opreme ro
+    ON o.id = ro.id_opreme
+GROUP BY o.id, o.sifra, o.naziv, o.proizvodac, o.stanje
+ORDER BY rezervacije_posljednjih_30_dana DESC,
+         dana_od_zadnje_rezervacije ASC;
+```
+**OPIS:**
+
+``COUNT(ro.id)`` i ``SUM(CASE WHEN …)`` mjere ukupne i završene rezervacije, te aktivnosti u zadnjih 7 i 30 dana.
+
+``ROUND(... omjer ...)`` računa postotak 30-dnevnih rezervacija u odnosu na 90-dnevni period.
+
+``DATEDIFF`` pokazuje koliko je dana prošlo od zadnje rezervacije.
+
+``CASE`` kategorizira razinu korištenja prema broju rezervacija u zadnjih 30 dana.
+
+-----------------------------
+## 7.13 Upit – Trend korištenja opreme
+
+Analitički tim želi pratiti promjene u učestalosti rezervacija svake sprave uspoređujući prosjeke zadnja četiri i prethodna četiri tjedna kako bi uočili rastuće ili opadajuće trendove.
+
+**TRAŽENO RJEŠENJE:**  
+ID opreme, šifra, naziv, prosjek rezervacija u zadnja 4 tjedna, prosjek rezervacija u prethodna 4 tjedna, razlika, trend korištenja (`Rastući trend` / `Opadajući trend` / `Stabilno`).
+
+**KOD:**
+```sql
+WITH tjedni AS (
+    SELECT
+        id_opreme,
+        YEARWEEK(datum, 1) AS yw,
+        COUNT(*)          AS broj_rezervacija
+    FROM rezervacija_opreme
+    GROUP BY id_opreme, yw
+),
+rangirani AS (
+    SELECT
+        t.*,
+        ROW_NUMBER() OVER (PARTITION BY id_opreme ORDER BY yw DESC) AS rn
+    FROM tjedni t
+),
+filtrirani AS (
+    SELECT
+        id_opreme,
+        ROUND(AVG(CASE WHEN rn BETWEEN 1 AND 4 THEN broj_rezervacija END), 2) AS avg_zadnja_4_tjedna,
+        ROUND(AVG(CASE WHEN rn BETWEEN 5 AND 8 THEN broj_rezervacija END), 2) AS avg_prethodna_4_tjedna
+    FROM rangirani
+    WHERE rn <= 8
+    GROUP BY id_opreme
+)
+SELECT
+    o.id,
+    o.sifra,
+    o.naziv,
+    COALESCE(f.avg_zadnja_4_tjedna, 0)    AS avg_zadnja_4_tjedna,
+    COALESCE(f.avg_prethodna_4_tjedna, 0) AS avg_prethodna_4_tjedna,
+    ROUND(
+      COALESCE(f.avg_zadnja_4_tjedna, 0)
+      - COALESCE(f.avg_prethodna_4_tjedna, 0)
+      , 2
+    )                                    AS razlika,
+    CASE
+      WHEN f.avg_zadnja_4_tjedna > f.avg_prethodna_4_tjedna THEN 'Rastući trend'
+      WHEN f.avg_zadnja_4_tjedna < f.avg_prethodna_4_tjedna THEN 'Opadajući trend'
+      ELSE 'Stabilno'
+    END                                   AS trend_koristenja
+FROM oprema o
+LEFT JOIN filtrirani f ON o.id = f.id_opreme
+ORDER BY razlika DESC;
+```
+**OPIS:**
+
+CTE tjedni prikuplja broj rezervacija po spravi i tjednu.
+
+CTE rangirani rangira tjedne za svaku spravu od najnovijeg ``(rn=1) `` prema starijima.
+
+CTE filtrirani izračunava prosjek rezervacija za zadnja 4  ``(rn 1–4)  ``i prethodna 4  ``(rn 5–8) `` tjedna.
+
+Glavni SELECT spaja rezultate na tablicu oprema, računa razliku i klasificira trend.
+
+Sortira sprave po najvećoj pozitivnoj ili negativnoj razlici za brzo uočavanje promjena.
+
+-----------------------
+## 7.14 Upit – Analiza rezervacija, trajanja i garancije opreme
+
+Menadžment želi detaljnu statistiku svake sprave uključujući broj rezervacija, raznolikost dana korištenja, trend unazad 30 dana te status garancije kako bi mogao optimizirati servisne cikluse i planirati zamjene.
+
+**TRAŽENO RJEŠENJE:**  
+ID opreme, šifra, naziv, stanje, ukupno rezervacija, broj različitih dana rezervacija, prva i zadnja rezervacija, rezervacije u zadnjih 30 dana, postotak tih rezervacija u odnosu na ukupne, prosjek rezervacija po danu, broj dana od zadnje rezervacije, broj dana do isteka garancije, status garancije, kategorija korištenja.
+
+**KOD:**
+```sql
+WITH res AS (
+    SELECT
+        id_opreme,
+        COUNT(*) AS ukupno_rezervacija,
+        COUNT(DISTINCT datum) AS broj_razlicitih_dana,
+        MIN(datum) AS prva_rezervacija,
+        MAX(datum) AS zadnja_rezervacija,
+        SUM(CASE WHEN datum >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY) THEN 1 ELSE 0 END) AS rezervacije_zadnjih_30_dana
+    FROM rezervacija_opreme
+    GROUP BY id_opreme
+)
+SELECT
+    o.id,
+    o.sifra,
+    o.naziv,
+    o.stanje,
+    COALESCE(r.ukupno_rezervacija, 0)           AS ukupno_rezervacija,
+    COALESCE(r.broj_razlicitih_dana, 0)         AS broj_razlicitih_dana,
+    r.prva_rezervacija,
+    r.zadnja_rezervacija,
+    COALESCE(r.rezervacije_zadnjih_30_dana, 0)  AS rezervacije_zadnjih_30_dana,
+    ROUND(
+      COALESCE(r.rezervacije_zadnjih_30_dana,0) * 100
+      / NULLIF(COALESCE(r.ukupno_rezervacija,0),0)
+      ,1
+    )                                          AS postotak_rezervacija_30_od_ukupnih,
+    ROUND(
+      COALESCE(r.ukupno_rezervacija,0)
+      / NULLIF(COALESCE(r.broj_razlicitih_dana,1),1)
+      ,2
+    )                                          AS prosjek_rezervacija_po_danu,
+    DATEDIFF(CURRENT_DATE, COALESCE(r.zadnja_rezervacija, o.datum_nabave))
+                                                AS dana_od_zadnje_rezervacije,
+    DATEDIFF(o.garancija_do, CURRENT_DATE)      AS dana_do_isteka_garancije,
+    CASE
+      WHEN DATEDIFF(o.garancija_do, CURRENT_DATE) < 0 THEN 'Jamstvo isteklo'
+      WHEN DATEDIFF(o.garancija_do, CURRENT_DATE) <= 30 THEN 'Jamstvo uskoro istječe'
+      ELSE 'Garancija valjana'
+    END                                         AS status_garancije,
+    CASE
+      WHEN COALESCE(r.rezervacije_zadnjih_30_dana,0) >= 10 THEN 'Visoka'
+      WHEN COALESCE(r.rezervacije_zadnjih_30_dana,0) >= 5  THEN 'Srednja'
+      ELSE 'Niska'
+    END                                         AS kategorija_koristenja
+FROM oprema o
+LEFT JOIN res r ON o.id = r.id_opreme
+ORDER BY
+    rezervacije_zadnjih_30_dana DESC,
+    dana_od_zadnje_rezervacije ASC;
+```
+**OPIS:**
+
+CTE res prebrojava sve rezervacije po opremi, različite dane korištenja i računa prvu te zadnju rezervaciju, uključujući broj rezervacija u zadnjih 30 dana.
+
+``COALESCE`` osigurava da se i oprema bez rezervacija prikaže s nulama umjesto ``NULL``.
+
+``ROUND(... *100 / NULLIF(...))`` izračunava postotak rezervacija u zadnjih 30 dana u odnosu na ukupne rezervacije.
+
+``ROUND(... / NULLIF(...))`` daje prosječan broj rezervacija po danu korištenja.
+
+``DATEDIFF`` prikazuje koliko je dana prošlo od posljednje rezervacije i koliko dana preostaje do isteka garancije.
+
+``CASE`` izrazi kategoriziraju status garancije i razinu korištenja ``(Visoka/Srednja/Niska)`` za brze odluke o servisu i zamjeni.
+
+---
+
 
 
 
