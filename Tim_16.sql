@@ -851,24 +851,30 @@ SELECT
     gt.vrijeme,
     gt.max_clanova,
     gt.cijena_po_terminu,
-    COUNT(DISTINCT p.id_clana) AS trenutno_prijavljenih,
-    gt.max_clanova - COUNT(DISTINCT p.id_clana) AS slobodnih_mjesta,
-    ROUND((COUNT(DISTINCT p.id_clana) / gt.max_clanova) * 100, 1) AS popunjenost_postotak,
+    COUNT(p.id) AS trenutno_prijavljenih,
+    GREATEST(gt.max_clanova - COUNT(p.id), 0) AS slobodnih_mjesta,
+    ROUND((LEAST(COUNT(p.id), gt.max_clanova) / gt.max_clanova) * 100, 1) AS popunjenost_postotak,
     CONCAT(t.ime, ' ', t.prezime) AS trener,
     CASE 
-        WHEN COUNT(DISTINCT p.id_clana) = gt.max_clanova THEN 'Puno'
-        WHEN COUNT(DISTINCT p.id_clana) > (gt.max_clanova * 0.8) THEN 'Skoro puno'
-        WHEN COUNT(DISTINCT p.id_clana) > (gt.max_clanova * 0.5) THEN 'Umjereno'
+        WHEN COUNT(p.id) >= gt.max_clanova THEN 'Puno'
+        WHEN COUNT(p.id) > (gt.max_clanova * 0.8) THEN 'Skoro puno'
+        WHEN COUNT(p.id) > (gt.max_clanova * 0.5) THEN 'Umjereno'
         ELSE 'Ima mjesta'
     END AS status_popunjenosti
 FROM grupni_trening gt
-LEFT JOIN prisutnost_grupni p ON gt.id = p.id_grupnog_treninga 
+LEFT JOIN prisutnost_grupni p 
+    ON gt.id = p.id_grupnog_treninga 
     AND p.datum >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)
     AND p.prisutan = TRUE
 JOIN trener t ON gt.id_trenera = t.id
 WHERE gt.aktivan = TRUE
 GROUP BY gt.id
 ORDER BY popunjenost_postotak DESC;
+
+
+-- testiranje pogleda
+SELECT * FROM popunjenost_grupnih_treninga;
+
 
 -- Pogled 14: Aktivnost članova na grupnim treninzima (Marko Aleksić)
 CREATE OR REPLACE VIEW aktivnost_clanova_grupni AS
@@ -891,6 +897,13 @@ GROUP BY c.id
 HAVING ukupno_prijava > 0
 ORDER BY postotak_prisutnosti DESC, ukupno_prijava DESC;
 
+
+-- testiranje pogleda
+SELECT * FROM aktivnost_clanova_grupni;
+
+
+
+
 -- Pogled 15: Statistika grupnih treninga po danima (Marko Aleksić)
 CREATE OR REPLACE VIEW statistika_grupnih_po_danima AS
 SELECT 
@@ -909,6 +922,12 @@ LEFT JOIN prisutnost_grupni p ON gt.id = p.id_grupnog_treninga
 WHERE gt.aktivan = TRUE
 GROUP BY gt.dan_u_tjednu
 ORDER BY FIELD(gt.dan_u_tjednu, 'Ponedjeljak', 'Utorak', 'Srijeda', 'Četvrtak', 'Petak', 'Subota', 'Nedjelja');
+
+
+-- testiranje pogleda
+SELECT * FROM statistika_grupnih_po_danima;
+
+
 
 -- ========================================
 -- SLOŽENI UPITI - Po 3 za svakog člana tima
@@ -1306,23 +1325,47 @@ ORDER BY
 -- ==========================================
 
 -- Upit 13: Analiza najprofitabilnijih grupnih programa (Marko Aleksić)
-WITH grupni_statistika AS (
+WITH prisutnosti_clean AS (
+    SELECT DISTINCT id_grupnog_treninga, datum, id_clana
+    FROM prisutnost_grupni
+    WHERE prisutan = TRUE
+    AND datum >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)
+),
+termini AS (
+    SELECT 
+        gt.id AS trening_id,
+        gt.max_clanova,
+        p.datum,
+        COUNT(p.id_clana) AS broj_prisutnih
+    FROM grupni_trening gt
+    LEFT JOIN prisutnosti_clean p 
+        ON gt.id = p.id_grupnog_treninga
+    WHERE gt.aktivan = TRUE
+    GROUP BY gt.id, p.datum
+    HAVING p.datum IS NOT NULL
+),
+prisutni_korigirani AS (
+    SELECT 
+        trening_id,
+        COUNT(*) AS broj_termina,
+        SUM(LEAST(broj_prisutnih, max_clanova)) AS efektivno_prisutnih
+    FROM termini
+    GROUP BY trening_id
+),
+grupni_statistika AS (
     SELECT 
         gt.id,
         gt.naziv,
         gt.dan_u_tjednu,
         gt.cijena_po_terminu,
         gt.max_clanova,
-        COUNT(DISTINCT p.datum) AS broj_termina,
-        COUNT(p.id) AS ukupno_prijava,
-        COUNT(CASE WHEN p.prisutan = TRUE THEN 1 END) AS ukupno_prisutnih,
-        AVG(CASE WHEN p.prisutan = TRUE THEN gt.cijena_po_terminu ELSE 0 END) AS prosječni_prihod_po_terminu,
+        COALESCE(pk.broj_termina, 0) AS broj_termina,
+        COALESCE(pk.efektivno_prisutnih, 0) AS efektivno_prisutnih,
         CONCAT(t.ime, ' ', t.prezime) AS trener
     FROM grupni_trening gt
     JOIN trener t ON gt.id_trenera = t.id
-    LEFT JOIN prisutnost_grupni p ON gt.id = p.id_grupnog_treninga
+    LEFT JOIN prisutni_korigirani pk ON gt.id = pk.trening_id
     WHERE gt.aktivan = TRUE
-    GROUP BY gt.id, gt.naziv, gt.dan_u_tjednu, gt.cijena_po_terminu, gt.max_clanova, trener
 )
 SELECT 
     naziv,
@@ -1331,20 +1374,21 @@ SELECT
     cijena_po_terminu,
     max_clanova,
     broj_termina,
-    ukupno_prijava,
-    ukupno_prisutnih,
-    ROUND(ukupno_prisutnih * cijena_po_terminu, 2) AS ukupni_prihod,
-    ROUND(ukupno_prisutnih / NULLIF(broj_termina, 0), 1) AS prosječno_prisutnih_po_terminu,
-    ROUND((ukupno_prisutnih / NULLIF(ukupno_prijava, 0)) * 100, 2) AS postotak_prisutnosti,
-    ROUND((ukupno_prisutnih / NULLIF(broj_termina, 0)) / max_clanova * 100, 2) AS iskorištenost_kapaciteta,
+    max_clanova * broj_termina AS ukupni_kapacitet,
+    efektivno_prisutnih AS ukupno_prisutnih,
+    ROUND(efektivno_prisutnih * cijena_po_terminu, 2) AS ukupni_prihod,
+    ROUND(efektivno_prisutnih / NULLIF(broj_termina, 0), 1) AS prosječno_prisutnih_po_terminu,
+    ROUND((efektivno_prisutnih / NULLIF(broj_termina * max_clanova, 0)) * 100, 2) AS iskorištenost_kapaciteta,
     CASE 
-        WHEN ukupno_prisutnih * cijena_po_terminu > 1000 THEN 'Vrlo profitabilan'
-        WHEN ukupno_prisutnih * cijena_po_terminu > 500 THEN 'Profitabilan'
-        WHEN ukupno_prisutnih * cijena_po_terminu > 200 THEN 'Umjereno profitabilan'
+        WHEN efektivno_prisutnih * cijena_po_terminu > 1000 THEN 'Vrlo profitabilan'
+        WHEN efektivno_prisutnih * cijena_po_terminu > 500 THEN 'Profitabilan'
+        WHEN efektivno_prisutnih * cijena_po_terminu > 200 THEN 'Umjereno profitabilan'
         ELSE 'Malo profitabilan'
     END AS kategorija_profitabilnosti
 FROM grupni_statistika
 ORDER BY ukupni_prihod DESC;
+
+
 
 -- Upit 14: Analiza prisutnosti članova na grupnim treninzima (Marko Aleksić)
 SELECT 
@@ -1353,9 +1397,9 @@ SELECT
     cl.tip AS tip_clanarine,
     COUNT(DISTINCT p.id_grupnog_treninga) AS broj_razlicitih_treninga,
     COUNT(p.id) AS ukupno_prijava,
-    COUNT(CASE WHEN p.prisutan = TRUE THEN 1 END) AS prisutni,
-    COUNT(CASE WHEN p.prisutan = FALSE THEN 1 END) AS odsutni,
-    ROUND(COUNT(CASE WHEN p.prisutan = TRUE THEN 1 END) * 100.0 / NULLIF(COUNT(p.id), 0), 2) AS postotak_prisutnosti,
+    SUM(p.prisutan = TRUE) AS prisutni,
+    SUM(p.prisutan = FALSE) AS odsutni,
+    ROUND(SUM(p.prisutan = TRUE) * 100.0 / NULLIF(COUNT(p.id), 0), 2) AS postotak_prisutnosti,
     MAX(p.datum) AS zadnji_dolazak,
     DATEDIFF(CURRENT_DATE, MAX(p.datum)) AS dana_od_zadnjeg_dolaska
 FROM clan c
@@ -1365,6 +1409,7 @@ WHERE c.aktivan = TRUE
 GROUP BY c.id, clan, cl.tip
 HAVING ukupno_prijava > 0
 ORDER BY postotak_prisutnosti DESC, ukupno_prijava DESC;
+
 
 
 -- Upit 15: Optimizacija rasporeda grupnih treninga (Marko Aleksić)
@@ -1386,7 +1431,8 @@ SELECT
     END AS preporuka,
     GROUP_CONCAT(DISTINCT gt.naziv ORDER BY gt.naziv SEPARATOR ', ') AS programi
 FROM grupni_trening gt
-LEFT JOIN prisutnost_grupni p ON gt.id = p.id_grupnog_treninga 
+LEFT JOIN prisutnost_grupni p 
+    ON gt.id = p.id_grupnog_treninga 
     AND p.datum >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)
 WHERE gt.aktivan = TRUE
 GROUP BY gt.dan_u_tjednu, gt.vrijeme
