@@ -749,78 +749,76 @@ ORDER BY ukupni_prihod DESC;
 -- VLADAN: Pogledi za opremu i rezervacije
 -- ==========================================
 
--- Pogled 10: Status i analiza opreme (Vladan)
-CREATE OR REPLACE VIEW status_opreme AS
+-- Pogled 9: Trenutno stanje i vrijednost opreme (Vladan)
+CREATE OR REPLACE VIEW stanje_opreme AS
+SELECT 
+    o.id,
+    o.sifra,
+    o.naziv,
+    o.proizvodac,
+    o.model,
+    o.stanje,
+    o.vrijednost,
+    o.datum_nabave,
+    o.garancija_do,
+    DATEDIFF(o.garancija_do, CURRENT_DATE) AS dana_do_isteka_garancije
+FROM oprema o
+ORDER BY o.stanje DESC, o.vrijednost DESC;
+
+-- Pogled 10: Broj rezervacija po opremi (Vladan)
+CREATE OR REPLACE VIEW broj_rezervacija_po_opremi AS
+SELECT 
+    o.naziv AS oprema,
+    COUNT(ro.id) AS broj_rezervacija,
+    COUNT(DISTINCT ro.id_clana) AS broj_razlicitih_korisnika,
+    MAX(ro.datum) AS zadnja_rezervacija
+FROM oprema o
+LEFT JOIN rezervacija_opreme ro ON o.id = ro.id_opreme
+GROUP BY o.id
+ORDER BY broj_rezervacija DESC;
+
+-- Pogled 11: Prosječno korištenje opreme po članu (Vladan)
+CREATE OR REPLACE VIEW prosjecno_koristenje_opreme AS
+SELECT 
+    o.naziv AS oprema,
+    CONCAT(c.ime, ' ', c.prezime) AS clan,
+    COUNT(ro.id) AS broj_rezervacija,
+    ROUND(AVG(TIMESTAMPDIFF(MINUTE, ro.vrijeme_pocetka, ro.vrijeme_zavrsetka)), 1) AS prosjecno_trajanje_minuta
+FROM rezervacija_opreme ro
+JOIN oprema o ON ro.id_opreme = o.id
+JOIN clan c ON ro.id_clana = c.id
+WHERE ro.status IN ('završena', 'aktivna')
+GROUP BY o.id, c.id
+ORDER BY broj_rezervacija DESC, prosjecno_trajanje_minuta DESC;
+
+-- Pogled 12: Top 5 najkorištenijih sprava po trajanju (Vladan)
+CREATE OR REPLACE VIEW top_oprema_po_trajanju AS
+SELECT 
+    o.naziv AS oprema,
+    COUNT(ro.id) AS broj_rezervacija,
+    SUM(TIMESTAMPDIFF(MINUTE, ro.vrijeme_pocetka, ro.vrijeme_zavrsetka)) AS ukupno_minuta,
+    ROUND(AVG(TIMESTAMPDIFF(MINUTE, ro.vrijeme_pocetka, ro.vrijeme_zavrsetka)), 1) AS prosjecno_trajanje
+FROM rezervacija_opreme ro
+JOIN oprema o ON ro.id_opreme = o.id
+WHERE ro.status IN ('završena', 'aktivna')
+GROUP BY o.id
+ORDER BY ukupno_minuta DESC
+LIMIT 5;
+
+-- Pogled 13: Oprema koja se još nije koristila (Vladan)
+CREATE OR REPLACE VIEW oprema_bez_rezervacije AS
 SELECT 
     o.id,
     o.sifra,
     o.naziv,
     o.stanje,
     o.vrijednost,
-    o.proizvodac,
-    o.model,
-    DATEDIFF(CURRENT_DATE, o.datum_nabave) AS starost_dana,
-    COUNT(ro.id) AS broj_rezervacija,
-    COALESCE(MAX(ro.datum), o.datum_nabave) AS zadnje_koristena,
-    DATEDIFF(CURRENT_DATE, COALESCE(MAX(ro.datum), o.datum_nabave)) AS dana_od_zadnjeg_koristenja,
-    CASE 
-        WHEN o.garancija_do IS NOT NULL AND o.garancija_do > CURRENT_DATE 
-        THEN CONCAT('Da (još ', DATEDIFF(o.garancija_do, CURRENT_DATE), ' dana)')
-        ELSE 'Ne'
-    END AS pod_garancijom,
-    CASE 
-        WHEN o.stanje = 'neispravna' THEN 'Hitno'
-        WHEN o.stanje = 'u servisu' THEN 'U servisu'
-        WHEN COUNT(ro.id) = 0 THEN 'Nekorištena'
-        WHEN COUNT(ro.id) > 50 THEN 'Vrlo popularna'
-        ELSE 'Normalno'
-    END AS prioritet
-FROM oprema o
-LEFT JOIN rezervacija_opreme ro ON o.id = ro.id_opreme AND ro.status != 'otkazana'
-GROUP BY o.id
-ORDER BY broj_rezervacija DESC;
-
-
-
--- Pogled 11: Analiza rezervacija opreme (Vladan)
-CREATE OR REPLACE VIEW analiza_rezervacija_opreme AS
-SELECT 
-    o.naziv AS oprema,
-    o.sifra,
-    COUNT(ro.id) AS ukupno_rezervacija,
-    COUNT(DISTINCT ro.id_clana) AS broj_korisnika,
-    COUNT(CASE WHEN ro.status = 'završena' THEN 1 END) AS završene,
-    COUNT(CASE WHEN ro.status = 'aktivna' THEN 1 END) AS aktivne,
-    COUNT(CASE WHEN ro.status = 'otkazana' THEN 1 END) AS otkazane,
-    AVG(TIMESTAMPDIFF(MINUTE, ro.vrijeme_pocetka, ro.vrijeme_zavrsetka)) AS prosjecno_trajanje_min,
-    SUM(TIMESTAMPDIFF(MINUTE, ro.vrijeme_pocetka, ro.vrijeme_zavrsetka)) AS ukupno_minuta,
-    ROUND(COUNT(CASE WHEN ro.status = 'završena' THEN 1 END) * 100.0 / NULLIF(COUNT(ro.id), 0), 2) AS postotak_realizacije
+    o.datum_nabave,
+    o.proizvodac
 FROM oprema o
 LEFT JOIN rezervacija_opreme ro ON o.id = ro.id_opreme
-GROUP BY o.id, o.naziv, o.sifra
-HAVING ukupno_rezervacija > 0
-ORDER BY ukupno_rezervacija DESC;
-
--- Pogled 12: Najpopularnija oprema po vremenskim periodima (Vladan)
-CREATE OR REPLACE VIEW popularnost_opreme_po_vremenu AS
-SELECT 
-    o.naziv AS oprema,
-    HOUR(ro.vrijeme_pocetka) AS sat,
-    DAYNAME(ro.datum) AS dan_u_tjednu,
-    COUNT(*) AS broj_rezervacija,
-    AVG(TIMESTAMPDIFF(MINUTE, ro.vrijeme_pocetka, ro.vrijeme_zavrsetka)) AS prosjecno_trajanje,
-    CASE 
-        WHEN HOUR(ro.vrijeme_pocetka) BETWEEN 6 AND 10 THEN 'Jutro'
-        WHEN HOUR(ro.vrijeme_pocetka) BETWEEN 11 AND 15 THEN 'Podne'
-        WHEN HOUR(ro.vrijeme_pocetka) BETWEEN 16 AND 20 THEN 'Večer'
-        ELSE 'Noć'
-    END AS period_dana
-FROM oprema o
-JOIN rezervacija_opreme ro ON o.id = ro.id_opreme
-WHERE ro.status != 'otkazana'
-GROUP BY o.naziv, sat, dan_u_tjednu, period_dana
-ORDER BY broj_rezervacija DESC;
-
+WHERE ro.id IS NULL
+ORDER BY o.vrijednost DESC;
 -- ==========================================
 -- MARKO ALEKSIĆ: Pogledi za grupne treninge i prisutnost
 -- ==========================================
@@ -1097,87 +1095,78 @@ ORDER BY ukupni_popusti_dani DESC;
 -- VLADAN: Složeni upiti za opremu i rezervacije
 -- ==========================================
 
--- Upit 10: ROI analiza opreme (Vladan)
-WITH oprema_koristenje AS (
-    SELECT 
-        o.id,
-        o.naziv,
-        o.vrijednost,
-        o.datum_nabave,
-        DATEDIFF(CURRENT_DATE, o.datum_nabave) AS starost_dana,
-        COUNT(r.id) AS broj_rezervacija,
-        SUM(TIMESTAMPDIFF(MINUTE, r.vrijeme_pocetka, r.vrijeme_zavrsetka)) AS ukupno_minuta,
-        COUNT(DISTINCT r.id_clana) AS broj_korisnika,
-        AVG(TIMESTAMPDIFF(MINUTE, r.vrijeme_pocetka, r.vrijeme_zavrsetka)) AS prosjecno_trajanje
-    FROM oprema o
-    LEFT JOIN rezervacija_opreme r ON o.id = r.id_opreme AND r.status = 'završena'
-    GROUP BY o.id
-)
-SELECT 
-    naziv,
-    vrijednost,
-    starost_dana,
-    broj_rezervacija,
-    ROUND(ukupno_minuta / 60.0, 1) AS ukupno_sati,
-    broj_korisnika,
-    ROUND(prosjecno_trajanje, 1) AS prosjecno_trajanje_min,
-    ROUND(vrijednost / NULLIF(broj_rezervacija, 0), 2) AS trosak_po_rezervaciji,
-    ROUND((ukupno_minuta / 60.0) / NULLIF(starost_dana, 0) * 365, 1) AS sati_godišnje,
-    CASE 
-        WHEN broj_rezervacija = 0 THEN 'Nekorištena'
-        WHEN broj_rezervacija < 10 THEN 'Slabo korištena'
-        WHEN broj_rezervacija < 50 THEN 'Umjereno korištena'
-        ELSE 'Često korištena'
-    END AS kategorija_koristenja,
-    CASE 
-        WHEN starost_dana > 1095 AND broj_rezervacija < 50 THEN 'Razmotriti prodaju'
-        WHEN starost_dana > 730 AND broj_rezervacija > 100 THEN 'Planirati zamjenu'
-        WHEN broj_rezervacija > 200 THEN 'Vrlo vrijedna'
-        ELSE 'Zadržati'
-    END AS preporuka
-FROM oprema_koristenje
-ORDER BY broj_rezervacija DESC;
 
--- Upit 11: Analiza efikasnosti korištenja prostora (Vladan)
-SELECT
+-- Pogled 9: Trenutno stanje i vrijednost opreme (Vladan)
+CREATE OR REPLACE VIEW stanje_opreme AS
+SELECT 
+    o.id,
+    o.sifra,
+    o.naziv,
+    o.proizvodac,
+    o.model,
+    o.stanje,
+    o.vrijednost,
+    o.datum_nabave,
+    o.garancija_do,
+    DATEDIFF(o.garancija_do, CURRENT_DATE) AS dana_do_isteka_garancije
+FROM oprema o
+ORDER BY o.stanje DESC, o.vrijednost DESC;
+
+-- Pogled 10: Broj rezervacija po opremi (Vladan)
+CREATE OR REPLACE VIEW broj_rezervacija_po_opremi AS
+SELECT 
     o.naziv AS oprema,
     COUNT(ro.id) AS broj_rezervacija,
-    SUM(TIMESTAMPDIFF(MINUTE, ro.vrijeme_pocetka, ro.vrijeme_zavrsetka)) AS ukupno_minuta_koristenja,
-    ROUND(SUM(TIMESTAMPDIFF(MINUTE, ro.vrijeme_pocetka, ro.vrijeme_zavrsetka)) / (COUNT(DISTINCT ro.datum) * 60), 2) AS prosjecno_sati_dnevno,
-    COUNT(DISTINCT ro.datum) AS broj_dana_koristenja,
-    ROUND(COUNT(DISTINCT ro.datum) * 100.0 / DATEDIFF(CURRENT_DATE, o.datum_nabave), 2) AS postotak_dana_koristena,
-    CASE
-        WHEN COUNT(DISTINCT ro.datum) * 100.0 / DATEDIFF(CURRENT_DATE, o.datum_nabave) > 80 THEN 'Odlično iskorištena'
-        WHEN COUNT(DISTINCT ro.datum) * 100.0 / DATEDIFF(CURRENT_DATE, o.datum_nabave) > 50 THEN 'Dobro iskorištena'
-        WHEN COUNT(DISTINCT ro.datum) * 100.0 / DATEDIFF(CURRENT_DATE, o.datum_nabave) > 20 THEN 'Umjereno iskorištena'
-        ELSE 'Slabo iskorištena'
-    END AS ocjena_iskoristenosti
+    COUNT(DISTINCT ro.id_clana) AS broj_razlicitih_korisnika,
+    MAX(ro.datum) AS zadnja_rezervacija
 FROM oprema o
-LEFT JOIN rezervacija_opreme ro ON o.id = ro.id_opreme AND ro.status = 'završena'
-GROUP BY o.id, o.naziv
-HAVING broj_rezervacija > 0
-ORDER BY postotak_dana_koristena DESC, prosjecno_sati_dnevno DESC;
+LEFT JOIN rezervacija_opreme ro ON o.id = ro.id_opreme
+GROUP BY o.id
+ORDER BY broj_rezervacija DESC;
 
--- Upit 12: Analiza održavanja i troškova opreme (Vladan)
+-- Pogled 11: Prosječno korištenje opreme po članu (Vladan)
+CREATE OR REPLACE VIEW prosjecno_koristenje_opreme AS
 SELECT 
+    o.naziv AS oprema,
+    CONCAT(c.ime, ' ', c.prezime) AS clan,
+    COUNT(ro.id) AS broj_rezervacija,
+    ROUND(AVG(TIMESTAMPDIFF(MINUTE, ro.vrijeme_pocetka, ro.vrijeme_zavrsetka)), 1) AS prosjecno_trajanje_minuta
+FROM rezervacija_opreme ro
+JOIN oprema o ON ro.id_opreme = o.id
+JOIN clan c ON ro.id_clana = c.id
+WHERE ro.status IN ('završena', 'aktivna')
+GROUP BY o.id, c.id
+ORDER BY broj_rezervacija DESC, prosjecno_trajanje_minuta DESC;
+
+-- Pogled 12: Top 5 najkorištenijih sprava po trajanju (Vladan)
+CREATE OR REPLACE VIEW top_oprema_po_trajanju AS
+SELECT 
+    o.naziv AS oprema,
+    COUNT(ro.id) AS broj_rezervacija,
+    SUM(TIMESTAMPDIFF(MINUTE, ro.vrijeme_pocetka, ro.vrijeme_zavrsetka)) AS ukupno_minuta,
+    ROUND(AVG(TIMESTAMPDIFF(MINUTE, ro.vrijeme_pocetka, ro.vrijeme_zavrsetka)), 1) AS prosjecno_trajanje
+FROM rezervacija_opreme ro
+JOIN oprema o ON ro.id_opreme = o.id
+WHERE ro.status IN ('završena', 'aktivna')
+GROUP BY o.id
+ORDER BY ukupno_minuta DESC
+LIMIT 5;
+
+-- Pogled 13: Oprema koja se još nije koristila (Vladan)
+CREATE OR REPLACE VIEW oprema_bez_rezervacije AS
+SELECT 
+    o.id,
+    o.sifra,
+    o.naziv,
     o.stanje,
-    COUNT(*) AS broj_opreme,
-    SUM(o.vrijednost) AS ukupna_vrijednost,
-    AVG(o.vrijednost) AS prosjecna_vrijednost,
-    AVG(DATEDIFF(CURRENT_DATE, o.datum_nabave)) AS prosjecna_starost_dana,
-    COUNT(CASE WHEN o.garancija_do > CURRENT_DATE THEN 1 END) AS pod_garancijom,
-    COUNT(CASE WHEN o.garancija_do <= CURRENT_DATE OR o.garancija_do IS NULL THEN 1 END) AS van_garancije,
-    GROUP_CONCAT(DISTINCT o.proizvodac ORDER BY o.proizvodac) AS proizvođači,
-    CASE 
-        WHEN o.stanje = 'neispravna' THEN 'Hitno - zamijeniti'
-        WHEN o.stanje = 'u servisu' THEN 'Praćenje servisa'
-        WHEN o.stanje = 'potrebna zamjena dijela' THEN 'Planirati popravak'
-        ELSE 'Redovno održavanje'
-    END AS preporuka_održavanja
+    o.vrijednost,
+    o.datum_nabave,
+    o.proizvodac
 FROM oprema o
-GROUP BY o.stanje
-ORDER BY 
-    FIELD(o.stanje, 'neispravna', 'u servisu', 'potrebna zamjena dijela', 'ispravna', 'nova');
+LEFT JOIN rezervacija_opreme ro ON o.id = ro.id_opreme
+WHERE ro.id IS NULL
+ORDER BY o.vrijednost DESC;
+
 
 -- ==========================================
 -- MARKO ALEKSIĆ: Složeni upiti za grupne treninge i prisutnost
