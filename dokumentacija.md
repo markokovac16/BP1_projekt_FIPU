@@ -204,7 +204,7 @@ REZERVACIJA_OPREME se odnosi na OPREMU
 Trenutno rukovodstvo teretane želi imati cjelokupan pregled nad angažmanom svojih trenera kako bi mogli donositi odluke o nagradama, zaduženjima i budućim zapošljavanjima. Odjel analitike zatražio je pogled koji prikazuje broj treninga po treneru, trajanje, broj klijenata, prihod i ostale korisne informacije.
 
 **TRAŽENO RJEŠENJE:**  
-ID trenera, ime i prezime, specijalizacija, email, broj individualnih i grupnih treninga, broj klijenata, trajanje, prihod i prosječna cijena održanih treninga.
+ID trenera, ime i prezime, specijalizacija, email, broj treninga, broj klijenata, trajanje, prihod i prosječna cijena održanih treninga.
 
 **KOD:**
 ```sql
@@ -215,25 +215,21 @@ SELECT
     t.specijalizacija,
     t.godine_iskustva,
     t.email,
-    COUNT(DISTINCT tr.id) AS ukupno_individualnih,
-    COUNT(DISTINCT gt.id) AS ukupno_grupnih_treninga,
-    COALESCE(COUNT(DISTINCT pg.id), 0) AS ukupno_grupnih_termina,
+    COUNT(DISTINCT tr.id) AS ukupno_termina,
     COUNT(DISTINCT tr.id_clana) AS broj_razlicitih_klijenata,
     COALESCE(SUM(CASE WHEN tr.status = 'održan' THEN tr.trajanje ELSE 0 END), 0) AS ukupno_minuta,
     COALESCE(AVG(CASE WHEN tr.status = 'održan' THEN tr.cijena END), 0) AS prosjecna_cijena,
     COALESCE(SUM(CASE WHEN tr.status = 'održan' THEN tr.cijena ELSE 0 END), 0) AS ukupni_prihod
 FROM trener t
 LEFT JOIN privatni_trening tr ON t.id = tr.id_trenera
-LEFT JOIN grupni_trening gt ON t.id = gt.id_trenera
-LEFT JOIN prisutnost_grupni pg ON pg.id_grupnog_treninga = gt.id
 WHERE t.aktivan = TRUE
 GROUP BY t.id, t.ime, t.prezime, t.specijalizacija, t.godine_iskustva, t.email
 ORDER BY ukupni_prihod DESC;
 ```
 
 **OPIS:**  
-Ovim pogledom se objedinjuju podaci iz tablica trener, privatni_trening, grupni_trening i prisutnost_grupni kako bi se dobila statistika za svakog trenera:
-- Računa se broj različitih individualnih treninga, različitih klijenata i termina.
+Ovim pogledom se objedinjuju podaci iz tablica trener i privatni_trening kako bi se dobila statistika za svakog trenera:
+- Računa se broj različitih treninga, različitih klijenata i termina.
 - `SUM` i `AVG` funkcijama se dobiva trajanje i prosječna cijena održanih treninga.
 - `LEFT JOIN` omogućuje da se i treneri koji trenutno nemaju treninge i dalje prikažu u rezultatu.
 - `COALESCE` zamjenjuje moguće `NULL` vrijednosti s nulom.
@@ -324,13 +320,11 @@ SELECT
     t.id AS trener_id,
     CONCAT(t.ime, ' ', t.prezime) AS trener,
     t.specijalizacija,
-    COUNT(DISTINCT pt.id) AS broj_privatnih_treninga,
-    COUNT(DISTINCT pt.id_clana) AS broj_klijenata_privatno,
-    COALESCE(ROUND(AVG(CASE WHEN pt.status = 'održan' THEN pt.cijena END), 2), 0) AS prosjecna_cijena_privatni,
-    COALESCE(SUM(CASE WHEN pt.status = 'održan' THEN pt.cijena ELSE 0 END), 0) AS prihod_privatni,
-    COALESCE(SUM(CASE WHEN pt.status = 'održan' THEN pt.trajanje ELSE 0 END), 0) / 60.0 AS sati_privatnih,
-    COUNT(DISTINCT gt.id) AS broj_grupnih_treninga,
-    COUNT(DISTINCT pg.id) AS ukupno_prisutnosti,
+    COUNT(DISTINCT pt.id) AS broj_treninga,
+    COUNT(DISTINCT pt.id_clana) AS broj_klijenata,
+    COALESCE(ROUND(AVG(CASE WHEN pt.status = 'održan' THEN pt.cijena END), 2), 0) AS prosjecna_cijena,
+    COALESCE(SUM(CASE WHEN pt.status = 'održan' THEN pt.cijena ELSE 0 END), 0) AS prihod,
+    COALESCE(SUM(CASE WHEN pt.status = 'održan' THEN pt.trajanje ELSE 0 END), 0) / 60.0 AS sati,
     COUNT(CASE WHEN pt.status = 'otkazan' THEN 1 END) AS broj_otkazanih,
     ROUND(
         CASE 
@@ -341,15 +335,13 @@ SELECT
     ) AS postotak_otkazanih
 FROM trener t
 LEFT JOIN privatni_trening pt ON pt.id_trenera = t.id
-LEFT JOIN grupni_trening gt ON gt.id_trenera = t.id
-LEFT JOIN prisutnost_grupni pg ON pg.id_grupnog_treninga = gt.id
 WHERE t.aktivan = TRUE
 GROUP BY t.id, t.ime, t.prezime, t.specijalizacija
-ORDER BY prihod_privatni DESC, broj_grupnih_treninga DESC;
+ORDER BY prihod DESC;
 ```
 
 **OPIS:**  
-Spajaju se `privatni_trening`, `grupni_trening` i `prisutnost_grupni` te se uz pomoć `COUNT`, `AVG`, `SUM` i `ROUND` izvlače podaci o učinkovitosti rada svakog trenera.
+Uz pomoć `COUNT`, `AVG`, `SUM` i `ROUND` izvlače podaci o učinkovitosti rada svakog trenera.
 Ključan dio je izračun postotka otkazanih termina kroz `CASE` i `COUNT`.
 
 ---
