@@ -746,7 +746,7 @@ ORDER BY ukupni_prihod DESC;
 
 
 -- ==========================================
--- VLADAN: Pogledi za opremu i rezervacije
+-- VLADAN KRIVOKAPIC: Pogledi za opremu i rezervacije
 -- ==========================================
 
 -- Pogled 9: Trenutno stanje i vrijednost opreme (Vladan)
@@ -764,6 +764,20 @@ SELECT
     DATEDIFF(o.garancija_do, CURRENT_DATE) AS dana_do_isteka_garancije
 FROM oprema o
 ORDER BY o.stanje DESC, o.vrijednost DESC;
+
+-- Oprema po proizvodacu (Vladan)
+CREATE OR REPLACE VIEW oprema_po_proizvodacu AS
+SELECT
+    o.proizvodac,
+    COUNT(*)                     AS broj_stavki,
+    SUM(o.vrijednost)            AS ukupna_vrijednost,
+    ROUND(AVG(DATEDIFF(o.garancija_do, CURRENT_DATE)), 1) AS prosjek_dana_do_isteka_garancije,
+    SUM(CASE WHEN DATEDIFF(o.garancija_do, CURRENT_DATE) < 0 THEN 1 ELSE 0 END) AS broj_isteklih_garancija,
+    SUM(CASE WHEN DATEDIFF(o.garancija_do, CURRENT_DATE) BETWEEN 0 AND 30 THEN 1 ELSE 0 END) AS broj_garancija_uskoro_istjece
+FROM oprema o
+GROUP BY o.proizvodac
+ORDER BY ukupna_vrijednost DESC;
+
 
 -- Pogled 10: Broj rezervacija po opremi (Vladan)
 CREATE OR REPLACE VIEW broj_rezervacija_po_opremi AS
