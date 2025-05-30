@@ -368,7 +368,10 @@ INSERT INTO oprema (sifra, naziv, datum_nabave, stanje, vrijednost, proizvodac, 
 ('OPR-027', 'Torba za snagu', '2021-06-11', 'ispravna', 180.00, 'Tiguar', 'PB2021', '2024-06-11'),
 ('OPR-028', 'Ski trenažer', '2022-03-29', 'ispravna', 2200.00, 'Concept2', 'SkiErg2', '2025-03-29'),
 ('OPR-029', 'Podloga za istezanje', '2023-05-08', 'ispravna', 60.00, 'Domyos', 'SM2023', '2026-05-08'),
-('OPR-030', 'Sprava za hiperektenziju', '2022-11-21', 'ispravna', 1700.00, 'Westside', 'RH2022', '2025-11-21');
+('OPR-030', 'Sprava za hiperektenziju', '2022-11-21', 'ispravna', 1700.00, 'Westside', 'RH2022', '2025-11-21'),
+('OPR-031', 'Multifunkcionalni squat rack', '2024-11-01', 'nova', 5000.00, 'Rogue', 'Monster Rack', '2027-11-01'),
+('OPR-032', 'Battle rope 15m',               '2024-10-15', 'nova', 300.00,  'Tiguar', 'BR15',        '2026-10-15'),
+('OPR-033', 'Plyo kutija set (3 kom)',       '2024-09-20', 'nova', 450.00,  'Reebok', 'PlyoBoxPro',  '2026-09-20');
 
 -- Podaci za rezervacije opreme (Vladan)
 INSERT INTO rezervacija_opreme (id_clana, id_opreme, datum, vrijeme_pocetka, vrijeme_zavrsetka, status) VALUES
