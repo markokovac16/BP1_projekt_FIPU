@@ -620,7 +620,7 @@ SELECT
         WHEN DAY(p.datum_uplate) > 10 THEN 'KAŠNJENJE'
     END AS status_placanja,
     
-    -- Logika izračuna dana kašnjenja
+    -- Logika računanja dana kašnjenja
     CASE 
         WHEN p.datum_uplate IS NULL THEN DATEDIFF(CURRENT_DATE, DATE(CONCAT(YEAR(CURRENT_DATE), '-', MONTH(CURRENT_DATE), '-10')))
         WHEN DAY(p.datum_uplate) > 10 THEN DAY(p.datum_uplate) - 10
@@ -653,38 +653,43 @@ SELECT
     c.prezime,
     cl.tip AS tip_clanarine,
     
+    -- Privatni treninzi (svi se naplaćuju za ne-Premium članove)
     COUNT(pt.id) AS broj_privatnih_treninga,
     COALESCE(SUM(pt.cijena), 0) AS troskovi_privatni_treninzi,
     
+    -- Dodatni grupni treninzi (samo za Osnovna i Student - Basic)
     COUNT(CASE 
         WHEN cl.tip IN ('Osnovna', 'Student - Basic') THEN pr.id 
         ELSE NULL 
     END) AS broj_dodatnih_grupnih,
+    
     COALESCE(SUM(CASE 
         WHEN cl.tip IN ('Osnovna', 'Student - Basic') THEN gt.cijena_po_terminu 
         ELSE 0 
     END), 0) AS troskovi_grupni_treninzi,
     
-
+    -- Ukupni dodatni troškovi
     COALESCE(SUM(pt.cijena), 0) + 
     COALESCE(SUM(CASE 
         WHEN cl.tip IN ('Osnovna', 'Student - Basic') THEN gt.cijena_po_terminu 
         ELSE 0 
     END), 0) AS ukupno_dodatni_troskovi,
 
+    -- Mjesečni iznos članarine (0 za Godišnju Standard)
     CASE 
-        WHEN c.id_clanarina IN (6, 7) THEN 0.00
+        WHEN c.id_clanarina = 6 THEN 0.00
         ELSE cl.cijena
     END AS mjesecni_iznos_clanarine,
     
+    -- Ukupno za naplatu ovaj mjesec
     CASE 
-        WHEN c.id_clanarina IN (6, 7) THEN 
+        WHEN c.id_clanarina = 6 THEN -- Godišnja Standard (ne naplaćuje se mjesečno)
             COALESCE(SUM(pt.cijena), 0) + 
             COALESCE(SUM(CASE 
                 WHEN cl.tip IN ('Osnovna', 'Student - Basic') THEN gt.cijena_po_terminu 
                 ELSE 0 
             END), 0)
-        ELSE 
+        ELSE -- Mjesečne članarine
             cl.cijena + 
             COALESCE(SUM(pt.cijena), 0) + 
             COALESCE(SUM(CASE 
@@ -693,12 +698,12 @@ SELECT
             END), 0)
     END AS ukupno_za_naplatu_ovaj_mjesec,
     
+    -- Označavanje godišnjih članarina
     CASE 
-        WHEN c.id_clanarina IN (6, 7) THEN 'DA' 
+        WHEN c.id_clanarina = 6 THEN 'DA' 
         ELSE 'NE' 
     END AS godisnja_clanarina
-
-FROM clan c
+    FROM clan c
 JOIN clanarina cl ON c.id_clanarina = cl.id
 LEFT JOIN privatni_trening pt ON c.id = pt.id_clana 
     AND pt.status = 'održan'
@@ -710,7 +715,8 @@ LEFT JOIN prisutnost_grupni pr ON c.id = pr.id_clana
     AND MONTH(pr.datum) = MONTH(CURRENT_DATE)
 LEFT JOIN grupni_trening gt ON pr.id_grupnog_treninga = gt.id
 WHERE c.aktivan = TRUE
-GROUP BY c.id, c.ime, c.prezime, cl.tip, cl.cijena, c.id_clanarina
+    AND cl.id NOT IN (3, 7)  -- Isključuje Premium (mjesečni) i Godišnju Premium
+GROUP BY c.id, c.ime, c.prezime, cl.tip, cl.cijena, c.id_clanarina, cl.id
 ORDER BY ukupno_dodatni_troskovi DESC;
 
 -- Pogled 9: Pregled aktivnosti trenera za tekući mjesec (Marko Kovač)
@@ -732,10 +738,9 @@ SELECT
     MAX(pt.datum) AS zadnji_trening_ovaj_mjesec,
     
     GROUP_CONCAT(DISTINCT tt.naziv ORDER BY tt.naziv SEPARATOR ', ') AS tipovi_treninga
-    
 FROM trener t
 LEFT JOIN privatni_trening pt ON t.id = pt.id_trenera 
-    AND pt.status = 'održan'
+	AND pt.status = 'održan'
     AND YEAR(pt.datum) = YEAR(CURRENT_DATE) 
     AND MONTH(pt.datum) = MONTH(CURRENT_DATE)
 LEFT JOIN tip_treninga tt ON pt.id_tip_treninga = tt.id
@@ -1117,16 +1122,16 @@ ORDER BY ukupni_prihod DESC;
 -- MARKO KOVAČ: Složeni upiti za osoblje i plaćanja
 -- ==========================================
 
--- Upit 7: Koji zaposlenici rade s najskupljim klijentima
+-- Upit 7: Ukupne transakcije po članu osoblja zaduženom za naplate
 SELECT 
     o.ime,
     o.prezime,
     o.uloga,
     COUNT(DISTINCT p.id_clana) AS broj_klijenata,
     COUNT(p.id) AS ukupno_transakcija,
-    SUM(p.iznos - p.popust) AS ukupni_prihod,
-    ROUND(SUM(p.iznos - p.popust) / COUNT(DISTINCT p.id_clana), 2) AS prihod_po_klijentu,
-    MAX(p.iznos - p.popust) AS najveca_pojedinacna_naplata,
+    ROUND(SUM(p.iznos * (1 - p.popust/100)), 2) AS ukupni_prihod,
+    ROUND(SUM(p.iznos * (1 - p.popust/100)) / COUNT(DISTINCT p.id_clana), 2) AS prihod_po_klijentu,
+    ROUND(MAX(p.iznos * (1 - p.popust/100)), 2) AS najveca_pojedinacna_naplata,
     GROUP_CONCAT(DISTINCT p.nacin_placanja ORDER BY p.nacin_placanja) AS nacini_placanja_koje_koristi
 FROM osoblje o
 JOIN placanje p ON o.id = p.id_osoblje
@@ -1158,16 +1163,17 @@ SELECT
     COUNT(CASE WHEN p.popust > 0 THEN 1 END) AS broj_popusta_odobren,
     COUNT(p.id) AS ukupno_naplata,
     ROUND((COUNT(CASE WHEN p.popust > 0 THEN 1 END) * 100.0) / COUNT(p.id), 2) AS postotak_s_popustom,
-    ROUND(AVG(CASE WHEN p.popust > 0 THEN p.popust END), 2) AS prosjecni_popust_kad_da,
-    SUM(p.popust) AS ukupni_popusti_dani,
-    SUM(p.iznos) AS ukupni_bruto_iznos,
-    SUM(p.iznos - p.popust) AS ukupni_neto_iznos,
-    ROUND((SUM(p.popust) * 100.0) / SUM(p.iznos), 2) AS postotak_umanjenja_prihoda
+    ROUND(AVG(CASE WHEN p.popust > 0 THEN p.popust END), 2) AS prosjecni_popust,
+    ROUND(SUM(p.iznos * p.popust/100), 2) AS ukupan_iznos_popusta,
+    ROUND(SUM(p.iznos), 2) AS ukupni_bruto_iznos,
+    ROUND(SUM(p.iznos * (1 - p.popust/100)), 2) AS ukupni_neto_iznos,
+    ROUND(AVG(p.popust), 2) AS prosjecni_postotak_popusta
 FROM osoblje o
 JOIN placanje p ON o.id = p.id_osoblje
 WHERE o.uloga IN ('Recepcionist', 'Voditelj') AND o.aktivan = TRUE
 GROUP BY o.id, o.ime, o.prezime, o.uloga
-ORDER BY ukupni_popusti_dani DESC;
+ORDER BY ukupan_iznos_popusta DESC;
+
 
 
 -- ==========================================
