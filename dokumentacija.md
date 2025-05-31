@@ -148,7 +148,7 @@ FK: id_clana → clan(id)
 FK: id_osoblje → osoblje(id)
 
 
-## 3. ER dijagram
+## 4. ER dijagram
 ![Alt text](/erd.png)
 
 ER dijagram detaljno i pregledno opisuje sve skupove entiteta, njihove atribute, kao i veze među njima. Dijagram jasno prikazuje logičku strukturu baze podataka za upravljanje teretanom.
