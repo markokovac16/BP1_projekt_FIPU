@@ -19,9 +19,7 @@ Tim 16
 5. EER dijagram (prošireni ER model)
 6. Implementacija baze (SQL kod)
 7. Upiti i pogledi (VIEWs)
- 7.1
-8. Prikaz rezultata upita 
-9. Zaključak i preporuke za daljnji razvoj
+8. Zaključak i preporuke za daljnji razvoj
 
 
 
@@ -59,8 +57,7 @@ ON UPDATE CASCADE — ako se promijeni ID članarine, ta promjena se automatski 
 Implementirana baza podataka omogućuje jednostavno upravljanje članovima i njihovim članarinama te pruža analitičke upite i poglede koji podupiru strateško odlučivanje. Kroz prikazane primjere, moguće je brzo identificirati aktivne članove, pratiti vrste članarina koje koriste te analizirati duljinu njihova članstva. Takav sustav omogućuje pravovremeno prepoznavanje članova kojima je potrebna dodatna motivacija ili kojima bi odgovarala ponuda za nadogradnju članarine.
 
 Demografska analiza s financijskim podacima: kombinira spol i dobne skupine s prosječnom cijenom članarine, ukupnim i prosječnim uplatama te brojem transakcija, što otkriva koje skupine najviše doprinose prihodu i kako optimizirati ponudu.
-
-Analiza vjernosti: na temelju duljine članstva i aktivnosti (privatni treninzi, grupni treninzi, rezervacije opreme) prepoznajemo najvjernije članove, kojima možemo ponuditi dodatne pogodnosti.
+Analiza vjernosti - na temelju duljine članstva i aktivnosti (privatni treninzi, grupni treninzi, rezervacije opreme) prepoznajemo najvjernije članove, kojima možemo ponuditi dodatne pogodnosti.
 
 ## 2.2 Treneri i treninzi
 U sklopu poslovanja teretane, prate se podaci o trenerima, tipovima treninga te privatnim treninzima. Treneri su stručne osobe zaposlene u teretani, od kojih se evidentiraju njihovi osobni podaci, kontakt podaci, specijalizacije, kao i godine iskustva. Svaki trener može voditi više različitih treninga, a može imati i više privatnih termina sa članovima.
@@ -100,64 +97,63 @@ Ovakva organizacija osigurava točnu financijsku evidenciju i odgovornost osoblj
 
 
 
-
-
 ## 3. Relacijski model
+
 Relacijski model prikazuje sve tablice baze podataka s pripadajućim atributima, primarnim ključevima (PK) i stranim ključevima (FK). Svaka relacija sadrži popis atributa uz naznaku veza među tablicama.
 Popis relacija:
-1. CLANARINA
-clanarina(id, tip, cijena, trajanje, opis)
+
+1. clanarina(id, tip, cijena, trajanje, opis)
 PK: id
 
-2. CLAN
-clan(id, ime, prezime, email, telefon, datum_uclanjenja, id_clanarina, aktivan, datum_rodjenja, spol, adresa, grad)
+2. clan(id, ime, prezime, email, telefon, datum_uclanjenja, id_clanarina, aktivan, datum_rodjenja, spol, adresa, grad)
 PK: id
 FK: id_clanarina → clanarina(id)
 
-3. TRENER
-trener(id, ime, prezime, specijalizacija, email, telefon, datum_zaposlenja, godine_iskustva, aktivan)
+3. trener(id, ime, prezime, specijalizacija, email, telefon, datum_zaposlenja, godine_iskustva, aktivan)
 PK: id
 
-4. PRIVATNI_TRENING
-privatni_trening(id, id_clana, id_trenera, tip_treninga, datum, vrijeme, trajanje, napomena, status, cijena)
+4. tip_treninga(id, naziv, osnovna_cijena, opis)
+PK: id
+
+5. privatni_trening(id, id_clana, id_trenera, id_tip_treninga, datum, vrijeme, trajanje, napomena, status, cijena)
 PK: id
 FK: id_clana → clan(id)
 FK: id_trenera → trener(id)
+FK: id_tip_treninga → tip_treninga(id)
 
-5. GRUPNI_TRENING
-grupni_trening(id, naziv, id_trenera, max_clanova, dan_u_tjednu, vrijeme, trajanje, cijena_po_terminu, aktivan, opis)
+6. grupni_trening(id, naziv, id_trenera, max_clanova, dan_u_tjednu, vrijeme, trajanje, cijena_po_terminu, aktivan, opis)
 PK: id
 FK: id_trenera → trener(id)
 
-6. PRISUTNOST
-prisutnost(id, id_clana, id_grupnog_treninga, datum, prisutan)
+7. prisutnost(id, id_clana, id_grupnog_treninga, datum, prisutan)
 PK: id
 FK: id_clana → clan(id)
 FK: id_grupnog_treninga → grupni_trening(id)
 
-7. OPREMA
+8. OPREMA
 oprema(id, sifra, naziv, datum_nabave, stanje, vrijednost, proizvođač, model, garancija_do)
 PK: id
 
-8. REZERVACIJA_OPREME
+9. REZERVACIJA_OPREME
 rezervacija_opreme(id, id_clana, id_opreme, datum, vrijeme_pocetka, vrijeme_zavrsetka, status, napomena)
 PK: id
 FK: id_clana → clan(id)
 FK: id_opreme → oprema(id)
 
-9. OSOBLJE
+10. OSOBLJE
 osoblje(id, ime, prezime, uloga, email, telefon, datum_zaposlenja, placa, radno_vrijeme, aktivan)
 PK: id
 
-10. PLACANJE
+11. PLACANJE
 placanje(id, id_clana, tip_placanja, referentni_id, iznos, datum_uplate, nacin_placanja, broj_racuna, popust, id_osoblje)
 PK: id
 FK: id_clana → clan(id)
 FK: id_osoblje → osoblje(id)
 
 
-
 ## 3. ER dijagram
+![Alt text](/erd.png)
+
 Sljedeći ER dijagram detaljno i pregledno opisuje sve skupove entiteta, njihove atribute, kao i veze među njima. Dijagram jasno prikazuje logičku strukturu baze podataka za upravljanje teretanom.
 Kardinalnosti označene na relacijama predstavljaju odnose među entitetima.
 
@@ -203,7 +199,299 @@ REZERVACIJA_OPREME se odnosi na OPREMU
 - kardinalnost: one to many
 
 
-## 7.4 Pogled - Pregled trenera s statistikama
+## 5.EER dijagram (prošireni ER model)
+![Alt text](/EER.png)
+
+# 6. Tablice
+
+Implementacija baze provedena je pomoću MySQL Workbench sustava. Baza nosi naziv **teretana**, a sastoji se od jedanest povezanih tablica. Svaka tablica sadrži definirane atribute s odgovarajućim tipovima podataka, primarnim i stranim ključevima.
+
+U nastavku su prikazane sve tablice korištene u bazi, zajedno s definicijama atributa. Također su navedene SQL naredbe za kreiranje baze, unos početnih podataka (INSERT INTO) i definiranje odnosa među tablicama pomoću FOREIGN KEY veza.
+
+## 6.1. TABLICA clanarina
+
+Tablica **clanarina** služi za evidenciju vrsta članarina u teretani. Sadrži atribute: `id`, `tip`, `cijena`, `trajanje` i `opis`.
+
+- **`id`** - primarni ključ (PRIMARY KEY) tipa `INT AUTO_INCREMENT`, jedinstveno identificira svaku članarinu
+- **`tip`** - `VARCHAR(50) NOT NULL UNIQUE` označava naziv članarine (npr. "Osnovna", "Premium") i jedinstven je, pa se ne može ponavljati
+- **`cijena`** - `DECIMAL(6,2) NOT NULL CHECK (cijena >= 0)` bilježi iznos u eurima, ne može biti negativan
+- **`trajanje`** - `INT NOT NULL CHECK (trajanje > 0)` govori o duljini članarine u mjesecima, mora biti barem 1
+- **`opis`** - `TEXT` može sadržavati dodatne napomene o pogodnostima ili uvjetima i može ostati prazan
+
+## 6.2. TABLICA clan
+
+Tablica **clan** pohranjuje osnovne podatke o članovima teretane. Sadrži atribute: `id`, `ime`, `prezime`, `email`, `telefon`, `datum_uclanjenja`, `id_clanarina`, `aktivan`, `datum_rodjenja`, `spol`, `adresa` i `grad`.
+
+- **`id`** - primarni ključ (`INT AUTO_INCREMENT`) i jedinstveno identificira člana
+- **`ime`** i **`prezime`** - `VARCHAR(50) NOT NULL` su obavezni za unos osobnih podataka
+- **`email`** - `VARCHAR(100) NOT NULL UNIQUE` mora biti jedinstven i ne smije biti prazan
+- **`telefon`** - `VARCHAR(20)` može ostati prazan ako se ne unese
+- **`datum_uclanjenja`** - `DATE NOT NULL DEFAULT CURRENT_DATE` automatski pohranjuje datum učlanjenja
+- **`id_clanarina`** - `INT` je strani ključ na `clanarina(id)`, označava vrstu članarine koju član odabere
+- **`aktivan`** - `BOOLEAN DEFAULT TRUE` pokazuje je li članstvo aktivno
+- **`datum_rodjenja`** - `DATE` i **`spol`** - `ENUM('M','Ž')` mogu ostati prazni
+- **`adresa`** - `VARCHAR(200)` i **`grad`** - `VARCHAR(50) DEFAULT 'Zagreb'` pohranjuju adresu prebivališta
+
+## 6.3. TABLICA trener
+
+Tablica **trener** služi za pohranu podataka o osobama koje provode individualne i grupne treninge u teretani. Sadrži atribute: `id`, `ime`, `prezime`, `specijalizacija`, `email` i `telefon`.
+
+- **`id`** - primarni ključ (PRIMARY KEY) tipa `INT`, s opcijom `AUTO_INCREMENT`, čime se automatski generira identifikator za svakog trenera
+- **`ime`** i **`prezime`** - `VARCHAR(50)` i obavezni su (`NOT NULL`) jer predstavljaju osnovne podatke trenera
+- **`specijalizacija`** - označava područje stručnosti trenera (npr. "Rehabilitacija", "Kondicijska priprema") i definiran je kao `VARCHAR(100)`
+- **`email`** - `VARCHAR(100)`, a **`telefon`** - `VARCHAR(20)`. Oba podatka služe za kontaktiranje trenera i mogu biti neobavezni, ovisno o dostupnosti podataka
+
+## 6.4. TABLICA tip_treninga
+
+Tablica **tip_treninga** služi za evidenciju različitih vrsta treninga koji se nude u teretani. Sadrži atribute: `id`, `naziv`, `osnovna_cijena` i `opis`.
+
+- **`id`** - PRIMARY KEY, `INT`, automatski se povećava (`AUTO_INCREMENT`) i koristi se za jedinstvenu identifikaciju svakog tipa treninga
+- **`naziv`** - `VARCHAR(50)`, `NOT NULL` i `UNIQUE` – definira naziv tipa treninga (npr. "Pilates", "Kondicija") i mora biti jedinstven
+- **`osnovna_cijena`** - `DECIMAL(6,2)`, `NOT NULL`, i predstavlja početnu cijenu treninga u eurima – ne može biti negativna
+- **`opis`** - `TEXT` i koristi se za dodatne informacije o vrsti treninga – nije obavezan
+
+## 6.5. TABLICA privatni_trening
+
+Tablica **privatni_trening** služi za evidenciju individualnih treninga između članova i trenera. Sadrži atribute: `id`, `id_clana`, `id_trenera`, `id_tip_treninga`, `datum`, `vrijeme`, `trajanje`, `napomena`, `status` i `cijena`.
+
+- **`id`** - PRIMARY KEY, `INT`, automatski se povećava (`AUTO_INCREMENT`) i koristi se za jedinstvenu identifikaciju svakog privatnog treninga
+- **`id_clana`** - strani ključ (FOREIGN KEY) koji označava člana koji sudjeluje na treningu – povezan je s `clan(id)`
+- **`id_trenera`** - strani ključ koji označava trenera koji vodi trening – povezan je s `trener(id)`
+- **`id_tip_treninga`** - strani ključ koji označava vrstu treninga – povezan je s `tip_treninga(id)`
+- **`datum`** - `DATE` i definira kada se trening održava, dok **`vrijeme`** (`TIME`) označava točan početak
+- **`trajanje`** - `INT` i predstavlja trajanje treninga u minutama (maksimalno 180 minuta)
+- **`napomena`** - `TEXT` i služi za dodatne informacije, po potrebi
+- **`status`** - `ENUM ('zakazan', 'održan', 'otkazan')` s početnom vrijednosti 'zakazan', i definira stanje treninga
+- **`cijena`** - `DECIMAL(6,2)` i prikazuje konačan iznos koji član plaća za taj trening
+
+## 6.6. TABLICA grupni_trening
+
+Tablica **grupni_trening** evidentira grupne treninge koji se održavaju u redovitim terminima i vodi ih jedan trener. Sadrži atribute: `id`, `naziv`, `id_trenera`, `max_clanova`, `dan_u_tjednu`, `vrijeme`, `trajanje`, `cijena_po_terminu`, `aktivan` i `opis`.
+
+- **`id`** - primarni ključ (PRIMARY KEY) tipa `INT` s `AUTO_INCREMENT` i koristi se za jedinstvenu identifikaciju svakog grupnog treninga
+- **`naziv`** - opisuje vrstu grupnog treninga (npr. "Pilates", "HIIT") i definiran je kao `VARCHAR(100)`, obavezan za unos
+- **`id_trenera`** - strani ključ koji označava trenera koji vodi trening – povezan je s `trener(id)`
+- **`max_clanova`** - `INT` koji označava maksimalan broj članova na treningu, uz ograničenje da mora biti veći od 0 i najviše 30
+- **`dan_u_tjednu`** - `ENUM` koji definira dan kada se trening održava (npr. "Ponedjeljak", "Srijeda")
+- **`vrijeme`** - `TIME` i koristi se za zakazivanje točnog termina treninga, s početnom vrijednosti `18:00:00`
+- **`trajanje`** - `INT` i predstavlja trajanje treninga u minutama, s početnom vrijednosti 60
+- **`cijena_po_terminu`** - `DECIMAL(5,2)` i označava cijenu po jednom terminu, mora biti veća od 0
+- **`aktivan`** - `BOOLEAN` koji označava je li trening trenutno aktivan (zadana vrijednost je `TRUE`)
+- **`opis`** - `TEXT` i koristi se za dodatne informacije o treningu
+
+## 6.7. TABLICA prisutnost_grupni
+
+Tablica **prisutnost_grupni** služi za evidenciju članova koji su prisustvovali grupnim treninzima. Povezuje članove s određenim grupnim treninzima na određeni datum. Sadrži atribute: `id`, `id_clana`, `id_grupnog_treninga`, `datum` i `prisutan`.
+
+- **`id`** - primarni ključ (PRIMARY KEY) tipa `INT` s `AUTO_INCREMENT`, i koristi se za jedinstvenu identifikaciju svakog zapisa prisutnosti
+- **`id_clana`** - strani ključ koji označava člana koji je sudjelovao na treningu – povezan je s `clan(id)`
+- **`id_grupnog_treninga`** - strani ključ koji označava grupni trening kojem je član prisustvovao – povezan je s `grupni_trening(id)`
+- **`datum`** - tipa `DATE` i koristi se za označavanje točnog dana prisustva. Ovaj podatak je obavezan (`NOT NULL`), jer omogućuje razlikovanje višestrukih prisustava na istom treningu
+- **`prisutan`** - `BOOLEAN` koji označava je li član bio prisutan ili ne, s početnom vrijednosti `TRUE`
+
+## 6.8. TABLICA oprema
+
+Tablica **oprema** koristi se za evidenciju sprava i uređaja dostupnih u teretani. Sadrži atribute: `id`, `sifra`, `naziv`, `datum_nabave`, `stanje`, `vrijednost`, `proizvodac`, `model` i `garancija_do`.
+
+- **`id`** - primarni ključ (PRIMARY KEY) tipa `INT` i automatski se generira (`AUTO_INCREMENT`)
+- **`sifra`** - `VARCHAR(20)`, mora biti jedinstvena (`UNIQUE`) i označava inventarnu oznaku opreme (npr. "SPR-001")
+- **`naziv`** - `VARCHAR(100)` i opisuje vrstu opreme (npr. "Bench klupa")
+- **`datum_nabave`** - tipa `DATE` i obavezan je za praćenje datuma nabave opreme
+- **`stanje`** - `ENUM` s mogućim vrijednostima: 'ispravna', 'u servisu', 'potrebna zamjena dijela', 'neispravna', 'nova' i po defaultu je 'nova', te opisuje trenutno stanje opreme
+- **`vrijednost`** - `DECIMAL(8,2)` i označava financijsku vrijednost opreme, s početnom vrijednošću 0.00
+- **`proizvodac`** i **`model`** - `VARCHAR(50)` i služe za unos podataka o proizvođaču i modelu opreme
+- **`garancija_do`** - `DATE` i bilježi do kada vrijedi garancija na opremu
+
+## 6.9. TABLICA rezervacija_opreme
+
+Tablica **rezervacija_opreme** vodi evidenciju rezervacija opreme koje su napravili članovi. Sadrži atribute: `id`, `id_clana`, `id_opreme`, `datum`, `vrijeme_pocetka`, `vrijeme_zavrsetka`, `status` i `napomena`.
+
+- **`id`** - primarni ključ (PRIMARY KEY) tipa `INT` s `AUTO_INCREMENT`
+- **`id_clana`** - strani ključ koji povezuje rezervaciju s članom – referencira `clan(id)`
+- **`id_opreme`** - strani ključ koji označava rezerviranu spravu – povezan je s `oprema(id)`
+- **`datum`** - `DATE` i označava dan rezervacije
+- **`vrijeme_pocetka`** i **`vrijeme_zavrsetka`** - tipa `TIME` i određuju vremenski raspon rezervacije; `vrijeme_zavrsetka` mora biti kasnije od `vrijeme_pocetka`
+- **`status`** - `ENUM` s vrijednostima 'aktivna', 'završena' i 'otkazana', s default vrijednošću 'aktivna'
+- **`napomena`** - tekstualno polje za dodatne informacije o rezervaciji
+
+## 6.10. TABLICA osoblje
+
+Tablica **osoblje** pohranjuje podatke o zaposlenicima teretane, uključujući trenere, recepcioniste i tehničko osoblje. Sadrži atribute: `id`, `ime`, `prezime`, `uloga`, `email`, `telefon`, `datum_zaposlenja`, `radno_vrijeme` i `aktivan`.
+
+- **`id`** - primarni ključ (PRIMARY KEY) tipa `INT` s `AUTO_INCREMENT` i jedinstveno identificira svakog zaposlenika
+- **`ime`** i **`prezime`** - `VARCHAR(50)` i obavezni su za osnovnu identifikaciju
+- **`uloga`** - `ENUM` koji definira funkciju zaposlenika (npr. 'Recepcionist', 'Voditelj', 'Čistačica', 'Održavanje', 'Administrator', 'Nutricionist')
+- **`email`** (`VARCHAR(100)`) je jedinstven kontakt, dok **`telefon`** (`VARCHAR(20)`) služi kao dodatni kontakt
+- **`datum_zaposlenja`** - `DATE` i po defaultu postavlja trenutni datum
+- **`radno_vrijeme`** - `VARCHAR(50)` i označava radni raspored zaposlenika
+- **`aktivan`** - `BOOLEAN` s default vrijednošću `TRUE` i označava je li zaposlenik trenutno aktivan
+
+## 6.11. TABLICA placanje
+
+Tablica **placanje** služi za praćenje uplata članova. Sadrži atribute: `id`, `id_clana`, `iznos`, `datum_uplate`, `nacin_placanja`, `broj_racuna`, `popust`, `id_osoblje` i `opis`.
+
+- **`id`** - primarni ključ, `INT` tipa, s `AUTO_INCREMENT` postavkom. Koristi se za identifikaciju svake transakcije u sustavu
+- **`id_clana`** - strani ključ koji se odnosi na člana koji je izvršio uplatu. Povezan je s tablicom `clan(id)` i osigurava integritet podataka
+- **`iznos`** - `DECIMAL(6,2)` i prikazuje iznos uplate. Obavezan je za unos jer prikazuje stvarno stanje prihoda
+- **`datum_uplate`** - označava datum kada je uplata izvršena i tipa je `DATE`. Obavezan je zbog kronološkog praćenja uplata
+- **`nacin_placanja`** - `ENUM` s vrijednostima ('gotovina', 'kartica', 'transfer', 'PayPal', 'kripto'), zadana vrijednost je 'kartica'. Opisuje način plaćanja i koristan je za analizu financija
+- **`broj_racuna`** - `VARCHAR(20)` i jedinstven je (`UNIQUE`). Koristi se za evidenciju broja računa, ako je primjenjivo
+- **`popust`** - `DECIMAL(5,2)` i predstavlja postotak popusta od 0 do 100, s default vrijednošću 0.00
+- **`id_osoblje`** - strani ključ koji označava zaposlenika koji je evidentirao uplatu i povezan je s tablicom `osoblje(id)`
+- **`opis`** - tekstualno polje za dodatne napomene
+
+Vanjski ključevi definirani su za `id_clana` i `id_osoblje`, s opcijama `ON DELETE RESTRICT` i `ON UPDATE CASCADE`.
+
+## 7. Pogledi i upit
+
+# 7.1. Pogledi - Martina Ilić
+# Pregled članova
+Ovaj pogled omogućuje brz uvid u trenutno aktivne članove, njihov status članarine i koliko su dugo članovi, što može biti korisno za analizu zadržavanja članova i upravljanje odnosima s korisnicima.
+```sql
+CREATE OR REPLACE VIEW pregled_clanova AS
+SELECT 
+    c.id,
+    CONCAT(c.ime, ' ', c.prezime) AS puno_ime,
+    c.email,
+    c.telefon,
+    cl.tip AS tip_clanarine,
+    cl.cijena,
+    cl.trajanje AS trajanje_dana,
+    c.datum_uclanjenja,
+    DATEDIFF(CURRENT_DATE, c.datum_uclanjenja) AS dana_od_uclanjenja
+FROM clan c
+INNER JOIN clanarina cl ON c.id_clanarina = cl.id
+WHERE c.aktivan = TRUE
+ORDER BY c.datum_uclanjenja DESC;
+```
+
+# Statistika članarina
+Ovaj pogled prikazuje statistiku po vrstama članarina, uključujući broj aktivnih članova po tipu, očekivani prihod i udio članova po vrsti članarine.
+Očekivani prihod je procjena temeljena na množenju broja aktivnih članova s punom cijenom članarine, bez uzimanja u obzir stvarnih uplata, datuma plaćanja ili eventualnih popusta. Rezultat služi kao gruba procjena potencijalnog prihoda u idealnim uvjetima.
+```sql
+CREATE OR REPLACE VIEW statistika_clanarina AS
+SELECT 
+    cl.tip,
+    cl.cijena,
+    cl.trajanje,
+    COUNT(c.id) AS broj_clanova,
+    COUNT(c.id) * cl.cijena AS ocekivani_prihod,
+    ROUND(COUNT(c.id) * 100.0 / (SELECT COUNT(*) FROM clan WHERE aktivan = TRUE), 2) AS postotak_clanova,
+    CASE 
+        WHEN cl.trajanje >= 365 THEN 'Godišnja'
+        WHEN cl.trajanje >= 30 THEN 'Mjesečna'
+    END AS kategorija_trajanja
+FROM clanarina cl
+LEFT JOIN clan c ON cl.id = c.id_clanarina AND c.aktivan = TRUE
+GROUP BY cl.id, cl.tip, cl.cijena, cl.trajanje
+ORDER BY broj_clanova DESC;
+```
+
+#  Demografski pregled članova
+Ovaj pogled pruža demografsku analizu aktivnih članova prema spolu, dobnim skupinama i tipu članarine.Pogled je koristan za bolje razumijevanje ciljnih skupina korisnika, što može pomoći pri kreiranju marketinških kampanja, prilagodbi ponude i donošenju poslovnih odluka temeljenih na strukturi članstva.
+```sql
+CREATE OR REPLACE VIEW demografski_pregled_clanova AS
+SELECT 
+    c.spol,
+    CASE 
+        WHEN YEAR(CURRENT_DATE) - YEAR(c.datum_rodjenja) < 25 THEN '18-24'
+        WHEN YEAR(CURRENT_DATE) - YEAR(c.datum_rodjenja) < 35 THEN '25-34'
+        WHEN YEAR(CURRENT_DATE) - YEAR(c.datum_rodjenja) < 45 THEN '35-44'
+        WHEN YEAR(CURRENT_DATE) - YEAR(c.datum_rodjenja) < 55 THEN '45-54'
+        ELSE '55+'
+    END AS dobna_skupina,
+    cl.tip AS tip_clanarine,
+    COUNT(*) AS broj_clanova
+FROM clan c
+JOIN clanarina cl ON c.id_clanarina = cl.id
+WHERE c.aktivan = TRUE AND c.datum_rodjenja IS NOT NULL
+GROUP BY c.spol, dobna_skupina, cl.tip
+ORDER BY c.spol, dobna_skupina;
+```
+# 7.2. Upiti (Martina Ilić)
+ Upit 1. Članovi koji u zadnjih 30 dana nisu rezervirali opremu niti sudjelovali na treninzima, a imaju aktivno članstvo (c.aktivan = TRUE)
+Ovaj upit prikazuje aktivne članove koji u posljednjih 30 dana nisu rezervirali opremu, nisu sudjelovali na privatnim treninzima niti na grupnim treninzima.
+
+Korisnost:
+Omogućuje identifikaciju članova koji ne koriste usluge teretane iako imaju aktivno članstvo.
+Može poslužiti za ciljanu komunikaciju, slanje podsjetnika, promotivnih ponuda ili poziva na aktivnosti kako bi se povećala njihova angažiranost i zadržavanje članova.
+```sql
+SELECT 
+    c.id,
+    c.ime,
+    c.prezime,
+    c.email,
+    c.datum_uclanjenja
+FROM clan c
+WHERE 
+    c.aktivan = TRUE
+    AND NOT EXISTS (
+        SELECT 1
+        FROM rezervacija_opreme ro
+        WHERE ro.id_clana = c.id
+    )
+    AND NOT EXISTS (
+        SELECT 1
+        FROM privatni_trening t
+        WHERE t.id_clana = c.id
+    )
+    AND NOT EXISTS (
+        SELECT 1
+        FROM prisutnost_grupni pg
+        WHERE pg.id_clana = c.id
+    )
+ORDER BY 
+    c.datum_uclanjenja ASC, 
+    c.prezime, 
+    c.ime;
+```
+
+Upit 2: Financijska analiza po dobnim skupinama i spolu
+Opis:
+Ovaj upit prikazuje statistički i financijski pregled aktivnih članova grupiranih po dobnim skupinama i spolu. Može se koristiti za prilagodbu cijena, promotivnih paketa ili usluga ciljanim skupinama. Korisno za strategijsko planiranje i financijske analize
+```sql
+SELECT 
+    CASE 
+        WHEN YEAR(CURRENT_DATE) - YEAR(c.datum_rodjenja) < 25 THEN '18-24'
+        WHEN YEAR(CURRENT_DATE) - YEAR(c.datum_rodjenja) < 35 THEN '25-34'
+        WHEN YEAR(CURRENT_DATE) - YEAR(c.datum_rodjenja) < 45 THEN '35-44'
+        WHEN YEAR(CURRENT_DATE) - YEAR(c.datum_rodjenja) < 55 THEN '45-54'
+        ELSE '55+'
+    END AS dobna_skupina,
+    c.spol,
+    COUNT(DISTINCT c.id) AS broj_clanova,
+    AVG(cl.cijena) AS prosjecna_cijena_clanarine,
+    SUM(p.iznos) AS ukupno_placeno,
+    AVG(p.iznos) AS prosjecno_placeno_po_transakciji,
+    COUNT(p.id) AS broj_transakcija
+FROM clan c
+JOIN clanarina cl ON c.id_clanarina = cl.id
+LEFT JOIN placanje p ON c.id = p.id_clana
+WHERE c.datum_rodjenja IS NOT NULL AND c.aktivan = TRUE
+GROUP BY dobna_skupina, c.spol
+ORDER BY dobna_skupina, c.spol;
+```
+
+Upit 3: Mjesečni prihod od članarina
+Opis:
+Ovaj upit izračunava ukupni očekivani mjesečni prihod temeljen na aktivnim članovima koji imaju mjesečne članarine (isključujući godišnje).Pomaže u procjeni redovitog mjesečnog prihoda
+
+Korisno za financijsko planiranje i kontrolu likvidnosti
+
+Fokusira se samo na ponavljajuće mjesečne uplate, što je važno za operativne troškove i budžetiranje
+```sql
+SELECT 
+    'MJESEČNI PRIHOD' as kategorija,
+    SUM(d.broj_clanova * cl.cijena) AS ukupno_eur,
+    COUNT(DISTINCT d.tip_clanarine) AS broj_tipova_clanarina,
+    SUM(d.broj_clanova) AS ukupno_aktivnih_clanova
+FROM demografski_pregled_clanova d
+JOIN clanarina cl ON d.tip_clanarine = cl.tip
+WHERE cl.tip NOT LIKE '%Godišnja%';
+```
+
+
+# 7.3 Pogled - Pregled trenera s statistikama - Karlo Perić
 
 Trenutno rukovodstvo teretane želi imati cjelokupan pregled nad angažmanom svojih trenera kako bi mogli donositi odluke o nagradama, zaduženjima i budućim zapošljavanjima. Odjel analitike zatražio je pogled koji prikazuje broj treninga po treneru, trajanje, broj klijenata, prihod i ostale korisne informacije.
 
@@ -240,7 +528,7 @@ Ovim pogledom se objedinjuju podaci iz tablica trener i privatni_trening kako bi
 
 ---
 
-## 7.5. Pogled - Raspored budućih treninga
+##  Pogled - Raspored budućih treninga - Karlo Perić
 
 Voditelj dvorane traži pregled svih nadolazećih privatnih treninga kako bi mogao organizirati prostor i resurse (sprave, osoblje). Pregled treba uključivati članove, trenere, termin i napomene.
 
@@ -277,7 +565,7 @@ Upit koristi `JOIN` kako bi dohvatio ime i prezime člana, tip treninga, kontakt
 
 ---
 
-## 7.6. Pogled - Analiza tipova treninga
+## Pogled - Analiza tipova treninga - Karlo Perić
 
 Odjel marketinga želi znati koji su tipovi treninga najpopularniji i najisplativiji kako bi prilagodili promocije i cijene.
 
@@ -314,7 +602,7 @@ Korišten je `LEFT JOIN` kako bi se prikazali i oni tipovi koji trenutno nemaju 
 
 ---
 
-## 7.7. Upit - Efikasnost trenera po tipovima treninga
+##  Upit - Efikasnost trenera po tipovima treninga - Karlo Perić
 
 Od menadžmenta je stigao zahtjev za procjenom rada trenera – koliko su angažirani, koliko klijenata imaju, koji su im prihodi, i koliko treninga je bilo otkazano. Upit daje efikasnost rada po tipu treninga.
 
@@ -410,7 +698,7 @@ Zbrajaju se minute po treneru i na temelju rezultata klasificira ih se u kategor
 
 ---
 
-## 7.9. Upit - ROI analiza tipova treninga
+## 7.9. Upit - ROI analiza tipova treninga (Karlo Perić)
 
 Cilj je utvrditi koji tipovi treninga donose najviše prihoda u odnosu na svoj utrošeni radni sat i koliko je stvarna naplata u odnosu na definiranu cijenu.
 
@@ -841,10 +1129,285 @@ CTE res prebrojava sve rezervacije po opremi, različite dane korištenja i rač
 
 ---
 
+## 7.2. Pogledi - Marko Kovač
+
+### Pregled uplata članarina
+Ovaj pogled prikazuje status plaćanja članarina za trenutni mjesec, omogućujući praćenje koji su članovi platili na vrijeme, koji kasne s plaćanjem, te koliko dana kasne. Pogled je koristan za upravljanje financijama teretane i identifikaciju članova kojima treba poslati opomene za plaćanje.
+
+
+```sql
+CREATE OR REPLACE VIEW pregled_uplata_clanarina AS
+SELECT 
+   c.id,
+   c.ime,
+   c.prezime,
+   c.email,
+   c.telefon,
+   cl.tip AS tip_clanarine,
+   cl.cijena AS cijena_clanarine,
+   
+   -- Informacije o uplati
+   p.datum_uplate,
+   p.iznos AS uplatio_iznos,
+   p.nacin_placanja,
+   CONCAT(o.ime, ' ', o.prezime) AS primio_uplatu,
+   
+   -- Status plaćanja s napomenama
+   CASE 
+       WHEN p.datum_uplate IS NULL THEN 'POSLATI OPOMENU'
+       WHEN DAY(p.datum_uplate) <= 10 THEN 'OK'
+       WHEN DAY(p.datum_uplate) > 10 THEN 'KAŠNJENJE'
+   END AS status_placanja,
+   
+   -- Logika računanja dana kašnjenja
+   CASE 
+       WHEN p.datum_uplate IS NULL THEN DATEDIFF(CURRENT_DATE, DATE(CONCAT(YEAR(CURRENT_DATE), '-', MONTH(CURRENT_DATE), '-10')))
+       WHEN DAY(p.datum_uplate) > 10 THEN DAY(p.datum_uplate) - 10
+       ELSE 0
+   END AS dana_kasnjenja,
+   
+   c.aktivan AS clan_aktivan
+FROM clan c
+JOIN clanarina cl ON c.id_clanarina = cl.id
+LEFT JOIN placanje p ON c.id = p.id_clana 
+   AND YEAR(p.datum_uplate) = YEAR(CURRENT_DATE) 
+   AND MONTH(p.datum_uplate) = MONTH(CURRENT_DATE)
+LEFT JOIN osoblje o ON p.id_osoblje = o.id
+WHERE c.aktivan = TRUE
+ORDER BY 
+   CASE 
+       WHEN p.datum_uplate IS NULL THEN 1
+       WHEN DAY(p.datum_uplate) > 10 THEN 2
+       ELSE 3
+   END,
+   dana_kasnjenja DESC,
+   c.prezime, c.ime;
+```
+**OPIS:**
+`CASE` izraz kategorizira status plaćanja prema datumu uplate (do 10. u mjesecu je OK, nakon toga kašnjenje).
+`DATEDIFF` računa broj dana kašnjenja od 10. dana u mjesecu.
+`LEFT JOIN` na `placanje` filtriran je po trenutnoj godini i mjesecu za praćenje mjesečnih uplata.
+`ORDER BY` prioritizira prikaz prvo onih koji nisu platili, zatim onih koji kasne, pa tek one koji su platili na vrijeme.
 
 
 
-## Zaključak
+### Pregled dodatnih troškova članova
+Ovaj pogled izračunava dodatne troškove članova osim osnovne članarine, uključujući privatne treninge i dodatne grupne treninge ovisno o tipu članarine. Pogled je koristan za izračun ukupnog iznosa za naplatu za svaki mjesec i razumijevanje koliko članovi troše na dodatne usluge.
+
+
+```sql
+CREATE OR REPLACE VIEW dodatni_troskovi_clanova AS
+SELECT 
+    c.id,
+    c.ime,
+    c.prezime,
+    cl.tip AS tip_clanarine,
+    
+    -- Privatni treninzi (svi se naplaćuju za ne-Premium članove)
+    COUNT(pt.id) AS broj_privatnih_treninga,
+    COALESCE(SUM(pt.cijena), 0) AS troskovi_privatni_treninzi,
+    
+    -- Dodatni grupni treninzi (samo za Osnovna i Student - Basic)
+    COUNT(CASE 
+        WHEN cl.tip IN ('Osnovna', 'Student - Basic') THEN pr.id 
+        ELSE NULL 
+    END) AS broj_dodatnih_grupnih,
+    
+    COALESCE(SUM(CASE 
+        WHEN cl.tip IN ('Osnovna', 'Student - Basic') THEN gt.cijena_po_terminu 
+        ELSE 0 
+    END), 0) AS troskovi_grupni_treninzi,
+    
+    -- Ukupni dodatni troškovi
+    COALESCE(SUM(pt.cijena), 0) + 
+    COALESCE(SUM(CASE 
+        WHEN cl.tip IN ('Osnovna', 'Student - Basic') THEN gt.cijena_po_terminu 
+        ELSE 0 
+    END), 0) AS ukupno_dodatni_troskovi,
+
+    -- Mjesečni iznos članarine (0 za Godišnju Standard)
+    CASE 
+        WHEN c.id_clanarina = 6 THEN 0.00
+        ELSE cl.cijena
+    END AS mjesecni_iznos_clanarine,
+    
+    -- Ukupno za naplatu ovaj mjesec
+    CASE 
+        WHEN c.id_clanarina = 6 THEN -- Godišnja Standard (ne naplaćuje se mjesečno)
+            COALESCE(SUM(pt.cijena), 0) + 
+            COALESCE(SUM(CASE 
+                WHEN cl.tip IN ('Osnovna', 'Student - Basic') THEN gt.cijena_po_terminu 
+                ELSE 0 
+            END), 0)
+        ELSE -- Mjesečne članarine
+            cl.cijena + 
+            COALESCE(SUM(pt.cijena), 0) + 
+            COALESCE(SUM(CASE 
+                WHEN cl.tip IN ('Osnovna', 'Student - Basic') THEN gt.cijena_po_terminu 
+                ELSE 0 
+            END), 0)
+    END AS ukupno_za_naplatu_ovaj_mjesec,
+    
+    -- Označavanje godišnjih članarina
+    CASE 
+        WHEN c.id_clanarina = 6 THEN 'DA' 
+        ELSE 'NE' 
+    END AS godisnja_clanarina
+FROM clan c
+JOIN clanarina cl ON c.id_clanarina = cl.id
+LEFT JOIN privatni_trening pt ON c.id = pt.id_clana 
+    AND pt.status = 'održan'
+    AND YEAR(pt.datum) = YEAR(CURRENT_DATE) 
+    AND MONTH(pt.datum) = MONTH(CURRENT_DATE)
+LEFT JOIN prisutnost_grupni pr ON c.id = pr.id_clana 
+    AND pr.prisutan = TRUE
+    AND YEAR(pr.datum) = YEAR(CURRENT_DATE) 
+    AND MONTH(pr.datum) = MONTH(CURRENT_DATE)
+LEFT JOIN grupni_trening gt ON pr.id_grupnog_treninga = gt.id
+WHERE c.aktivan = TRUE
+    AND cl.id NOT IN (3, 7)  -- Isključuje Premium (mjesečni) i Godišnju Premium
+GROUP BY c.id, c.ime, c.prezime, cl.tip, cl.cijena, c.id_clanarina, cl.id
+ORDER BY ukupno_dodatni_troskovi DESC;
+```
+**OPIS:**
+`COUNT` i `COALESCE` računaju broj i troškove privatnih treninga i grupnih treninga.
+`CASE` izraz razlikuje godišnje članarine (id=6) od mjesečnih pri računanju ukupnog iznosa za naplatu.
+Logika naplate grupnih treninga primjenjuje se samo na 'Osnovna' i 'Student - Basic' članarine.
+`WHERE` klauzula isključuje Premium članarine (id 3 i 7) jer one imaju drugačiju strukturu naplate.
+
+
+### Pregled uplata članarina
+Ovaj pogled prikazuje statistike aktivnosti trenera za trenutni mjesec, uključujući broj održanih privatnih treninga, ukupan prihod, broj klijenata i prosječne cijene. Pogled je koristan za praćenje performansi trenera i donošenje odluka o nagrađivanju ili dodatnom treningu.
+
+
+```sql
+CREATE OR REPLACE VIEW aktivnost_trenera AS
+SELECT 
+    t.id,
+    t.ime,
+    t.prezime,
+    t.specijalizacija,
+    
+    COUNT(pt.id) AS broj_privatnih_treninga,
+    COALESCE(SUM(pt.cijena), 0) AS ukupni_prihod,
+    COUNT(DISTINCT pt.id_clana) AS broj_klijenata,
+    
+    ROUND(AVG(pt.cijena), 2) AS prosjecna_cijena_treninga,
+    ROUND(COALESCE(SUM(pt.cijena), 0) / NULLIF(COUNT(DISTINCT pt.id_clana), 0), 2) AS prihod_po_klijentu,
+    
+    MIN(pt.datum) AS prvi_trening_ovaj_mjesec,
+    MAX(pt.datum) AS zadnji_trening_ovaj_mjesec,
+    
+    GROUP_CONCAT(DISTINCT tt.naziv ORDER BY tt.naziv SEPARATOR ', ') AS tipovi_treninga
+FROM trener t
+LEFT JOIN privatni_trening pt ON t.id = pt.id_trenera 
+    AND pt.status = 'održan'
+    AND YEAR(pt.datum) = YEAR(CURRENT_DATE) 
+    AND MONTH(pt.datum) = MONTH(CURRENT_DATE)
+LEFT JOIN tip_treninga tt ON pt.id_tip_treninga = tt.id
+WHERE t.aktivan = TRUE
+GROUP BY t.id, t.ime, t.prezime, t.specijalizacija
+ORDER BY ukupni_prihod DESC;
+```
+**OPIS:**
+`COUNT(DISTINCT pt.id_clana)` broji jedinstvene klijente po treneru.
+`ROUND(AVG(pt.cijena), 2)` računa prosječnu cijenu treninga.
+`NULLIF` sprječava dijeljenje s nulom pri računanju prihoda po klijentu.
+`GROUP_CONCAT` spaja različite tipove treninga koje trener vodi u jedan string.
+`MIN MAX` prikazuju vremenski raspon aktivnosti u mjesecu.
+
+
+## 7 Upit – Ukupne transakcije po članu osoblja zaduženom za naplate
+
+Prikazuje ukupne transakcije, prihod, broj klijenata i načine plaćanja po recepcionistima i voditeljima.
+
+**TRAŽENO RJEŠENJE:**  
+Ime, prezime, uloga, broj klijenata, ukupno transakcija, ukupni prihod, prihod po klijentu, najveća pojedinačna naplata, korišteni načini plaćanja.
+
+**KOD:**  
+```sql
+SELECT 
+    o.ime,
+    o.prezime,
+    o.uloga,
+    COUNT(DISTINCT p.id_clana) AS broj_klijenata,
+    COUNT(p.id) AS ukupno_transakcija,
+    ROUND(SUM(p.iznos * (1 - p.popust/100)), 2) AS ukupni_prihod,
+    ROUND(SUM(p.iznos * (1 - p.popust/100)) / COUNT(DISTINCT p.id_clana), 2) AS prihod_po_klijentu,
+    ROUND(MAX(p.iznos * (1 - p.popust/100)), 2) AS najveca_pojedinacna_naplata,
+    GROUP_CONCAT(DISTINCT p.nacin_placanja ORDER BY p.nacin_placanja) AS nacini_placanja_koje_koristi
+FROM osoblje o
+JOIN placanje p ON o.id = p.id_osoblje
+WHERE o.uloga IN ('Recepcionist', 'Voditelj') AND o.aktivan = TRUE
+GROUP BY o.id, o.ime, o.prezime, o.uloga
+ORDER BY prihod_po_klijentu DESC;
+```
+
+**OPIS:**  
+Grupira transakcije po zaposlenicima, računa ukupan i prosječni prihod, najveću pojedinačnu naplatu i prikuplja načine plaćanja.
+
+-----------------------------  
+## 8 Upit – Analiza plaćanja po načinu (Marko Kovač)
+
+Analizira broj, prihod i udio transakcija po načinu plaćanja.
+
+**TRAŽENO RJEŠENJE:**  
+Način plaćanja, broj transakcija, ukupni prihod, prosječni iznos, broj različitih klijenata, postotak transakcija, postotak prihoda.
+
+**KOD:**  
+```sql
+SELECT 
+    p.nacin_placanja,
+    COUNT(*) AS broj_transakcija,
+    SUM(p.iznos - p.popust) AS ukupni_prihod,
+    ROUND(AVG(p.iznos - p.popust), 2) AS prosjecni_iznos,
+    COUNT(DISTINCT p.id_clana) AS broj_različitih_klijenata,
+    ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM placanje), 2) AS postotak_transakcija,
+    ROUND(SUM(p.iznos - p.popust) * 100.0 / (SELECT SUM(iznos - popust) FROM placanje), 2) AS postotak_prihoda
+FROM placanje p
+WHERE p.nacin_placanja IS NOT NULL
+GROUP BY p.nacin_placanja
+ORDER BY ukupni_prihod DESC;
+```
+
+**OPIS:**  
+Računa koliko je transakcija po načinu plaćanja, koliki je njihov prihod i udio u ukupnom volumenu.
+
+-----------------------------  
+## 9 Upit – Koji zaposlenici daju popuste i koliki je ukupni iznos popusta
+
+Prikazuje pregled popusta koje su odobrili recepcionisti i voditelji.
+
+**TRAŽENO RJEŠENJE:**  
+Ime, prezime, uloga, broj odobrenih popusta, ukupno naplata, postotak s popustom, prosječni popust, ukupan iznos popusta, bruto iznos, neto iznos, prosječni postotak popusta.
+
+**KOD:**  
+```sql
+SELECT 
+    o.ime,
+    o.prezime,
+    o.uloga,
+    COUNT(CASE WHEN p.popust > 0 THEN 1 END) AS broj_popusta_odobren,
+    COUNT(p.id) AS ukupno_naplata,
+    ROUND((COUNT(CASE WHEN p.popust > 0 THEN 1 END) * 100.0) / COUNT(p.id), 2) AS postotak_s_popustom,
+    ROUND(AVG(CASE WHEN p.popust > 0 THEN p.popust END), 2) AS prosjecni_popust,
+    ROUND(SUM(p.iznos * p.popust/100), 2) AS ukupan_iznos_popusta,
+    ROUND(SUM(p.iznos), 2) AS ukupni_bruto_iznos,
+    ROUND(SUM(p.iznos * (1 - p.popust/100)), 2) AS ukupni_neto_iznos,
+    ROUND(AVG(p.popust), 2) AS prosjecni_postotak_popusta
+FROM osoblje o
+JOIN placanje p ON o.id = p.id_osoblje
+WHERE o.uloga IN ('Recepcionist', 'Voditelj') AND o.aktivan = TRUE
+GROUP BY o.id, o.ime, o.prezime, o.uloga
+ORDER BY ukupan_iznos_popusta DESC;
+```
+
+**OPIS:**  
+Analizira učestalost i iznose odobrenih popusta po zaposlenicima, te uspoređuje bruto i neto iznose.
+
+
+
+## 8. Zaključak
 U ovom projektu razvijen je detaljan model baze podataka koji omogućuje učinkovito upravljanje poslovanjem teretane. Obuhvaćeni su svi ključni aspekti – članstvo, članarine, treninzi, prisutnost, oprema, osoblje te financijske transakcije. Normalizacijom podataka i implementacijom stranih ključeva osigurana je konzistentnost i povezanost podataka, dok se fleksibilnim strukturama (npr. ENUM, tekstualna polja, napomene) omogućuje dodatna prilagodba stvarnim poslovnim potrebama.
 
 Za daljnje poboljšanje sustava mogu se razmotriti sljedeće nadogradnje:
@@ -860,7 +1423,6 @@ Integracija s online sustavima za plaćanje radi veće dostupnosti i praktičnos
 Mobilna aplikacija ili web sučelje za članove kako bi mogli samostalno pregledavati treninge, rezervirati opremu i pratiti napredak.
 
 U konačnici, ovaj sustav predstavlja temelj za cjelovito digitalno upravljanje teretanom, a njegovim daljnjim razvojem može se postići veća učinkovitost, bolja korisnička podrška i kvalitetnije poslovno odlučivanje.
-
 
 
 
