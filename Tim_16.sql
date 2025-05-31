@@ -500,7 +500,6 @@ SELECT
     CASE 
         WHEN cl.trajanje >= 365 THEN 'Godišnja'
         WHEN cl.trajanje >= 30 THEN 'Mjesečna'
-        ELSE 'Kratkotrajna'
     END AS kategorija_trajanja
 FROM clanarina cl
 LEFT JOIN clan c ON cl.id = c.id_clanarina AND c.aktivan = TRUE
