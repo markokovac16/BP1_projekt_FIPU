@@ -94,6 +94,7 @@ Za nesmetano svakodnevno funkcioniranje teretane, vodi se evidencija zaposlenika
 Proces plaćanja članarina i drugih usluga također je centraliziran. Svaka uplata se povezuje s konkretnim članom i zaposlenikom koji je izvršio naplatu, što omogućuje veću transparentnost i kontrolu nad financijama. Uplaćeni iznosi bilježe se zajedno s datumom, načinom plaćanja (gotovina, kartica, bankovni transfer, PayPal ili kripto), mogućim popustom i dodatnim opisom.
 
 Ovakva organizacija osigurava točnu financijsku evidenciju i odgovornost osoblja, dok članovima pruža više opcija prilikom plaćanja.
+Također, omogućava vlasniku teretane da ima detaljne uvide u isplativosti određenih grupnih treninga, isplativosti privatnih trenera dugoročno, uvid u kašnjenja i izostale uplate i još mnoge stvari vezane uz financijsku stranu poslovanja.
 
 
 
