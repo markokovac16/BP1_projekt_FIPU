@@ -453,7 +453,7 @@ Idealno za usporedbu koliko se realno naplaćuje u odnosu na očekivano (osnovna
 
 ---
 
-## 7.10 Pogled – Trenutno stanje i vrijednost opreme
+## 7.10 Pogled – Trenutno stanje i vrijednost opreme (Vladan Krivokapić)
 
 Vodstvo teretane treba brz uvid u sve komade opreme i njihov rok jamstva kako bi planirali servise i zamjene.
 
@@ -486,7 +486,7 @@ Funkcija ``DATEDIFF`` izračunava broj dana do isteka garancije, omogućujući p
 Sortira prvo po stanje (najkritičnije sprave na vrhu), a potom po vrijednost (najskuplje sprave prve).
 
 ---------------------------------------------------
-## 7.11 Pogled – Oprema po proizvođaču
+## 7.11 Pogled – Oprema po proizvođaču (Vladan Krivokapić)
 
 Odjel analitike treba agregirane podatke o vrijednosti i stanju garancija za svaku robnu marku opreme kako bi mogao optimizirati nabavu i servis.
 
@@ -524,7 +524,7 @@ Grupira opremu prema proizvođaču (``GROUP BY o.proizvodac``).
 Rezultati se sortiraju silazno po ukupna_vrijednost za prioritetno praćenje najvrjednijih proizvođača.
 
 ------------------------------------------------
-## 7.12 Pogled – Broj rezervacija po opremi
+## 7.12 Pogled – Broj rezervacija po opremi (Vladan Krivokapić)
 
 Menadžment želi znati koje sprave su najpopularnije kako bi mogao prilagoditi raspored održavanja i eventualno proširiti ponudu.
 
@@ -555,7 +555,7 @@ ORDER BY broj_rezervacija DESC;
 ``LEFT JOIN`` osigurava da i nepopularne sprave budu vidljive s brojem rezervacija 0.
 
 ---------------------------
-## 7.13 Pogled – Prosječno korištenje opreme po članu
+## 7.13 Pogled – Prosječno korištenje opreme po članu (Vladan Krivokapić)
 
 Odjel analitike želi dobiti uvid u to koliko vremena pojedini članovi u prosjeku provode na svakoj spravi kako bi se razumjela korisnička aktivnost i optimizirao raspored.
 
@@ -588,7 +588,7 @@ Filtrira se samo status ``aktivna`` i ``završena`` kako bi se izbjegle otkazane
 Rezultati se sortiraju po broju rezervacija (silazno) i po duljini prosječnog trajanja.
 
 -----------------------------------
-## 7.14 Pogled – Top 5 sprava po trajanju
+## 7.14 Pogled – Top 5 sprava po trajanju (Vladan Krivokapić)
 
 Cilj je identificirati sprave koje su kroz vrijeme najintenzivnije korištene kako bi se planiralo održavanje i eventualno proširenje inventara.
 
@@ -621,7 +621,7 @@ LIMIT 5;
 ``LIMIT 5`` osigurava da se prikaže samo prvih pet najintenzivnijih sprava.
 
 --------------------------------------
-## 7.15 Pogled – Oprema bez rezervacija
+## 7.15 Pogled – Oprema bez rezervacija (Vladan Krivokapić)
 
 Operativni tim želi identificirati komade opreme koji nikada nisu rezervirani kako bi mogao pokrenuti promocije ili preispitati njihove troškove.
 
@@ -653,7 +653,7 @@ ORDER BY o.vrijednost DESC;
 Sortira po vrijednost silazno kako bi se prvo vidjele najskuplje neiskorištene sprave.
 
 ---------------------------------------
-## 7.16 Upit – Osnovni podaci opreme i detaljna statistika
+## 7.16 Upit – Osnovni podaci opreme i detaljna statistika (Vladan Krivokapić)
 
 Menadžment želi objedinjeni prikaz ključnih metrika korištenja svake sprave kako bi mogao pratiti učestalost rezervacija, recentne trendove i prioritete za servis.
 
@@ -701,7 +701,7 @@ ORDER BY rezervacije_posljednjih_30_dana DESC,
 ``CASE`` kategorizira razinu korištenja prema broju rezervacija u zadnjih 30 dana.
 
 -----------------------------
-## 7.17 Upit – Trend korištenja opreme
+## 7.17 Upit – Trend korištenja opreme (Vladan Krivokapić)
 
 Analitički tim želi pratiti promjene u učestalosti rezervacija svake sprave uspoređujući prosjeke zadnja četiri i prethodna četiri tjedna kako bi uočili rastuće ili opadajuće trendove.
 
@@ -766,7 +766,7 @@ Glavni SELECT spaja rezultate na tablicu oprema, računa razliku i klasificira t
 Sortira sprave po najvećoj pozitivnoj ili negativnoj razlici za brzo uočavanje promjena.
 
 -----------------------
-## 7.18 Upit – Analiza rezervacija, trajanja i garancije opreme
+## 7.18 Upit – Analiza rezervacija, trajanja i garancije opreme (Vladan Krivokapić)
 
 Menadžment želi detaljnu statistiku svake sprave uključujući broj rezervacija, raznolikost dana korištenja, trend unazad 30 dana te status garancije kako bi mogao optimizirati servisne cikluse i planirati zamjene.
 
