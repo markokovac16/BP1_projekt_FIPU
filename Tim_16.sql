@@ -467,8 +467,8 @@ INSERT INTO placanje (id_clana, iznos, datum_uplate, nacin_placanja, broj_racuna
 -- MARTINA ILIĆ: Pogledi za članove i članarine
 -- ==========================================
 
--- Pogled 1: Pregled aktivnih članova s tipom članarine (Martina Ilić)
-CREATE OR REPLACE VIEW aktivni_clanovi_clanarine AS
+-- Pogled 1: Pregled članova s tipom članarine i brojem dana od upisa (Martina Ilić)
+CREATE OR REPLACE VIEW pregled_clanova AS
 SELECT 
     c.id,
     CONCAT(c.ime, ' ', c.prezime) AS puno_ime,
@@ -476,13 +476,9 @@ SELECT
     c.telefon,
     cl.tip AS tip_clanarine,
     cl.cijena,
+    cl.trajanje AS trajanje_dana,
     c.datum_uclanjenja,
-    DATEDIFF(CURRENT_DATE, c.datum_uclanjenja) AS dana_clanstva,
-    CASE 
-        WHEN DATEDIFF(CURRENT_DATE, c.datum_uclanjenja) > cl.trajanje THEN 'Istekla'
-        WHEN DATEDIFF(CURRENT_DATE, c.datum_uclanjenja) > (cl.trajanje - 7) THEN 'Uskoro istječe'
-        ELSE 'Aktivna'
-    END AS status_clanarine
+    DATEDIFF(CURRENT_DATE, c.datum_uclanjenja) AS dana_od_uclanjenja
 FROM clan c
 INNER JOIN clanarina cl ON c.id_clanarina = cl.id
 WHERE c.aktivan = TRUE
@@ -495,12 +491,11 @@ SELECT
     cl.cijena,
     cl.trajanje,
     COUNT(c.id) AS broj_clanova,
-    COUNT(c.id) * cl.cijena AS potencijalni_prihod,
+    COUNT(c.id) * cl.cijena AS ocekivani_prihod,
     ROUND(COUNT(c.id) * 100.0 / (SELECT COUNT(*) FROM clan WHERE aktivan = TRUE), 2) AS postotak_clanova,
     CASE 
         WHEN cl.trajanje >= 365 THEN 'Godišnja'
         WHEN cl.trajanje >= 30 THEN 'Mjesečna'
-        ELSE 'Kratkotrajna'
     END AS kategorija_trajanja
 FROM clanarina cl
 LEFT JOIN clan c ON cl.id = c.id_clanarina AND c.aktivan = TRUE
@@ -519,13 +514,13 @@ SELECT
         ELSE '55+'
     END AS dobna_skupina,
     cl.tip AS tip_clanarine,
-    COUNT(*) AS broj_clanova,
-    AVG(cl.cijena) AS prosjecna_cijena
+    COUNT(*) AS broj_clanova
 FROM clan c
 JOIN clanarina cl ON c.id_clanarina = cl.id
 WHERE c.aktivan = TRUE AND c.datum_rodjenja IS NOT NULL
 GROUP BY c.spol, dobna_skupina, cl.tip
-ORDER BY c.spol, dobna_skupina;
+ORDER BY broj_clanova DESC;
+
 
 -- ==========================================
 -- KARLO PERIĆ: Pogledi za trenere, treninge i tipove treninga
@@ -936,20 +931,38 @@ SELECT * FROM statistika_grupnih_po_danima;
 -- MARTINA ILIĆ: Složeni upiti za članove i članarine
 -- ==========================================
 
--- Upit 1: Analiza zadržavanja članova (Martina Ilić)
+-- Upit 1. Članovi koji u zadnjih 30 dana nisu rezervirali opremu niti sudjelovali na treninzima, a imaju aktivno članstvo (c.aktivan = TRUE)
 SELECT 
-    cl.tip AS tip_clanarine,
-    COUNT(*) AS ukupno_clanova,
-    COUNT(CASE WHEN c.aktivan = TRUE THEN 1 END) AS aktivni_clanovi,
-    COUNT(CASE WHEN c.aktivan = FALSE THEN 1 END) AS neaktivni_clanovi,
-    ROUND(COUNT(CASE WHEN c.aktivan = TRUE THEN 1 END) * 100.0 / COUNT(*), 2) AS postotak_zadrzavanja,
-    AVG(DATEDIFF(CURRENT_DATE, c.datum_uclanjenja)) AS prosjecna_duljina_clanstva,
-    MIN(DATEDIFF(CURRENT_DATE, c.datum_uclanjenja)) AS najkraće_clanstvo,
-    MAX(DATEDIFF(CURRENT_DATE, c.datum_uclanjenja)) AS najduže_clanstvo
+    c.id,
+    c.ime,
+    c.prezime,
+    c.email,
+    c.datum_uclanjenja
 FROM clan c
-JOIN clanarina cl ON c.id_clanarina = cl.id
-GROUP BY cl.tip
-ORDER BY postotak_zadrzavanja DESC;
+WHERE 
+    c.aktivan = TRUE
+    AND NOT EXISTS (
+        SELECT 1
+        FROM rezervacija_opreme ro
+        WHERE ro.id_clana = c.id
+    )
+    AND NOT EXISTS (
+        SELECT 1
+        FROM privatni_trening t
+        WHERE t.id_clana = c.id
+    )
+    AND NOT EXISTS (
+        SELECT 1
+        FROM prisutnost_grupni pg
+        WHERE pg.id_clana = c.id
+    )
+ORDER BY 
+    c.datum_uclanjenja ASC, 
+    c.prezime, 
+    c.ime;
+
+
+
 
 -- Upit 2: Demografska analiza s financijskim podacima (Martina Ilić)
 SELECT 
@@ -973,29 +986,15 @@ WHERE c.datum_rodjenja IS NOT NULL AND c.aktivan = TRUE
 GROUP BY dobna_skupina, c.spol
 ORDER BY dobna_skupina, c.spol;
 
--- Upit 3: Analiza najvjernijih članova (Martina Ilić)
+-- 3. Mjesečni (tekući) prihod teretane (bez godišnjih clanarina) (Martina Ilić)
 SELECT 
-    c.id,
-    CONCAT(c.ime, ' ', c.prezime) AS clan,
-    cl.tip AS tip_clanarine,
-    COUNT(p.id) AS broj_transakcija,
-    SUM(p.iznos) AS ukupno_placeno,
-    AVG(p.iznos) AS prosjecno_placeno,
-    MAX(p.datum_uplate) AS zadnja_uplata,
-    DATEDIFF(CURRENT_DATE, MAX(p.datum_uplate)) AS dana_od_zadnje_uplate,
-    CASE 
-        WHEN COUNT(p.id) >= 10 THEN 'Vrlo vjerni'
-        WHEN COUNT(p.id) >= 5 THEN 'Vjerni'
-        ELSE 'Povremeni'
-    END AS status_vjernosti
-FROM clan c
-JOIN clanarina cl ON c.id_clanarina = cl.id
-LEFT JOIN placanje p ON c.id = p.id_clana
-WHERE c.aktivan = TRUE
-GROUP BY c.id, clan, cl.tip
-HAVING ukupno_placeno > 0
-ORDER BY ukupno_placeno DESC, broj_transakcija DESC;
-
+    'MJESEČNI PRIHOD' as kategorija,
+    SUM(d.broj_clanova * cl.cijena) AS ukupno_eur,
+    COUNT(DISTINCT d.tip_clanarine) AS broj_tipova_clanarina,
+    SUM(d.broj_clanova) AS ukupno_aktivnih_clanova
+FROM demografski_pregled_clanova d
+JOIN clanarina cl ON d.tip_clanarine = cl.tip
+WHERE cl.tip NOT LIKE '%Godišnja%';
 
 -- ==========================================
 -- KARLO PERIĆ: Složeni upiti za trenere, treninge i tipove
