@@ -154,8 +154,8 @@ CREATE TABLE placanje (
     popust DECIMAL(5,2) DEFAULT 0.00 CHECK (popust >= 0 AND popust <= 100),
     id_osoblje INT NOT NULL,
     opis TEXT,
-    FOREIGN KEY (id_clana) REFERENCES clan(id) ON DELETE RESTRICT ON UPDATE CASCADE,
-    FOREIGN KEY (id_osoblje) REFERENCES osoblje(id) ON DELETE RESTRICT ON UPDATE CASCADE
+    FOREIGN KEY (id_clana) REFERENCES clan(id),
+    FOREIGN KEY (id_osoblje) REFERENCES osoblje(id)
 );
 
 
@@ -596,7 +596,7 @@ SELECT * FROM analiza_tipova_treninga;
 -- MARKO KOVAČ: Pogledi za osoblje i plaćanja
 -- ==========================================
 
--- Pogled 7: Pregled osoblja s performansama za tekući mjesec
+-- Pogled 7: Pregled uplata članarina
 CREATE OR REPLACE VIEW pregled_uplata_clanarina AS
 SELECT 
     c.id,
@@ -620,7 +620,7 @@ SELECT
         WHEN DAY(p.datum_uplate) > 10 THEN 'KAŠNJENJE'
     END AS status_placanja,
     
-    -- Dodatne korisne informacije
+    -- Logika izračuna dana kašnjenja
     CASE 
         WHEN p.datum_uplate IS NULL THEN DATEDIFF(CURRENT_DATE, DATE(CONCAT(YEAR(CURRENT_DATE), '-', MONTH(CURRENT_DATE), '-10')))
         WHEN DAY(p.datum_uplate) > 10 THEN DAY(p.datum_uplate) - 10
@@ -628,8 +628,8 @@ SELECT
     END AS dana_kasnjenja,
     
     c.aktivan AS clan_aktivan
-    
 FROM clan c
+
 JOIN clanarina cl ON c.id_clanarina = cl.id
 LEFT JOIN placanje p ON c.id = p.id_clana 
     AND YEAR(p.datum_uplate) = YEAR(CURRENT_DATE) 
@@ -645,7 +645,7 @@ ORDER BY
     dana_kasnjenja DESC,
     c.prezime, c.ime;
 
--- Pogled 8: Financijski pregled za tekući mjesec
+-- Pogled 8: Dodatni troškovi članova
 CREATE OR REPLACE VIEW dodatni_troskovi_clanova AS
 SELECT 
     c.id,
