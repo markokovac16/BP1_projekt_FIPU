@@ -1130,7 +1130,7 @@ CTE res prebrojava sve rezervacije po opremi, različite dane korištenja i rač
 
 ---
 
-## 7.2. Pogledi - Marko Kovač
+## 7.19. Pogledi - Marko Kovač
 
 ### Pregled uplata članarina
 Ovaj pogled prikazuje status plaćanja članarina za trenutni mjesec, omogućujući praćenje koji su članovi platili na vrijeme, koji kasne s plaćanjem, te koliko dana kasne. Pogled je koristan za upravljanje financijama teretane i identifikaciju članova kojima treba poslati opomene za plaćanje.
@@ -1318,7 +1318,9 @@ ORDER BY ukupni_prihod DESC;
 `MIN MAX` prikazuju vremenski raspon aktivnosti u mjesecu.
 
 
-## 7 Upit – Ukupne transakcije po članu osoblja zaduženom za naplate
+## 7.20 Upiti vezani za članove i osoblje
+
+## Upit – Ukupne transakcije po članu osoblja zaduženom za naplate
 
 Prikazuje ukupne transakcije, prihod, broj klijenata i načine plaćanja po recepcionistima i voditeljima.
 
@@ -1348,7 +1350,7 @@ ORDER BY prihod_po_klijentu DESC;
 Grupira transakcije po zaposlenicima, računa ukupan i prosječni prihod, najveću pojedinačnu naplatu i prikuplja načine plaćanja.
 
 -----------------------------  
-## 8 Upit – Analiza plaćanja po načinu (Marko Kovač)
+## Upit – Analiza plaćanja po načinu (Marko Kovač)
 
 Analizira broj, prihod i udio transakcija po načinu plaćanja.
 
@@ -1375,7 +1377,7 @@ ORDER BY ukupni_prihod DESC;
 Računa koliko je transakcija po načinu plaćanja, koliki je njihov prihod i udio u ukupnom volumenu.
 
 -----------------------------  
-## 9 Upit – Koji zaposlenici daju popuste i koliki je ukupni iznos popusta
+## Upit – Koji zaposlenici daju popuste i koliki je ukupni iznos popusta
 
 Prikazuje pregled popusta koje su odobrili recepcionisti i voditelji.
 
