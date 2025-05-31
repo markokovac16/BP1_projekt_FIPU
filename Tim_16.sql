@@ -523,7 +523,8 @@ FROM clan c
 JOIN clanarina cl ON c.id_clanarina = cl.id
 WHERE c.aktivan = TRUE AND c.datum_rodjenja IS NOT NULL
 GROUP BY c.spol, dobna_skupina, cl.tip
-ORDER BY c.spol, dobna_skupina;
+ORDER BY broj_clanova DESC;
+
 
 -- ==========================================
 -- KARLO PERIĆ: Pogledi za trenere, treninge i tipove treninga
