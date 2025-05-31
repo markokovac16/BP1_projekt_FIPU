@@ -131,22 +131,18 @@ PK: id
 FK: id_clana → clan(id)
 FK: id_grupnog_treninga → grupni_trening(id)
 
-8. OPREMA
-oprema(id, sifra, naziv, datum_nabave, stanje, vrijednost, proizvođač, model, garancija_do)
+8. oprema(id, sifra, naziv, datum_nabave, stanje, vrijednost, proizvođač, model, garancija_do)
 PK: id
 
-9. REZERVACIJA_OPREME
-rezervacija_opreme(id, id_clana, id_opreme, datum, vrijeme_pocetka, vrijeme_zavrsetka, status, napomena)
+9. rezervacija_opreme(id, id_clana, id_opreme, datum, vrijeme_pocetka, vrijeme_zavrsetka, status, napomena)
 PK: id
 FK: id_clana → clan(id)
 FK: id_opreme → oprema(id)
 
-10. OSOBLJE
-osoblje(id, ime, prezime, uloga, email, telefon, datum_zaposlenja, placa, radno_vrijeme, aktivan)
+10. osoblje(id, ime, prezime, uloga, email, telefon, datum_zaposlenja, placa, radno_vrijeme, aktivan)
 PK: id
 
-11. PLACANJE
-placanje(id, id_clana, tip_placanja, referentni_id, iznos, datum_uplate, nacin_placanja, broj_racuna, popust, id_osoblje)
+11. placanje(id, id_clana, tip_placanja, referentni_id, iznos, datum_uplate, nacin_placanja, broj_racuna, popust, id_osoblje)
 PK: id
 FK: id_clana → clan(id)
 FK: id_osoblje → osoblje(id)
@@ -155,7 +151,7 @@ FK: id_osoblje → osoblje(id)
 ## 3. ER dijagram
 ![Alt text](/erd.png)
 
-Sljedeći ER dijagram detaljno i pregledno opisuje sve skupove entiteta, njihove atribute, kao i veze među njima. Dijagram jasno prikazuje logičku strukturu baze podataka za upravljanje teretanom.
+ER dijagram detaljno i pregledno opisuje sve skupove entiteta, njihove atribute, kao i veze među njima. Dijagram jasno prikazuje logičku strukturu baze podataka za upravljanje teretanom.
 Kardinalnosti označene na relacijama predstavljaju odnose među entitetima.
 
 CLANARINA je dodijeljena CLANU
@@ -344,8 +340,7 @@ Tablica **placanje** služi za praćenje uplata članova. Sadrži atribute: `id`
 Vanjski ključevi definirani su za `id_clana` i `id_osoblje`, s opcijama `ON DELETE RESTRICT` i `ON UPDATE CASCADE`.
 
 ## 7. Pogledi i upit
-
-# 7.1. Pogledi - Martina Ilić
+## 7.1 Pogledi (Martina Ilić)
 # Pregled članova
 Ovaj pogled omogućuje brz uvid u trenutno aktivne članove, njihov status članarine i koliko su dugo članovi, što može biti korisno za analizu zadržavanja članova i upravljanje odnosima s korisnicima.
 ```sql
@@ -366,7 +361,7 @@ WHERE c.aktivan = TRUE
 ORDER BY c.datum_uclanjenja DESC;
 ```
 
-# Statistika članarina
+## 7.2. Statistika članarina
 Ovaj pogled prikazuje statistiku po vrstama članarina, uključujući broj aktivnih članova po tipu, očekivani prihod i udio članova po vrsti članarine.
 Očekivani prihod je procjena temeljena na množenju broja aktivnih članova s punom cijenom članarine, bez uzimanja u obzir stvarnih uplata, datuma plaćanja ili eventualnih popusta. Rezultat služi kao gruba procjena potencijalnog prihoda u idealnim uvjetima.
 ```sql
@@ -388,7 +383,7 @@ GROUP BY cl.id, cl.tip, cl.cijena, cl.trajanje
 ORDER BY broj_clanova DESC;
 ```
 
-#  Demografski pregled članova
+# 7.3. Demografski pregled članova
 Ovaj pogled pruža demografsku analizu aktivnih članova prema spolu, dobnim skupinama i tipu članarine.Pogled je koristan za bolje razumijevanje ciljnih skupina korisnika, što može pomoći pri kreiranju marketinških kampanja, prilagodbi ponude i donošenju poslovnih odluka temeljenih na strukturi članstva.
 ```sql
 CREATE OR REPLACE VIEW demografski_pregled_clanova AS
@@ -409,7 +404,7 @@ WHERE c.aktivan = TRUE AND c.datum_rodjenja IS NOT NULL
 GROUP BY c.spol, dobna_skupina, cl.tip
 ORDER BY c.spol, dobna_skupina;
 ```
-# 7.2. Upiti (Martina Ilić)
+# 7.4. Upiti (Martina Ilić)
  Upit 1. Članovi koji u zadnjih 30 dana nisu rezervirali opremu niti sudjelovali na treninzima, a imaju aktivno članstvo (c.aktivan = TRUE)
 Ovaj upit prikazuje aktivne članove koji u posljednjih 30 dana nisu rezervirali opremu, nisu sudjelovali na privatnim treninzima niti na grupnim treninzima.
 
@@ -446,8 +441,7 @@ ORDER BY
     c.prezime, 
     c.ime;
 ```
-
-Upit 2: Financijska analiza po dobnim skupinama i spolu
+## 7.5 Upit 2: Financijska analiza po dobnim skupinama i spolu
 Opis:
 Ovaj upit prikazuje statistički i financijski pregled aktivnih članova grupiranih po dobnim skupinama i spolu. Može se koristiti za prilagodbu cijena, promotivnih paketa ili usluga ciljanim skupinama. Korisno za strategijsko planiranje i financijske analize
 ```sql
@@ -473,7 +467,7 @@ GROUP BY dobna_skupina, c.spol
 ORDER BY dobna_skupina, c.spol;
 ```
 
-Upit 3: Mjesečni prihod od članarina
+## 7.6 Upit 3: Mjesečni prihod od članarina
 Opis:
 Ovaj upit izračunava ukupni očekivani mjesečni prihod temeljen na aktivnim članovima koji imaju mjesečne članarine (isključujući godišnje).Pomaže u procjeni redovitog mjesečnog prihoda
 
@@ -492,7 +486,7 @@ WHERE cl.tip NOT LIKE '%Godišnja%';
 ```
 
 
-# 7.3 Pogled - Pregled trenera s statistikama - Karlo Perić
+# 7.7 Pogled - Pregled trenera s statistikama - Karlo Perić
 
 Trenutno rukovodstvo teretane želi imati cjelokupan pregled nad angažmanom svojih trenera kako bi mogli donositi odluke o nagradama, zaduženjima i budućim zapošljavanjima. Odjel analitike zatražio je pogled koji prikazuje broj treninga po treneru, trajanje, broj klijenata, prihod i ostale korisne informacije.
 
@@ -529,7 +523,7 @@ Ovim pogledom se objedinjuju podaci iz tablica trener i privatni_trening kako bi
 
 ---
 
-##  Pogled - Raspored budućih treninga - Karlo Perić
+## 7.8. Pogled - Raspored budućih treninga (Karlo Perić)
 
 Voditelj dvorane traži pregled svih nadolazećih privatnih treninga kako bi mogao organizirati prostor i resurse (sprave, osoblje). Pregled treba uključivati članove, trenere, termin i napomene.
 
@@ -566,7 +560,7 @@ Upit koristi `JOIN` kako bi dohvatio ime i prezime člana, tip treninga, kontakt
 
 ---
 
-## Pogled - Analiza tipova treninga - Karlo Perić
+## 7.9 Pogled - Analiza tipova treninga (Karlo Perić)
 
 Odjel marketinga želi znati koji su tipovi treninga najpopularniji i najisplativiji kako bi prilagodili promocije i cijene.
 
@@ -603,7 +597,7 @@ Korišten je `LEFT JOIN` kako bi se prikazali i oni tipovi koji trenutno nemaju 
 
 ---
 
-##  Upit - Efikasnost trenera po tipovima treninga - Karlo Perić
+## 7.10 Upit - Efikasnost trenera po tipovima treninga (Karlo Perić)
 
 Od menadžmenta je stigao zahtjev za procjenom rada trenera – koliko su angažirani, koliko klijenata imaju, koji su im prihodi, i koliko treninga je bilo otkazano. Upit daje efikasnost rada po tipu treninga.
 
@@ -639,7 +633,7 @@ Ključan dio je izračun postotka otkazanih termina kroz `CASE` i `COUNT`.
 
 ---
 
-## 7.8. Upit - Analiza opterećenosti trenera (Karlo Perić)
+## 7.11. Upit - Analiza opterećenosti trenera (Karlo Perić)
 
 Potrebna je analiza koliko je koji trener radio u zadnjih tjedan i mjesec dana kako bi se odredila razina opterećenosti i planirala preraspodjela.
 
@@ -699,7 +693,7 @@ Zbrajaju se minute po treneru i na temelju rezultata klasificira ih se u kategor
 
 ---
 
-## 7.9. Upit - ROI analiza tipova treninga (Karlo Perić)
+## 7.12 Upit - ROI analiza tipova treninga (Karlo Perić)
 
 Cilj je utvrditi koji tipovi treninga donose najviše prihoda u odnosu na svoj utrošeni radni sat i koliko je stvarna naplata u odnosu na definiranu cijenu.
 
@@ -742,7 +736,7 @@ Idealno za usporedbu koliko se realno naplaćuje u odnosu na očekivano (osnovna
 
 ---
 
-## 7.10 Pogled – Trenutno stanje i vrijednost opreme (Vladan Krivokapić)
+## 7.13 Pogled – Trenutno stanje i vrijednost opreme (Vladan Krivokapić)
 
 Vodstvo teretane treba brz uvid u sve komade opreme i njihov rok jamstva kako bi planirali servise i zamjene.
 
@@ -775,7 +769,7 @@ Funkcija ``DATEDIFF`` izračunava broj dana do isteka garancije, omogućujući p
 Sortira prvo po stanje (najkritičnije sprave na vrhu), a potom po vrijednost (najskuplje sprave prve).
 
 ---------------------------------------------------
-## 7.11 Pogled – Oprema po proizvođaču (Vladan Krivokapić)
+## 7.14 Pogled – Oprema po proizvođaču (Vladan Krivokapić)
 
 Odjel analitike treba agregirane podatke o vrijednosti i stanju garancija za svaku robnu marku opreme kako bi mogao optimizirati nabavu i servis.
 
@@ -813,7 +807,7 @@ Grupira opremu prema proizvođaču (``GROUP BY o.proizvodac``).
 Rezultati se sortiraju silazno po ukupna_vrijednost za prioritetno praćenje najvrjednijih proizvođača.
 
 ------------------------------------------------
-## 7.12 Pogled – Broj rezervacija po opremi (Vladan Krivokapić)
+## 7.15 Pogled – Broj rezervacija po opremi (Vladan Krivokapić)
 
 Menadžment želi znati koje sprave su najpopularnije kako bi mogao prilagoditi raspored održavanja i eventualno proširiti ponudu.
 
@@ -844,7 +838,7 @@ ORDER BY broj_rezervacija DESC;
 ``LEFT JOIN`` osigurava da i nepopularne sprave budu vidljive s brojem rezervacija 0.
 
 ---------------------------
-## 7.13 Pogled – Prosječno korištenje opreme po članu (Vladan Krivokapić)
+## 7.16 Pogled – Prosječno korištenje opreme po članu (Vladan Krivokapić)
 
 Odjel analitike želi dobiti uvid u to koliko vremena pojedini članovi u prosjeku provode na svakoj spravi kako bi se razumjela korisnička aktivnost i optimizirao raspored.
 
@@ -877,7 +871,7 @@ Filtrira se samo status ``aktivna`` i ``završena`` kako bi se izbjegle otkazane
 Rezultati se sortiraju po broju rezervacija (silazno) i po duljini prosječnog trajanja.
 
 -----------------------------------
-## 7.14 Pogled – Top 5 sprava po trajanju (Vladan Krivokapić)
+## 7.17 Pogled – Top 5 sprava po trajanju (Vladan Krivokapić)
 
 Cilj je identificirati sprave koje su kroz vrijeme najintenzivnije korištene kako bi se planiralo održavanje i eventualno proširenje inventara.
 
@@ -910,7 +904,7 @@ LIMIT 5;
 ``LIMIT 5`` osigurava da se prikaže samo prvih pet najintenzivnijih sprava.
 
 --------------------------------------
-## 7.15 Pogled – Oprema bez rezervacija (Vladan Krivokapić)
+## 7.18 Pogled – Oprema bez rezervacija (Vladan Krivokapić)
 
 Operativni tim želi identificirati komade opreme koji nikada nisu rezervirani kako bi mogao pokrenuti promocije ili preispitati njihove troškove.
 
@@ -942,7 +936,7 @@ ORDER BY o.vrijednost DESC;
 Sortira po vrijednost silazno kako bi se prvo vidjele najskuplje neiskorištene sprave.
 
 ---------------------------------------
-## 7.16 Upit – Osnovni podaci opreme i detaljna statistika (Vladan Krivokapić)
+## 7.19 Upit – Osnovni podaci opreme i detaljna statistika (Vladan Krivokapić)
 
 Menadžment želi objedinjeni prikaz ključnih metrika korištenja svake sprave kako bi mogao pratiti učestalost rezervacija, recentne trendove i prioritete za servis.
 
@@ -990,7 +984,7 @@ ORDER BY rezervacije_posljednjih_30_dana DESC,
 ``CASE`` kategorizira razinu korištenja prema broju rezervacija u zadnjih 30 dana.
 
 -----------------------------
-## 7.17 Upit – Trend korištenja opreme (Vladan Krivokapić)
+## 7.20 Upit – Trend korištenja opreme (Vladan Krivokapić)
 
 Analitički tim želi pratiti promjene u učestalosti rezervacija svake sprave uspoređujući prosjeke zadnja četiri i prethodna četiri tjedna kako bi uočili rastuće ili opadajuće trendove.
 
@@ -1055,7 +1049,7 @@ Glavni SELECT spaja rezultate na tablicu oprema, računa razliku i klasificira t
 Sortira sprave po najvećoj pozitivnoj ili negativnoj razlici za brzo uočavanje promjena.
 
 -----------------------
-## 7.18 Upit – Analiza rezervacija, trajanja i garancije opreme (Vladan Krivokapić)
+## 7.21 Upit – Analiza rezervacija, trajanja i garancije opreme (Vladan Krivokapić)
 
 Menadžment želi detaljnu statistiku svake sprave uključujući broj rezervacija, raznolikost dana korištenja, trend unazad 30 dana te status garancije kako bi mogao optimizirati servisne cikluse i planirati zamjene.
 
@@ -1130,7 +1124,7 @@ CTE res prebrojava sve rezervacije po opremi, različite dane korištenja i rač
 
 ---
 
-## 7.19. Pogledi - Marko Kovač
+## 7.22 Pogledi - Marko Kovač
 
 ### Pregled uplata članarina
 Ovaj pogled prikazuje status plaćanja članarina za trenutni mjesec, omogućujući praćenje koji su članovi platili na vrijeme, koji kasne s plaćanjem, te koliko dana kasne. Pogled je koristan za upravljanje financijama teretane i identifikaciju članova kojima treba poslati opomene za plaćanje.
@@ -1192,7 +1186,7 @@ ORDER BY
 
 
 
-### Pregled dodatnih troškova članova
+### 7.23. Pregled dodatnih troškova članova
 Ovaj pogled izračunava dodatne troškove članova osim osnovne članarine, uključujući privatne treninge i dodatne grupne treninge ovisno o tipu članarine. Pogled je koristan za izračun ukupnog iznosa za naplatu za svaki mjesec i razumijevanje koliko članovi troše na dodatne usluge.
 
 
@@ -1277,7 +1271,7 @@ Logika naplate grupnih treninga primjenjuje se samo na 'Osnovna' i 'Student - Ba
 `WHERE` klauzula isključuje Premium članarine (id 3 i 7) jer one imaju drugačiju strukturu naplate.
 
 
-### Pregled uplata članarina
+### 7.24. Pregled uplata članarina
 Ovaj pogled prikazuje statistike aktivnosti trenera za trenutni mjesec, uključujući broj održanih privatnih treninga, ukupan prihod, broj klijenata i prosječne cijene. Pogled je koristan za praćenje performansi trenera i donošenje odluka o nagrađivanju ili dodatnom treningu.
 
 
@@ -1318,7 +1312,7 @@ ORDER BY ukupni_prihod DESC;
 `MIN MAX` prikazuju vremenski raspon aktivnosti u mjesecu.
 
 
-## 7.20 Upiti vezani za članove i osoblje
+## 7.25 Upiti vezani za članove i osoblje
 
 ## Upit – Ukupne transakcije po članu osoblja zaduženom za naplate
 
@@ -1350,7 +1344,7 @@ ORDER BY prihod_po_klijentu DESC;
 Grupira transakcije po zaposlenicima, računa ukupan i prosječni prihod, najveću pojedinačnu naplatu i prikuplja načine plaćanja.
 
 -----------------------------  
-## Upit – Analiza plaćanja po načinu (Marko Kovač)
+## 7.26. Upit – Analiza plaćanja po načinu (Marko Kovač)
 
 Analizira broj, prihod i udio transakcija po načinu plaćanja.
 
@@ -1377,7 +1371,7 @@ ORDER BY ukupni_prihod DESC;
 Računa koliko je transakcija po načinu plaćanja, koliki je njihov prihod i udio u ukupnom volumenu.
 
 -----------------------------  
-## Upit – Koji zaposlenici daju popuste i koliki je ukupni iznos popusta
+## 7.28. Upit – Koji zaposlenici daju popuste i koliki je ukupni iznos popusta
 
 Prikazuje pregled popusta koje su odobrili recepcionisti i voditelji.
 
@@ -1408,7 +1402,7 @@ ORDER BY ukupan_iznos_popusta DESC;
 **OPIS:**  
 Analizira učestalost i iznose odobrenih popusta po zaposlenicima, te uspoređuje bruto i neto iznose.
 
-## 7.21 Pogledi - Marko Aleksić
+## 7.29 Pogledi - Marko Aleksić
 
 ## Pregled popunjenosti grupnih treninga
 
@@ -1448,7 +1442,7 @@ ORDER BY popunjenost_postotak DESC;
 
 ---
 
-## Pregled aktivnosti članova na grupnim treninzima
+## 7.30. Pregled aktivnosti članova na grupnim treninzima
 
 **TRAŽENO RJEŠENJE:**  
 Prikaz broja različitih treninga, ukupnih prijava, postotka prisutnosti, zadnjeg dolaska i dana od zadnjeg dolaska za svakog aktivnog člana.
@@ -1478,7 +1472,7 @@ ORDER BY postotak_prisutnosti DESC, ukupno_prijava DESC;
 
 ---
 
-## Pregled statistika grupnih treninga po danima
+## 7.31 Pregled statistika grupnih treninga po danima
 
 **TRAŽENO RJEŠENJE:**  
 Prikaz broja programa, broja trenera, ukupnog kapaciteta, prijava, iskorištenosti kapaciteta, prosječne cijene i potencijalnog prihoda po danima u tjednu.
@@ -1504,7 +1498,7 @@ GROUP BY gt.dan_u_tjednu
 ORDER BY FIELD(gt.dan_u_tjednu, 'Ponedjeljak', 'Utorak', 'Srijeda', 'Četvrtak', 'Petak', 'Subota', 'Nedjelja');
 ```
 
-## 7.21 Upiti - Marko Aleksić
+## 7.32 Upiti - Marko Aleksić
 
 Prikazuje koliko su grupni treninzi popunjeni u zadnjih 30 dana.
 
@@ -1546,7 +1540,7 @@ ORDER BY popunjenost_postotak DESC;
 Broji koliko je ljudi prijavljeno na aktivne grupne treninge, računa koliko još ima mjesta i klasificira status popunjenosti.
 
 -----------------------------  
-## 14 Upit o aktivnosti članova na grupnim treninzima
+## 7.33 Upit o aktivnosti članova na grupnim treninzima
 
 Prikazuje koliko članovi sudjeluju na grupnim treninzima.
 
@@ -1580,7 +1574,7 @@ ORDER BY postotak_prisutnosti DESC, ukupno_prijava DESC;
 Prikazuje koliko članovi koriste grupne treninge, s detaljima o prisutnosti i zadnjem dolasku.
 
 -----------------------------  
-## 15 Pogled – Statistika grupnih treninga po danima (Marko Aleksić)
+## 7.34. Pogled – Statistika grupnih treninga po danima (Marko Aleksić)
 
 Sumira grupne treninge po danima u tjednu.
 
