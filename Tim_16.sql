@@ -500,7 +500,6 @@ SELECT
     CASE 
         WHEN cl.trajanje >= 365 THEN 'Godišnja'
         WHEN cl.trajanje >= 30 THEN 'Mjesečna'
-        ELSE 'Kratkotrajna'
     END AS kategorija_trajanja
 FROM clanarina cl
 LEFT JOIN clan c ON cl.id = c.id_clanarina AND c.aktivan = TRUE
@@ -524,7 +523,8 @@ FROM clan c
 JOIN clanarina cl ON c.id_clanarina = cl.id
 WHERE c.aktivan = TRUE AND c.datum_rodjenja IS NOT NULL
 GROUP BY c.spol, dobna_skupina, cl.tip
-ORDER BY c.spol, dobna_skupina;
+ORDER BY broj_clanova DESC;
+
 
 -- ==========================================
 -- KARLO PERIĆ: Pogledi za trenere, treninge i tipove treninga
