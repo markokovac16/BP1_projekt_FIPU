@@ -579,7 +579,7 @@ ORDER BY broj_rezervacija DESC, prosjecno_trajanje_minuta DESC;
 ```
 **OPIS:**
 
-``COUNT(ro.id)` prebrojava sve rezervacije pojedine sprave od strane člana.
+``COUNT(ro.id)`` prebrojava sve rezervacije pojedine sprave od strane člana.
 
 ``AVG(TIMESTAMPDIFF(...))`` računa prosječno trajanje svake rezervacije u minutama.
 
