@@ -1408,6 +1408,211 @@ ORDER BY ukupan_iznos_popusta DESC;
 **OPIS:**  
 Analizira učestalost i iznose odobrenih popusta po zaposlenicima, te uspoređuje bruto i neto iznose.
 
+## 7.21 Pogledi - Marko Aleksić
+
+## Pregled popunjenosti grupnih treninga
+
+**TRAŽENO RJEŠENJE:**  
+Prikaz trenutne popunjenosti svakog grupnog treninga, slobodnih mjesta, postotka popunjenosti i statusa.
+
+**KOD:**
+```sql
+CREATE OR REPLACE VIEW popunjenost_grupnih_treninga AS
+SELECT 
+    gt.id AS trening_id,
+    gt.naziv,
+    gt.dan_u_tjednu,
+    gt.vrijeme,
+    gt.max_clanova,
+    gt.cijena_po_terminu,
+    COUNT(p.id) AS trenutno_prijavljenih,
+    GREATEST(gt.max_clanova - COUNT(p.id), 0) AS slobodnih_mjesta,
+    ROUND((LEAST(COUNT(p.id), gt.max_clanova) / gt.max_clanova) * 100, 1) AS popunjenost_postotak,
+    CONCAT(t.ime, ' ', t.prezime) AS trener,
+    CASE 
+        WHEN COUNT(p.id) >= gt.max_clanova THEN 'Puno'
+        WHEN COUNT(p.id) > (gt.max_clanova * 0.8) THEN 'Skoro puno'
+        WHEN COUNT(p.id) > (gt.max_clanova * 0.5) THEN 'Umjereno'
+        ELSE 'Ima mjesta'
+    END AS status_popunjenosti
+FROM grupni_trening gt
+LEFT JOIN prisutnost_grupni p 
+    ON gt.id = p.id_grupnog_treninga 
+    AND p.datum >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)
+    AND p.prisutan = TRUE
+JOIN trener t ON gt.id_trenera = t.id
+WHERE gt.aktivan = TRUE
+GROUP BY gt.id
+ORDER BY popunjenost_postotak DESC;
+```
+
+---
+
+## Pregled aktivnosti članova na grupnim treninzima
+
+**TRAŽENO RJEŠENJE:**  
+Prikaz broja različitih treninga, ukupnih prijava, postotka prisutnosti, zadnjeg dolaska i dana od zadnjeg dolaska za svakog aktivnog člana.
+
+**KOD:**
+```sql
+CREATE OR REPLACE VIEW aktivnost_clanova_grupni AS
+SELECT 
+    c.id,
+    CONCAT(c.ime, ' ', c.prezime) AS clan,
+    cl.tip AS tip_clanarine,
+    COUNT(DISTINCT p.id_grupnog_treninga) AS broj_razlicitih_treninga,
+    COUNT(p.id) AS ukupno_prijava,
+    COUNT(CASE WHEN p.prisutan = TRUE THEN 1 END) AS prisutni,
+    COUNT(CASE WHEN p.prisutan = FALSE THEN 1 END) AS odsutni,
+    ROUND(COUNT(CASE WHEN p.prisutan = TRUE THEN 1 END) * 100.0 / NULLIF(COUNT(p.id), 0), 2) AS postotak_prisutnosti,
+    MAX(p.datum) AS zadnji_dolazak,
+    DATEDIFF(CURRENT_DATE, MAX(p.datum)) AS dana_od_zadnjeg_dolaska
+FROM clan c
+JOIN clanarina cl ON c.id_clanarina = cl.id
+LEFT JOIN prisutnost_grupni p ON c.id = p.id_clana
+WHERE c.aktivan = TRUE
+GROUP BY c.id
+HAVING ukupno_prijava > 0
+ORDER BY postotak_prisutnosti DESC, ukupno_prijava DESC;
+```
+
+---
+
+## Pregled statistika grupnih treninga po danima
+
+**TRAŽENO RJEŠENJE:**  
+Prikaz broja programa, broja trenera, ukupnog kapaciteta, prijava, iskorištenosti kapaciteta, prosječne cijene i potencijalnog prihoda po danima u tjednu.
+
+**KOD:**
+```sql
+CREATE OR REPLACE VIEW statistika_grupnih_po_danima AS
+SELECT 
+    gt.dan_u_tjednu,
+    COUNT(DISTINCT gt.id) AS broj_programa,
+    COUNT(DISTINCT gt.id_trenera) AS broj_trenera,
+    SUM(gt.max_clanova) AS ukupni_kapacitet,
+    COUNT(p.id) AS ukupno_prijava,
+    COUNT(CASE WHEN p.prisutan = TRUE THEN 1 END) AS ukupno_prisutnih,
+    ROUND(COUNT(CASE WHEN p.prisutan = TRUE THEN 1 END) * 100.0 / NULLIF(SUM(gt.max_clanova), 0), 2) AS iskorištenost_kapaciteta,
+    ROUND(AVG(gt.cijena_po_terminu), 2) AS prosjecna_cijena,
+    SUM(CASE WHEN p.prisutan = TRUE THEN gt.cijena_po_terminu ELSE 0 END) AS potencijalni_prihod
+FROM grupni_trening gt
+LEFT JOIN prisutnost_grupni p ON gt.id = p.id_grupnog_treninga 
+    AND p.datum >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)
+WHERE gt.aktivan = TRUE
+GROUP BY gt.dan_u_tjednu
+ORDER BY FIELD(gt.dan_u_tjednu, 'Ponedjeljak', 'Utorak', 'Srijeda', 'Četvrtak', 'Petak', 'Subota', 'Nedjelja');
+```
+
+## 7.21 Upiti - Marko Aleksić
+
+Prikazuje koliko su grupni treninzi popunjeni u zadnjih 30 dana.
+
+**TRAŽENO RJEŠENJE:**  
+ID treninga, naziv, dan u tjednu, vrijeme, maksimalan broj članova, cijena po terminu, trenutno prijavljenih, slobodnih mjesta, popunjenost u postotku, trener, status popunjenosti.
+
+**KOD:**  
+```sql
+CREATE OR REPLACE VIEW popunjenost_grupnih_treninga AS
+SELECT 
+    gt.id AS trening_id,
+    gt.naziv,
+    gt.dan_u_tjednu,
+    gt.vrijeme,
+    gt.max_clanova,
+    gt.cijena_po_terminu,
+    COUNT(p.id) AS trenutno_prijavljenih,
+    GREATEST(gt.max_clanova - COUNT(p.id), 0) AS slobodnih_mjesta,
+    ROUND((LEAST(COUNT(p.id), gt.max_clanova) / gt.max_clanova) * 100, 1) AS popunjenost_postotak,
+    CONCAT(t.ime, ' ', t.prezime) AS trener,
+    CASE 
+        WHEN COUNT(p.id) >= gt.max_clanova THEN 'Puno'
+        WHEN COUNT(p.id) > (gt.max_clanova * 0.8) THEN 'Skoro puno'
+        WHEN COUNT(p.id) > (gt.max_clanova * 0.5) THEN 'Umjereno'
+        ELSE 'Ima mjesta'
+    END AS status_popunjenosti
+FROM grupni_trening gt
+LEFT JOIN prisutnost_grupni p 
+    ON gt.id = p.id_grupnog_treninga 
+    AND p.datum >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)
+    AND p.prisutan = TRUE
+JOIN trener t ON gt.id_trenera = t.id
+WHERE gt.aktivan = TRUE
+GROUP BY gt.id
+ORDER BY popunjenost_postotak DESC;
+```
+
+**OPIS:**  
+Broji koliko je ljudi prijavljeno na aktivne grupne treninge, računa koliko još ima mjesta i klasificira status popunjenosti.
+
+-----------------------------  
+## 14 Upit o aktivnosti članova na grupnim treninzima
+
+Prikazuje koliko članovi sudjeluju na grupnim treninzima.
+
+**TRAŽENO RJEŠENJE:**  
+ID člana, ime i prezime, tip članarine, broj različitih treninga, ukupno prijava, broj prisutnih, broj odsutnih, postotak prisutnosti, zadnji dolazak, broj dana od zadnjeg dolaska.
+
+**KOD:**  
+```sql
+CREATE OR REPLACE VIEW aktivnost_clanova_grupni AS
+SELECT 
+    c.id,
+    CONCAT(c.ime, ' ', c.prezime) AS clan,
+    cl.tip AS tip_clanarine,
+    COUNT(DISTINCT p.id_grupnog_treninga) AS broj_razlicitih_treninga,
+    COUNT(p.id) AS ukupno_prijava,
+    COUNT(CASE WHEN p.prisutan = TRUE THEN 1 END) AS prisutni,
+    COUNT(CASE WHEN p.prisutan = FALSE THEN 1 END) AS odsutni,
+    ROUND(COUNT(CASE WHEN p.prisutan = TRUE THEN 1 END) * 100.0 / NULLIF(COUNT(p.id), 0), 2) AS postotak_prisutnosti,
+    MAX(p.datum) AS zadnji_dolazak,
+    DATEDIFF(CURRENT_DATE, MAX(p.datum)) AS dana_od_zadnjeg_dolaska
+FROM clan c
+JOIN clanarina cl ON c.id_clanarina = cl.id
+LEFT JOIN prisutnost_grupni p ON c.id = p.id_clana
+WHERE c.aktivan = TRUE
+GROUP BY c.id
+HAVING ukupno_prijava > 0
+ORDER BY postotak_prisutnosti DESC, ukupno_prijava DESC;
+```
+
+**OPIS:**  
+Prikazuje koliko članovi koriste grupne treninge, s detaljima o prisutnosti i zadnjem dolasku.
+
+-----------------------------  
+## 15 Pogled – Statistika grupnih treninga po danima (Marko Aleksić)
+
+Sumira grupne treninge po danima u tjednu.
+
+**TRAŽENO RJEŠENJE:**  
+Dan u tjednu, broj programa, broj trenera, ukupni kapacitet, ukupno prijava, ukupno prisutnih, iskorištenost kapaciteta, prosječna cijena, potencijalni prihod.
+
+**KOD:**  
+```sql
+CREATE OR REPLACE VIEW statistika_grupnih_po_danima AS
+SELECT 
+    gt.dan_u_tjednu,
+    COUNT(DISTINCT gt.id) AS broj_programa,
+    COUNT(DISTINCT gt.id_trenera) AS broj_trenera,
+    SUM(gt.max_clanova) AS ukupni_kapacitet,
+    COUNT(p.id) AS ukupno_prijava,
+    COUNT(CASE WHEN p.prisutan = TRUE THEN 1 END) AS ukupno_prisutnih,
+    ROUND(COUNT(CASE WHEN p.prisutan = TRUE THEN 1 END) * 100.0 / NULLIF(SUM(gt.max_clanova), 0), 2) AS iskorištenost_kapaciteta,
+    ROUND(AVG(gt.cijena_po_terminu), 2) AS prosjecna_cijena,
+    SUM(CASE WHEN p.prisutan = TRUE THEN gt.cijena_po_terminu ELSE 0 END) AS potencijalni_prihod
+FROM grupni_trening gt
+LEFT JOIN prisutnost_grupni p ON gt.id = p.id_grupnog_treninga 
+    AND p.datum >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)
+WHERE gt.aktivan = TRUE
+GROUP BY gt.dan_u_tjednu
+ORDER BY FIELD(gt.dan_u_tjednu, 'Ponedjeljak', 'Utorak', 'Srijeda', 'Četvrtak', 'Petak', 'Subota', 'Nedjelja');
+```
+
+**OPIS:**  
+Daje pregled broja programa, trenera, prijava i potencijalnog prihoda za svaki dan u tjednu.
+
+
+
 
 
 ## 8. Zaključak
